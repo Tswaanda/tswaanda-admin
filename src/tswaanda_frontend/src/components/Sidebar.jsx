@@ -28,6 +28,7 @@ import {
   PaidOutlined,
 } from "@mui/icons-material";
 import AgricultureIcon from '@mui/icons-material/Agriculture';
+import SupportAgentIcon from '@mui/icons-material/SupportAgent';
 import ShoppingCartCheckoutIcon from "@mui/icons-material/ShoppingCartCheckout";
 import Badge from "@mui/material/Badge";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -128,6 +129,10 @@ const Sidebar = ({
     {
       text: "Admin",
       icon: <AdminPanelSettingsOutlined />,
+    },
+    {
+      text: "Support",
+      icon: <SupportAgentIcon />,
     },
     {
       text: "Performance",

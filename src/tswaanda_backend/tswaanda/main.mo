@@ -32,6 +32,7 @@ shared ({ caller = initializer }) actor class () {
     type Permission = Type.Permission;
     type Farmer = Type.Farmer;
     type ProductReview = Type.ProductReview;
+    type Staff = Type.Staff;
 
     //Access control variables
     private stable var roles : AssocList.AssocList<Principal, Role> = List.nil();
@@ -44,9 +45,12 @@ shared ({ caller = initializer }) actor class () {
     //Farmers map
     var farmers = HashMap.HashMap<Text, Farmer>(0, Text.equal, Text.hash);
 
+    var staff = HashMap.HashMap<Text, Staff>(0, Text.equal, Text.hash);
+
     private stable var productsEntries : [(Text, Product)] = [];
     private stable var farmersEntries : [(Text, Farmer)] = [];
     private stable var productReviewsEntries : [(Text, List.List<ProductReview>)] = [];
+    private stable var staffEntries : [(Text, Staff)] = [];
 
     //-----------------------------------------Access control implimentation---------------------------------------------
 
@@ -79,8 +83,8 @@ shared ({ caller = initializer }) actor class () {
         };
     };
 
-    public shared func my_role(userId : Principal) : async Text {
-        let role = get_role(userId);
+    public shared ({caller}) func my_role() : async Text {
+        let role = get_role(caller);
         switch (role) {
             case (null) {
                 return "unauthorized";
@@ -91,15 +95,66 @@ shared ({ caller = initializer }) actor class () {
             case (? #admin) {
                 return "admin";
             };
+            case (? #staff) {
+                return "staff";
+            };
             case (? #authorized) {
                 return "authorized";
             };
         };
     };
 
+    func isAdmin(pal : Principal) : Bool {
+        let role = get_role(pal);
+        switch (role) {
+            case (? #owner or ? #admin) true;
+            case (_) false;
+        };
+    };
+
     public shared ({ caller }) func getAllAdmins() : async [(Principal, Role)] {
-        let admins = List.toArray(roles);
-        return admins;
+        List.toArray(roles);
+    };
+
+    public shared ({ caller }) func addStaffMember(staffMember : Staff) : async () {
+        assert(isAdmin(caller));
+        staff.put(staffMember.email, staffMember);
+    };
+
+    public shared ({ caller }) func getAllStaffMembers() : async [Staff] {
+        assert(isAdmin(caller));
+        return Iter.toArray(staff.vals());
+    };
+
+    public shared ({ caller }) func deleteStaffMember(email : Text) : async Bool {
+        assert(isAdmin(caller));
+        staff.delete(email);
+        return true;
+    };
+
+    public shared ({ caller }) func updateStaffMember(staffMember : Staff) : async Bool {
+        assert(isAdmin(caller) or caller == staffMember.principal);
+        switch (staff.get(staffMember.email)) {
+            case (null) {
+                return false;
+            };
+            case (?result) {
+                ignore staff.replace(staffMember.email, staffMember);
+                return true;
+            };
+        };
+    };
+
+    public shared ({ caller }) func getStaffMemberByEmail(email : Text) : async Result.Result<Staff, Text> {
+        assert(isAdmin(caller));
+        switch (staff.get(email)) {
+            case (null) {
+                return #err("Invalid result ID");
+            };
+            case (?result) {
+                return #ok(result);
+            };
+        };
     };
 
     // Assign a new role to a principal
@@ -177,7 +232,7 @@ shared ({ caller = initializer }) actor class () {
     };
 
     public shared func addProductReview(review : ProductReview) : () {
-        var reviews: List.List<ProductReview> = switch (productReviews.get(review.productId)) {
+        var reviews : List.List<ProductReview> = switch (productReviews.get(review.productId)) {
             case (null) {
                 List.nil();
             };
@@ -199,7 +254,6 @@ shared ({ caller = initializer }) actor class () {
             };
         };
     };
-
 
     //----------------------------------------------Farmers implimentation------------------------------------------------
 
@@ -274,11 +328,13 @@ shared ({ caller = initializer }) actor class () {
         productsEntries := Iter.toArray(products.entries());
         farmersEntries := Iter.toArray(farmers.entries());
         productReviewsEntries := Iter.toArray(productReviews.entries());
+        staffEntries := Iter.toArray(staff.entries());
     };
 
     system func postupgrade() {
         products := HashMap.fromIter<Text, Product>(productsEntries.vals(), 0, Text.equal, Text.hash);
         farmers := HashMap.fromIter<Text, Farmer>(farmersEntries.vals(), 0, Text.equal, Text.hash);
         productReviews := HashMap.fromIter<Text, List.List<ProductReview>>(productReviewsEntries.vals(), 0, Text.equal, Text.hash);
+        staff := HashMap.fromIter<Text, Staff>(staffEntries.vals(), 0, Text.equal, Text.hash);
     };
 };

@@ -16,6 +16,8 @@
 # generated files
 src/declarations/
 
+livedeploysteps.txt
+
 # frontend code
 node_modules/
 dist/

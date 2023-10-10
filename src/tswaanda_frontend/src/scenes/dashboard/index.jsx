@@ -20,12 +20,12 @@ import BreakdownChart from "../../components/BreakdownChart";
 import OverviewChart from "../../components/OverviewChart";
 import { useGetDashboardQuery } from "../../state/api";
 import StatBox from "../../components/StatBox";
-import { UserContext } from "../../UserContext";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../hooks/auth";
 
 const Dashboard = () => {
   const theme = useTheme();
-  const { session } = useContext(UserContext);
+  const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
   const isNonMediumScreens = useMediaQuery("(min-width: 1200px");
@@ -63,8 +63,8 @@ const Dashboard = () => {
   ];
 
   useEffect(() => {
-    if (!session) navigate("/login");
-  }, [session]);
+    if (!isAuthenticated) navigate("/login");
+  }, [isAuthenticated]);
 
   return (
     <Box m="1.5rem 2.5rem">

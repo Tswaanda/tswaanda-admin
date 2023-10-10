@@ -14,7 +14,7 @@ import {
 import { categories } from "../constants/index";
 import { deleteAsset, uploadFile } from "../../storage-config/functions";
 import { useSelector, useDispatch } from 'react-redux'
-import { backendActor } from "../../config";
+import { useAuth } from "../../hooks/auth";
 
 const UpdateProduct = ({
   productInfo,
@@ -22,6 +22,8 @@ const UpdateProduct = ({
   isOpen,
   onClose,
 }) => {
+
+   const { backendActor } = useAuth()
 
   const { storageInitiated } = useSelector((state) => state.global)
 

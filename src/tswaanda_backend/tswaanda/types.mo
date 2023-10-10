@@ -1,12 +1,14 @@
 import Nat32 "mo:base/Nat32";
 import Text "mo:base/Text";
 import Blob "mo:base/Blob";
+import Principal "mo:base/Principal";
 
 module {
 
     public type Role = {
         #owner;
         #admin;
+        #staff;
         #authorized;
     };
 
@@ -52,6 +54,16 @@ module {
         userLastName : Text;
         rating : Int;
         review : Text;
+        created : Int;
+    };
+
+    public type Staff = {
+        fullName : Text;
+        email : Text;
+        phone : Text;
+        role : ?Role;
+        principal: Principal;
+        suspended : Bool;
         created : Int;
     };
 };

@@ -22,24 +22,22 @@ import {
   Box,
   Menu,
 } from "@mui/material";
+import { useAuth } from "../hooks/auth";
 
-import { UserContext } from "../UserContext";
-import { useAuth } from "../hooks";
+
 
 const Navbar = ({ user, isSidebarOpen, setIsSidebarOpen }) => {
   const dispatch = useDispatch();
   const theme = useTheme();
 
-  const { session, setSession } = useContext(UserContext);
-
-  const { login, logout } = useAuth(session, setSession);
+  const { logout , isAuthenticated, } = useAuth();
 
   const [anchorEl, setAnchorEl] = useState(null);
   const isOpen = Boolean(anchorEl);
   const handleClick = (event) => setAnchorEl(event.currentTarget);
   const handleClose = () => setAnchorEl(null);
 
-  if (!session) return null;
+  if (!isAuthenticated) return null;
 
   return (
     <AppBar

@@ -13,13 +13,14 @@ import {
 } from "@mui/material";
 import { categories } from "../constants/index";
 import { v4 as uuidv4 } from "uuid";
-import { backendActor } from "../../config";
 import { useSelector, useDispatch } from 'react-redux'
 import { uploadFile } from "../../storage-config/functions";
+import { useAuth } from "../../hooks/auth";
 
 function UpLoadProduct({ isOpen, onClose, setProductsUpdated }) {
 
   const { storageInitiated } = useSelector((state) => state.global)
+  const { backendActor } = useAuth()
 
   const [minOrder, setMinOrder] = useState(null);
   const [productName, setProductName] = useState("");

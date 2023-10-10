@@ -9,19 +9,19 @@ let repository_canister;
 let wallet;
 
 export async function initializeRepositoryCanister() {
-  try {
-    const authClient = await AuthClient.create();
-    if (await authClient.isAuthenticated()) {
-      const identity = await authClient.getIdentity();
-      let exporter_ic = icblast({ identity });
-      repository_canister = await exporter_ic("chs73-3aaaa-aaaar-qabaa-cai");
-      callerWallet(identity);
-    } else {
-      console.log("User is not authenticated");
-    }
-  } catch (error) {
-    console.log("Error instantiating the repository_canister canister", error);
-  }
+  // try {
+  //   const authClient = await AuthClient.create();
+  //   if (await authClient.isAuthenticated()) {
+  //     const identity = await authClient.getIdentity();
+  //     let exporter_ic = icblast({ identity });
+  //     repository_canister = await exporter_ic("chs73-3aaaa-aaaar-qabaa-cai");
+  //     callerWallet(identity);
+  //   } else {
+  //     console.log("User is not authenticated");
+  //   }
+  // } catch (error) {
+  //   console.log("Error instantiating the repository_canister canister", error);
+  // }
 }
 
 // user copys and deploys his/her wallet
@@ -46,17 +46,17 @@ export const checkUserWallet = async (userPrincipal) => {
 
 // check the wallet address of the call
 export const callerWallet = async (identity) => {
-  try {
-    let exporter_ic = icblast({ identity });
-    let wallet_address = await repository_canister.get_wallet_principal_of(
-      identity.getPrincipal().toString()
-    );
-    console.log(wallet_address.toString())
-    wallet = await exporter_ic(wallet_address.toString());
-    createContractCanister();
-  } catch (error) {
-    console.log("Error instaitiating the wallet", error);
-  }
+  // try {
+  //   let exporter_ic = icblast({ identity });
+  //   let wallet_address = await repository_canister.get_wallet_principal_of(
+  //     identity.getPrincipal().toString()
+  //   );
+  //   console.log(wallet_address.toString())
+  //   wallet = await exporter_ic(wallet_address.toString());
+  //   createContractCanister();
+  // } catch (error) {
+  //   console.log("Error instaitiating the wallet", error);
+  // }
 };
 
 // check contract address of the call
