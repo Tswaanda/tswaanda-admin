@@ -62,6 +62,7 @@ module {
         email : Text;
         phone : Text;
         role : ?Role;
+        approved : Bool;
         principal: Principal;
         suspended : Bool;
         created : Int;

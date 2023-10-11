@@ -45,12 +45,28 @@ shared ({ caller = initializer }) actor class () {
     //Farmers map
     var farmers = HashMap.HashMap<Text, Farmer>(0, Text.equal, Text.hash);
 
-    var staff = HashMap.HashMap<Text, Staff>(0, Text.equal, Text.hash);
+    var staff = HashMap.HashMap<Principal, Staff>(0, Principal.equal, Principal.hash);
 
     private stable var productsEntries : [(Text, Product)] = [];
     private stable var farmersEntries : [(Text, Farmer)] = [];
     private stable var productReviewsEntries : [(Text, List.List<ProductReview>)] = [];
-    private stable var staffEntries : [(Text, Staff)] = [];
+    private stable var staffEntries : [(Principal, Staff)] = [];
+
+    //----------------------------------------------Upgrade methods--------------------------------------------------------
+
+    system func preupgrade() {
+        productsEntries := Iter.toArray(products.entries());
+        farmersEntries := Iter.toArray(farmers.entries());
+        productReviewsEntries := Iter.toArray(productReviews.entries());
+        staffEntries := Iter.toArray(staff.entries());
+    };
+
+    system func postupgrade() {
+        products := HashMap.fromIter<Text, Product>(productsEntries.vals(), 0, Text.equal, Text.hash);
+        farmers := HashMap.fromIter<Text, Farmer>(farmersEntries.vals(), 0, Text.equal, Text.hash);
+        productReviews := HashMap.fromIter<Text, List.List<ProductReview>>(productReviewsEntries.vals(), 0, Text.equal, Text.hash);
+        staff := HashMap.fromIter<Principal, Staff>(staffEntries.vals(), 0, Principal.equal, Principal.hash);
+    };
 
     //-----------------------------------------Access control implimentation---------------------------------------------
 
@@ -83,7 +99,7 @@ shared ({ caller = initializer }) actor class () {
         };
     };
 
-    public shared ({caller}) func my_role() : async Text {
+    public shared ({ caller }) func my_role() : async Text {
         let role = get_role(caller);
         switch (role) {
             case (null) {
@@ -117,37 +133,29 @@ shared ({ caller = initializer }) actor class () {
     };
 
     public shared ({ caller }) func addStaffMember(staffMember : Staff) : async () {
-        assert(isAdmin(caller));
-        staff.put(staffMember.email, staffMember);
+        assert (isAdmin(caller) or caller == staffMember.principal);
+        staff.put(staffMember.principal, staffMember);
     };
 
     public shared ({ caller }) func getAllStaffMembers() : async [Staff] {
-        assert(isAdmin(caller));
+        assert (isAdmin(caller));
         return Iter.toArray(staff.vals());
     };
 
-    public shared ({ caller }) func deleteStaffMember(email : Text) : async Bool {
-        assert(isAdmin(caller));
-        staff.delete(email);
+    public shared ({ caller }) func deleteStaffMember(id : Principal) : async Bool {
+        assert (isAdmin(caller));
+        staff.delete(id);
         return true;
     };
 
-    public shared ({ caller }) func updateStaffMember(staffMember : Staff) : async Bool {
-        assert(isAdmin(caller) or caller == staffMember.principal);
-        switch (staff.get(staffMember.email)) {
-            case (null) {
-                return false;
-            };
-            case (?result) {
-                ignore staff.replace(staffMember.email, staffMember);
-                return true;
-            };
-        };
+    public shared ({ caller }) func updateStaffMember(staffMember : Staff) : async () {
+        assert (isAdmin(caller) or caller == staffMember.principal);
+        staff.put(staffMember.principal, staffMember);
     };
 
-    public shared ({ caller }) func getStaffMemberByEmail(email : Text) : async Result.Result<Staff, Text> {
-        assert(isAdmin(caller));
-        switch (staff.get(email)) {
+    public shared query ({ caller }) func getStaffMember(id: Principal) : async Result.Result<Staff, Text> {
+        assert (isAdmin(caller) or caller == id);
+        switch (staff.get(id)) {
             case (null) {
                 return #err("Invalid result ID");
             };
@@ -320,21 +328,5 @@ shared ({ caller = initializer }) actor class () {
             };
         };
         return Buffer.toArray<Farmer>(suspendedFarmers);
-    };
-
-    //----------------------------------------------Upgrade methods--------------------------------------------------------
-
-    system func preupgrade() {
-        productsEntries := Iter.toArray(products.entries());
-        farmersEntries := Iter.toArray(farmers.entries());
-        productReviewsEntries := Iter.toArray(productReviews.entries());
-        staffEntries := Iter.toArray(staff.entries());
-    };
-
-    system func postupgrade() {
-        products := HashMap.fromIter<Text, Product>(productsEntries.vals(), 0, Text.equal, Text.hash);
-        farmers := HashMap.fromIter<Text, Farmer>(farmersEntries.vals(), 0, Text.equal, Text.hash);
-        productReviews := HashMap.fromIter<Text, List.List<ProductReview>>(productReviewsEntries.vals(), 0, Text.equal, Text.hash);
-        staff := HashMap.fromIter<Text, Staff>(staffEntries.vals(), 0, Text.equal, Text.hash);
     };
 };

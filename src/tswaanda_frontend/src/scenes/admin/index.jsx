@@ -1,99 +1,65 @@
-import React from 'react';
-import { Box, useTheme } from "@mui/material";
-import { useGetAdminsQuery  } from '../../state/api';
-import { DataGrid } from '@mui/x-data-grid';
-import Header from '../../components/Header';
-import CustomColumnMenu from "../../components/DataGridCustomColumnMenu";
+import React, { useEffect, useState } from "react";
+import {
+    Box,
+    Tabs,
+    Tab,
+} from "@mui/material";
+import Header from "../../components/Header";
+import Staff from '../../components/Admin/Staff';
+import AccessRequest from '../../components/Admin/AccessRequest';
+
+const Support = () => {
+
+    const [value, setValue] = useState(0);
+    const [expanded, setExpanded] = useState(false);
+
+    const handleTabChange = (event, newValue) => {
+        setValue(newValue);
+    };
+
+    const handleChange = (panel) => (event, isExpanded) => {
+        setExpanded(isExpanded ? panel : false);
+    };
+
+    const renderTabContent = () => {
+        switch (value) {
+            case 0:
+                return (
+                    <Staff
+                        {...{
+
+                        }}
+                    />
+                );
+            case 1:
+                return (
+                    <AccessRequest
+                        {...{
+                        }}
+                    />
+                );
+            default:
+                return null;
+        }
+    };
 
 
-const Admin = () => {
-    const theme = useTheme();
-    const { data, isLoading } = useGetAdminsQuery();
-    
-    const columns = [
-        {
-            field: "_id",
-            headerName: "ID",
-            flex: 1,
-        },
-        {
-            field: "name",
-            headerName: "Name",
-            flex: 0.5,
-        },
-        {
-            field: "email",
-            headerName: "Email",
-            flex: 1
-        },
-        {
-            field: "phoneNumber",
-            headerName: "Phone Number",
-            flex: 0.5,
-            renderCell: (params) => {
-                return params.value.replace(/^(\d{3})(\d{3})(\d{4})/, "($1)$2-$3")
-            }
-        },
-        {
-            field: "country",
-            headerName: "Country",
-            flex: 0.4,
-        },
-        {
-            field: "occupation",
-            headerName: "Occupation",
-            flex: 1
-        },
-        {
-            field: "role",
-            headerName: "Role",
-            flex: 1
-        },
-    ]
-    
     return (
-        <Box m="1.5rem 2.5rem">
-            <Header title="ADMINS" subtitle="List of Admins" />
-            <Box 
-                mt="40px" 
-                height="75vh"
-                sx={{
-                    "& .MuiDataGrid-root": {
-                        border: "none"
-                    },
-                    "& .MuiDataGrid-cell": {
-                        borderBottom: "none"
-                    },
-                    "& .MuiDataGrid-columnHeaders": {
-                        backgroundColor: theme.palette.background.alt,
-                        color: theme.palette.secondary[100],
-                        borderBottom: "none"
-                    },
-                    "& .MuiDataGrid-virtualScroller": {
-                        backgroundColor: theme.palette.primary.light,
-                    },
-                    "& .MuiDataGrid-footerContainer": {
-                        backgroundColor: theme.palette.background.alt,
-                        color: theme.palette.secondary[100],
-                        borderTop: "none"
-                    },
-                    "& .MuiDataGrid-toolbarContainer .MuiButton-text": {
-                        color: `${theme.palette.secondary[200]} !important`
-                    }
-                }}
-            >
-                <DataGrid
-                    loading={isLoading || !data}
-                    getRowId={(row) => row._id}
-                    rows={data || []}
-                    columns={columns}
-                    components={{
-                        ColumnMenu: CustomColumnMenu,
-                    }}
-                />
+        <div>
+            <Box m="1.5rem 2.5rem">
+                <Box display="flex" justifyContent="space-between" alignItems="center">
+                    <Header title="Admin" subtitle="Admin and access control management" />
+                </Box>
+                <Box m="2.5rem 0 0 0">
+                    <Tabs value={value} onChange={handleTabChange}>
+                        <Tab label="Staff" />
+                        <Tab label="Access Request" />
+                    </Tabs>
+                </Box>
+                {renderTabContent()}
             </Box>
-    </Box>
+        </div>
     )
 }
 
-export default Admin
+export default Support

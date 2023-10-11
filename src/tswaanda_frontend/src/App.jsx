@@ -34,12 +34,23 @@ import { initializeRepositoryCanister } from "./hanse/interface";
 import Documents from "./scenes/documents/index";
 import Support from "./scenes/support/index";
 import { useAuth } from "./hooks/auth";
+import Unauthorized from "./components/Unauthorized";
 
 function App() {
   const dispatch = useDispatch()
 
   const { isAuthenticated, identity, checkAuth, backendActor } = useAuth()
-  const [authorized, setAuthorized] = useState(false);
+  const [authorized, setAuthorized] = useState(null);
+  const [user, setUser] = useState(null)
+
+  useEffect(() => {
+    if (identity) (async () => {
+      const user = await backendActor.getStaffMember(identity.getPrincipal())
+      if (user.ok) {
+        setUser(user)
+      }
+    })()
+  }, [identity])
 
   const getRole = async () => {
     console.log("Your principal id:", identity.getPrincipal().toString())
@@ -81,7 +92,9 @@ function App() {
     } else if (!isAuthenticated) {
       return <Navigate to="/login" />;
     } else if (isAuthenticated && authorized === false) {
-      return <h3>You are unauthorized</h3>;
+      return <Unauthorized {...{user}}/>;
+    } else if (isAuthenticated && authorized === null) {
+      return <h3>Checking authorization</h3>;
     }
   };
 
