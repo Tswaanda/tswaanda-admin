@@ -120,48 +120,19 @@ shared ({ caller = initializer }) actor class () {
         };
     };
 
+    func isAuthorized(pal : Principal) : Bool {
+        let role = get_role(pal);
+        switch (role) {
+            case (? #owner or ? #admin or ? #authorized) true;
+            case (_) false;
+        };
+    };
+
     func isAdmin(pal : Principal) : Bool {
         let role = get_role(pal);
         switch (role) {
             case (? #owner or ? #admin) true;
             case (_) false;
-        };
-    };
-
-    public shared ({ caller }) func getAllAdmins() : async [(Principal, Role)] {
-        List.toArray(roles);
-    };
-
-    public shared ({ caller }) func addStaffMember(staffMember : Staff) : async () {
-        assert (isAdmin(caller) or caller == staffMember.principal);
-        staff.put(staffMember.principal, staffMember);
-    };
-
-    public shared ({ caller }) func getAllStaffMembers() : async [Staff] {
-        assert (isAdmin(caller));
-        return Iter.toArray(staff.vals());
-    };
-
-    public shared ({ caller }) func deleteStaffMember(id : Principal) : async Bool {
-        assert (isAdmin(caller));
-        staff.delete(id);
-        return true;
-    };
-
-    public shared ({ caller }) func updateStaffMember(staffMember : Staff) : async () {
-        assert (isAdmin(caller) or caller == staffMember.principal);
-        staff.put(staffMember.principal, staffMember);
-    };
-
-    public shared query ({ caller }) func getStaffMember(id: Principal) : async Result.Result<Staff, Text> {
-        assert (isAdmin(caller) or caller == id);
-        switch (staff.get(id)) {
-            case (null) {
-                return #err("Invalid result ID");
-            };
-            case (?result) {
-                return #ok(result);
-            };
         };
     };
 
@@ -180,6 +151,65 @@ shared ({ caller = initializer }) actor class () {
         };
         roles := AssocList.replace<Principal, Role>(roles, assignee, principal_eq, new_role).0;
         role_requests := AssocList.replace<Principal, Role>(role_requests, assignee, principal_eq, null).0;
+    };
+
+    public shared ({ caller }) func getAllAdmins() : async [(Principal, Role)] {
+        List.toArray(roles);
+    };
+
+    public shared ({ caller }) func addStaffMember(staffMember : Staff) : async () {
+        assert (isAdmin(caller) or caller == staffMember.principal);
+        staff.put(staffMember.principal, staffMember);
+    };
+
+    public shared query ({ caller }) func getAllStaffMembers() : async [Staff] {
+        assert (isAdmin(caller) or isAuthorized(caller));
+        return Iter.toArray(staff.vals());
+    };
+
+    public shared query ({ caller }) func getApprovedStaff() : async [Staff] {
+        assert (isAdmin(caller) or isAuthorized(caller));
+        let verifiedStaff = Buffer.Buffer<Staff>(0);
+        for (staffMember in staff.vals()) {
+            if (staffMember.approved == true) {
+                verifiedStaff.add(staffMember);
+            };
+        };
+        return Buffer.toArray<Staff>(verifiedStaff);
+    };
+
+    public shared query ({ caller }) func getUnapprovedStaff() : async [Staff] {
+        assert (isAdmin(caller) or isAuthorized(caller));
+        let unverifiedStaff = Buffer.Buffer<Staff>(0);
+        for (staffMember in staff.vals()) {
+            if (staffMember.approved == false) {
+                unverifiedStaff.add(staffMember);
+            };
+        };
+        return Buffer.toArray<Staff>(unverifiedStaff);
+    };
+
+    public shared ({ caller }) func deleteStaffMember(id : Principal) : async Bool {
+        assert (isAdmin(caller));
+        staff.delete(id);
+        return true;
+    };
+
+    public shared ({ caller }) func updateStaffMember(staffMember : Staff) : async () {
+        assert (isAdmin(caller) or caller == staffMember.principal);
+        staff.put(staffMember.principal, staffMember);
+    };
+
+    public shared query ({ caller }) func getStaffMember(id : Principal) : async Result.Result<Staff, Text> {
+        assert (isAdmin(caller) or caller == id);
+        switch (staff.get(id)) {
+            case (null) {
+                return #err("Invalid result ID");
+            };
+            case (?result) {
+                return #ok(result);
+            };
+        };
     };
 
     //-----------------------------------------Products implimentation------------------------------------------------
@@ -269,11 +299,13 @@ shared ({ caller = initializer }) actor class () {
         farmers.put(newFarmer.email, newFarmer);
     };
 
-    public shared query func getAllFarmers() : async [Farmer] {
+    public shared query ({ caller }) func getAllFarmers() : async [Farmer] {
+        assert (isAdmin(caller) or isAuthorized(caller));
         return Iter.toArray(farmers.vals());
     };
 
-    public shared query func getFarmerByEmail(email : Text) : async Result.Result<Farmer, Text> {
+    public shared query ({ caller }) func getFarmerByEmail(email : Text) : async Result.Result<Farmer, Text> {
+        assert (isAdmin(caller) or isAuthorized(caller));
         switch (farmers.get(email)) {
             case (null) {
                 return #err("Invalid result ID");
@@ -296,7 +328,8 @@ shared ({ caller = initializer }) actor class () {
         };
     };
 
-    public shared func deleteFarmer(email : Text) : () {
+    public shared ({ caller }) func deleteFarmer(email : Text) : () {
+        assert (isAdmin(caller));
         farmers.delete(email);
     };
 

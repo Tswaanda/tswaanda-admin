@@ -2,7 +2,9 @@ import React, { useContext, useState, useEffect, createContext } from "react";
 import { Actor, HttpAgent } from "@dfinity/agent"
 import { idlFactory as marketIdlFactory } from "../../../declarations/marketplace_backend";
 import { AuthClient } from "@dfinity/auth-client";
+import { canisterId as identityCanId } from "../../../declarations/internet_identity/index";
 import { canisterId, idlFactory } from "../../../declarations/tswaanda_backend/index";
+
 
 const authClient = await AuthClient.create({
   idleOptions: {
@@ -24,6 +26,7 @@ export const ContextProvider = ({ children }) => {
   const [identity, setIdentity] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [storageInitiated, setStorageInitiated] = useState(false)
+  const [accessLevel, setAccessLevel] = useState("")
 
   useEffect(() => {
     setPrincipleId(localStorage.getItem("principleId") || "");
@@ -44,7 +47,7 @@ export const ContextProvider = ({ children }) => {
     const nanoseconds = BigInt(3600000000000);
     await authClient.login({
       // identityProvider: "https://identity.ic0.app/#authorize",
-      identityProvider: "http://localhost:4943?canisterId=be2us-64aaa-aaaaa-qaabq-cai",
+      identityProvider: `http://localhost:4943?canisterId=${identityCanId}`,
       maxTimeToLive: days * hours * nanoseconds,
       onSuccess: () => {
         setIsAuthenticated(true)
@@ -85,24 +88,38 @@ export const ContextProvider = ({ children }) => {
   })
   agent.fetchRootKey()
 
-const marketCanisterId = "55ger-liaaa-aaaal-qb33q-cai";
+  const marketCanisterId = "55ger-liaaa-aaaal-qb33q-cai";
 
-const backendActor = Actor.createActor(idlFactory, {
-  agent,
-  canisterId: canisterId,
-});
+  const backendActor = Actor.createActor(idlFactory, {
+    agent,
+    canisterId: canisterId,
+  });
 
-let marketAgent = new HttpAgent({
-  host: host,
-})
+  let marketAgent = new HttpAgent({
+    host: host,
+  })
 
-const marketActor = Actor.createActor(marketIdlFactory, {
-  marketAgent,
-  canisterId: marketCanisterId,
-});
+  const marketActor = Actor.createActor(marketIdlFactory, {
+    marketAgent,
+    canisterId: marketCanisterId,
+  });
 
   return (
-    <ContextWrapper.Provider value={{ principleId, marketActor, storageInitiated, setStorageInitiated, setContextPrincipleID, identity, setContextIdentity, backendActor, isAuthenticated, login, logout, checkAuth }}>
+    <ContextWrapper.Provider value={{ 
+      accessLevel,
+      setAccessLevel,
+      principleId, 
+      marketActor, 
+      storageInitiated, 
+      setStorageInitiated, 
+      setContextPrincipleID, 
+      identity, 
+      setContextIdentity, 
+      backendActor, 
+      isAuthenticated, 
+      login, 
+      logout, 
+      checkAuth }}>
       {children}
     </ContextWrapper.Provider>
   );
