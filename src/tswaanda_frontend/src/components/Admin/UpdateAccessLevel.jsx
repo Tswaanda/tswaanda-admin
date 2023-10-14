@@ -45,17 +45,22 @@ const UpdateAccessLevel = ({
 
       const getRole = () => {
         if (accessLevel === "admin") {
-          return { 'admin': "admin" };
+          return { 'admin': null };
         }
         if (accessLevel === "staff") {
-          return { 'staff': "staff" };
+          return { 'staff': null };
         }
         if (accessLevel === "authorized") {
-          return { 'authorized': "authorized" };
+          return { 'authorized': null };
         }
       }
-      const res = await backendActor.assign_role(member.principal, getRole())
-      console.log(res)
+      await backendActor.assign_role(member.principal, [getRole()])
+      let updatedUser = {
+        ...member,
+        role: [getRole()],
+        approved: true,
+      }
+      await backendActor.updateStaffMember(updatedUser)
       setUpdating(false)
       setUpdated(true)
       setAccessModal(false)

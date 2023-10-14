@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import {
   Box,
   Container,
@@ -14,8 +14,13 @@ import AccordionSummary from "@mui/material/AccordionSummary";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ContactStaff from './ContactStaff';
 import UpdateAccessLevel from './UpdateAccessLevel';
+import { useAuth } from '../../hooks/auth';
 
-const Staff = ({ expanded, staff, handleChange }) => {
+const Staff = ({ expanded, handleChange }) => {
+  const [staff, setStaff] = useState([])
+
+  const { backendActor } = useAuth()
+
   const theme = useTheme();
   const [showContact, setShowContactForm] = useState(false);
   const [showAccessForm, setShowAccessForm] = useState(false);
@@ -24,6 +29,19 @@ const Staff = ({ expanded, staff, handleChange }) => {
   const [openContactModal, setContactModal] = useState(false);
 
   const [member, setMember] = useState({});
+
+  useEffect(() => {
+    getStaff()
+}, [])
+
+const getStaff = async () => {
+    try {
+        const _staff = await backendActor.getApprovedStaff()
+        setStaff(_staff)
+    } catch (error) {
+        console.log("Error getting staff members", error)
+    }
+}
 
   const handleShowStatusForm = (member) => {
     setMember(member);

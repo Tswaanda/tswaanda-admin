@@ -11,8 +11,6 @@ import { useAuth } from "../../hooks/auth";
 
 const Support = () => {
     const { backendActor } = useAuth()
-    const [staff, setStaff] = useState([])
-    const [accessRequest, setAccessRequest] = useState([])
     const [value, setValue] = useState(0);
     const [expanded, setExpanded] = useState(false);
 
@@ -24,29 +22,6 @@ const Support = () => {
         setExpanded(isExpanded ? panel : false);
     };
 
-    useEffect(() => {
-        getStaff()
-        getAccessRequest()
-    }, [])
-
-    const getStaff = async () => {
-        try {
-            const _staff = await backendActor.getApprovedStaff()
-            setStaff(_staff)
-        } catch (error) {
-            console.log("Error getting staff members", error)
-        }
-    }
-
-    const getAccessRequest = async () => {
-        try {
-            const _accessRequest = await backendActor.getUnapprovedStaff()
-            setAccessRequest(_accessRequest)
-        } catch (error) {
-            console.log("Error getting access request", error)
-        }
-    }
-
     const renderTabContent = () => {
         switch (value) {
             case 0:
@@ -54,7 +29,6 @@ const Support = () => {
                     <Staff
                         {...{
                             expanded,
-                            staff,
                             handleChange,
                         }}
                     />
@@ -64,7 +38,6 @@ const Support = () => {
                     <AccessRequest
                         {...{
                             expanded,
-                            accessRequest,
                             handleChange,
                         }}
                     />

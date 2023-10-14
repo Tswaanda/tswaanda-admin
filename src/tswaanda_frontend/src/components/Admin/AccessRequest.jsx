@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import {
   Box,
   Container,
@@ -14,8 +14,12 @@ import AccordionSummary from "@mui/material/AccordionSummary";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ContactStaff from './ContactStaff';
 import UpdateAccessLevel from './UpdateAccessLevel';
+import { useAuth } from '../../hooks/auth';
 
-const AccessRequest = ({ expanded, accessRequest, handleChange }) => {
+const AccessRequest = ({ expanded, handleChange }) => {
+  const [accessRequest, setAccessRequest] = useState([])
+  const { backendActor } = useAuth()
+
   const theme = useTheme();
   const [showContact, setShowContactForm] = useState(false);
   const [showAccessForm, setShowAccessForm] = useState(false);
@@ -24,6 +28,19 @@ const AccessRequest = ({ expanded, accessRequest, handleChange }) => {
   const [openContactModal, setContactModal] = useState(false);
 
   const [member, setMember] = useState({});
+
+  useEffect(() => {
+    getAccessRequest()
+  }, [])
+
+  const getAccessRequest = async () => {
+    try {
+      const _accessRequest = await backendActor.getUnapprovedStaff()
+      setAccessRequest(_accessRequest)
+    } catch (error) {
+      console.log("Error getting access request", error)
+    }
+  }
 
   const handleShowStatusForm = (member) => {
     setMember(member);
