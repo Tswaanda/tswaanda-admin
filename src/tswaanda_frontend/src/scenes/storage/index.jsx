@@ -1,6 +1,6 @@
 import { Box, useTheme, Tabs, Tab } from "@mui/material";
 import Header from "../../components/Header";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import StorageFiles from "../../components/storage/StorageFiles";
 import Canisters from "../../components/storage/Canisters";
 
@@ -15,19 +15,11 @@ const Storage = () => {
     switch (value) {
       case 0:
         return (
-          <StorageFiles
-            {...{
-
-            }}
-          />
+          <Canisters />
         );
       case 1:
         return (
-          <Canisters
-            {...{
-
-            }}
-          />
+          <StorageFiles />
         );
       default:
         return null;
@@ -42,8 +34,8 @@ const Storage = () => {
         </Box>
         <Box m="2.5rem 0 0 0">
           <Tabs value={value} onChange={handleTabChange}>
-            <Tab label="Storage Files" />
             <Tab label="Canisters" />
+            <Tab label="Storage Files" />
           </Tabs>
         </Box>
         {renderTabContent()}
