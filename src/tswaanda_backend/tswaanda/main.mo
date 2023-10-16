@@ -15,6 +15,7 @@ import Text "mo:base/Text";
 import AssocList "mo:base/AssocList";
 import Error "mo:base/Error";
 import List "mo:base/List";
+import Cycles "mo:base/ExperimentalCycles";
 
 import Type "types";
 import Debug "mo:base/Debug";
@@ -23,8 +24,10 @@ import Iter "mo:base/Iter";
 import Result "mo:base/Result";
 import Buffer "mo:base/Buffer";
 import Principal "mo:base/Principal";
+import Map "mo:hashmap/Map/Map";
+import Utils "./utils";
 
-shared ({ caller = initializer }) actor class () {
+shared ({ caller = initializer }) actor class TswaandaAdmin() = this {
 
     type Id = Text;
     type Product = Type.Product;
@@ -33,6 +36,7 @@ shared ({ caller = initializer }) actor class () {
     type Farmer = Type.Farmer;
     type ProductReview = Type.ProductReview;
     type Staff = Type.Staff;
+    type Health = Type.Health;
 
     //Access control variables
     private stable var roles : AssocList.AssocList<Principal, Role> = List.nil();
@@ -361,5 +365,184 @@ shared ({ caller = initializer }) actor class () {
             };
         };
         return Buffer.toArray<Farmer>(suspendedFarmers);
+    };
+
+    // --------------------------------------------CANISTER MANAGEMENT----------------------------------------------------
+
+    public query func get_health() : async Health {
+        let health : Health = {
+            cycles = Utils.get_cycles_balance();
+            memory_mb = Utils.get_memory_in_mb();
+            heap_mb = Utils.get_heap_in_mb();
+        };
+
+        return health;
+    };
+
+    public type canister_id = Principal;
+    public type canister_settings = {
+        freezing_threshold : ?Nat;
+        controllers : ?[Principal];
+        memory_allocation : ?Nat;
+        compute_allocation : ?Nat;
+    };
+    public type definite_canister_settings = {
+        freezing_threshold : Nat;
+        controllers : [Principal];
+        memory_allocation : Nat;
+        compute_allocation : Nat;
+    };
+    public type user_id = Principal;
+    public type wasm_module = Blob;
+
+    public type Status = {
+        status : { #stopped; #stopping; #running };
+        memory_size : Nat;
+        cycles : Nat;
+        settings : definite_canister_settings;
+        module_hash : ?[Nat8];
+    };
+
+    //IC Management Canister
+    let IC = actor ("aaaaa-aa") : actor {
+        canister_status : shared { canister_id : canister_id } -> async {
+            status : { #stopped; #stopping; #running };
+            memory_size : Nat;
+            cycles : Nat;
+            settings : definite_canister_settings;
+            module_hash : ?[Nat8];
+        };
+        create_canister : shared { settings : ?canister_settings } -> async {
+            canister_id : canister_id;
+        };
+        delete_canister : shared { canister_id : canister_id } -> async ();
+        deposit_cycles : shared { canister_id : canister_id } -> async ();
+        install_code : shared {
+            arg : Blob;
+            wasm_module : wasm_module;
+            mode : { #reinstall; #upgrade; #install };
+            canister_id : canister_id;
+        } -> async ();
+        provisional_create_canister_with_cycles : shared {
+            settings : ?canister_settings;
+            amount : ?Nat;
+        } -> async { canister_id : canister_id };
+        provisional_top_up_canister : shared {
+            canister_id : canister_id;
+            amount : Nat;
+        } -> async ();
+        raw_rand : shared () -> async [Nat8];
+        start_canister : shared { canister_id : canister_id } -> async ();
+        stop_canister : shared { canister_id : canister_id } -> async ();
+        uninstall_code : shared { canister_id : canister_id } -> async ();
+        update_settings : shared {
+            canister_id : Principal;
+            settings : canister_settings;
+        } -> async ();
+    };
+
+    private func _isController(p : Principal) : async (Bool) {
+        var status : {
+            status : { #stopped; #stopping; #running };
+            memory_size : Nat;
+            cycles : Nat;
+            settings : definite_canister_settings;
+            module_hash : ?[Nat8];
+        } = await IC.canister_status({
+            canister_id = Principal.fromActor(this);
+        });
+        var controllers : [Principal] = status.settings.controllers;
+        for (i in controllers.vals()) {
+            if (i == p) {
+                return true;
+            };
+        };
+        return false;
+    };
+
+    public query func cycleBalance() : async Nat {
+        Cycles.balance();
+    };
+
+    public shared ({ caller }) func add_controller(p : Principal) : async () {
+        var check : Bool = await _isController(caller);
+        if (check == false) {
+            return ();
+        };
+        var status : {
+            status : { #stopped; #stopping; #running };
+            memory_size : Nat;
+            cycles : Nat;
+            settings : definite_canister_settings;
+            module_hash : ?[Nat8];
+        } = await IC.canister_status({
+            canister_id = Principal.fromActor(this);
+        });
+        var controllers : [Principal] = status.settings.controllers;
+        var b : Buffer.Buffer<Principal> = Buffer.Buffer<Principal>(0);
+        for (i in controllers.vals()) {
+            if (i != p) b.add(i);
+        };
+        b.add(p);
+        await (
+            IC.update_settings({
+                canister_id = Principal.fromActor(this);
+                settings = {
+                    controllers = ?Buffer.toArray(b);
+                    compute_allocation = null;
+                    memory_allocation = null;
+                    freezing_threshold = ?31_540_000;
+                };
+            })
+        );
+    };
+
+    public shared ({ caller }) func remove_controller(p : Principal) : async () {
+        var check : Bool = await _isController(caller);
+        if (check == false) {
+            return ();
+        };
+        var status : {
+            status : { #stopped; #stopping; #running };
+            memory_size : Nat;
+            cycles : Nat;
+            settings : definite_canister_settings;
+            module_hash : ?[Nat8];
+        } = await IC.canister_status({
+            canister_id = Principal.fromActor(this);
+        });
+        var controllers : [Principal] = status.settings.controllers;
+        var b : Buffer.Buffer<Principal> = Buffer.Buffer<Principal>(0);
+        for (i in controllers.vals()) {
+            if (i != p) b.add(i);
+        };
+        await (
+            IC.update_settings({
+                canister_id = Principal.fromActor(this);
+                settings = {
+                    controllers = ?Buffer.toArray(b);
+                    compute_allocation = null;
+                    memory_allocation = null;
+                    freezing_threshold = ?31_540_000;
+                };
+            })
+        );
+    };
+
+    public shared ({ caller }) func getCanisterStatus() : async Result.Result<Status, ()> {
+        var check : Bool = await _isController(caller);
+        if (check == false) {
+            return #err();
+        };
+        var status : {
+            status : { #stopped; #stopping; #running };
+            memory_size : Nat;
+            cycles : Nat;
+            settings : definite_canister_settings;
+            module_hash : ?[Nat8];
+        } = await IC.canister_status({
+            canister_id = Principal.fromActor(this);
+        });
+        return #ok(status);
     };
 };

@@ -63,8 +63,14 @@ module {
         phone : Text;
         role : ?Role;
         approved : Bool;
-        principal: Principal;
+        principal : Principal;
         suspended : Bool;
         created : Int;
+    };
+
+    public type Health = {
+        cycles : Int;
+        memory_mb : Int;
+        heap_mb : Int;
     };
 };

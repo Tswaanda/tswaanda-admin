@@ -12,8 +12,23 @@ import Accordion from "@mui/material/Accordion";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import AccordionSummary from "@mui/material/AccordionSummary";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import icblast from "@infu/icblast";
+
+let ic = icblast({ local: false });
 
 const Canister = ({ canister }) => {
+
+    useEffect(() => {
+        if (canister) {
+            getCanisterInfo();
+        }
+    }, [canister])
+
+    const getCanisterInfo = async () => {
+        let actor = await ic(canister.id);
+        console.log(actor)
+    }
+
     const theme = useTheme();
     return (
         <div className="">
@@ -24,8 +39,12 @@ const Canister = ({ canister }) => {
                     id="panel1bh-header"
                 >
                     <Typography sx={{ width: "25%", flexShrink: 0 }}>
-                        <span style={{ fontWeight: "bold" }}>Canister</span>:
+                        <span style={{ fontWeight: "bold" }}>Canister name{" "}</span>:
                         {canister.name}
+                    </Typography>
+                    <Typography sx={{ width: "25%", flexShrink: 0 }}>
+                        <span style={{ fontWeight: "bold" }}>Id{" "}</span>:
+                        {canister.id}
                     </Typography>
                 </AccordionSummary>
                 <AccordionDetails>
