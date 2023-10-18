@@ -14,6 +14,7 @@ import Result "mo:base/Result";
 import Text "mo:base/Text";
 import Time "mo:base/Time";
 import Timer "mo:base/Timer";
+import Cycles "mo:base/ExperimentalCycles";
 
 import { ofBlob } "./CRC32";
 
