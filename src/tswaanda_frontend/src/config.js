@@ -17,7 +17,7 @@ const marketCanisterId = "55ger-liaaa-aaaal-qb33q-cai";
 
 export const backendActor = Actor.createActor(idlFactory, {
   agent,
-  canisterId: canisterId,
+  canisterId: "56r5t-tqaaa-aaaal-qb4gq-cai",
 });
 
 export const marketActor = Actor.createActor(marketIdlFactory, {
