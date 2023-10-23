@@ -120,7 +120,7 @@ const Farmers = () => {
     return modifiedOrder;
   }
 
-  const getCustomers = async () => {
+  const getFarmers = async () => {
     setIsLoading(true);
     const res = await backendActor.getAllFarmers();
     setData(res);
@@ -145,7 +145,7 @@ const Farmers = () => {
   }, [data]);
 
   useEffect(() => {
-    getCustomers();
+    getFarmers();
     getPendingFarmers();
   }, []);
 
