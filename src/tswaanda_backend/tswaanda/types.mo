@@ -20,6 +20,8 @@ module {
     public type Product = {
         id : Text;
         name : Text;
+        // hscode: Text;
+        // farmer: Text;
         price : Int32;
         minOrder : Int32;
         shortDescription : Text;

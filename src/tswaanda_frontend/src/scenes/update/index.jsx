@@ -15,6 +15,7 @@ import { categories } from "../constants/index";
 import { deleteAsset, uploadFile } from "../../storage-config/functions";
 import { useSelector, useDispatch } from 'react-redux'
 import { useAuth } from "../../hooks/auth";
+import { HSCodes } from "../../hscodes/hscodes";
 
 const UpdateProduct = ({
   productInfo,
@@ -23,13 +24,16 @@ const UpdateProduct = ({
   onClose,
 }) => {
 
-   const { backendActor } = useAuth()
+  const { backendActor } = useAuth()
 
   const { storageInitiated } = useSelector((state) => state.global)
 
   const [id, setId] = useState(productInfo.id);
   const [minOrder, setMinOrder] = useState(productInfo.minOrder);
-  const [productName, setProductName] = useState(productInfo.name);
+  const [productItem, setProductItem] = useState({
+    name: productInfo.name,
+    code: productInfo.hscode,
+  });
   const [shortDescription, setShortDescription] = useState(
     productInfo.shortDescription
   );
@@ -85,7 +89,8 @@ const UpdateProduct = ({
   const saveUpdatedProduct = async (filesUrls) => {
     const updatedProduct = {
       id: id,
-      name: productName,
+      name: productItem.name,
+      hscode: productItem.code,
       price: parseInt(price),
       minOrder: parseInt(minOrder),
       shortDescription: shortDescription,
@@ -154,9 +159,23 @@ const UpdateProduct = ({
             label="Product name"
             type="text"
             fullWidth
-            value={productName}
-            onChange={(e) => setProductName(e.target.value)}
+            value={productItem}
+            onChange={(e) => setProductItem(e.target.value)}
           />
+          <FormControl fullWidth margin="dense">
+            <InputLabel id="category-label">Product Name</InputLabel>
+            <Select
+              labelId="category-label"
+              value={productItem}
+              onChange={(e) => setProductItem(e.target.value)}
+            >
+              {HSCodes.map((codeItem, index) => (
+                <MenuItem key={index} value={codeItem}>
+                  {codeItem.name} - {codeItem.code}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
           <TextField
             autoFocus
             margin="dense"

@@ -16,6 +16,7 @@ import { v4 as uuidv4 } from "uuid";
 import { useSelector, useDispatch } from 'react-redux'
 import { uploadFile } from "../../storage-config/functions";
 import { useAuth } from "../../hooks/auth";
+import { HSCodes } from "../../hscodes/hscodes";
 
 function UpLoadProduct({ isOpen, onClose, setProductsUpdated }) {
 
@@ -23,7 +24,7 @@ function UpLoadProduct({ isOpen, onClose, setProductsUpdated }) {
   const { backendActor } = useAuth()
 
   const [minOrder, setMinOrder] = useState(null);
-  const [productName, setProductName] = useState("");
+  const [product, setProduct] = useState({});
   const [shortDescription, setShortDescription] = useState("");
   const [fullDesc, setFullDesc] = useState("");
   const [price, setPrice] = useState("");
@@ -58,12 +59,12 @@ function UpLoadProduct({ isOpen, onClose, setProductsUpdated }) {
     } else {
       try {
         const urls = await uploadAssets();
-        console.log("Images saved, urls here", urls);
         setSaving(true);
         if (urls) {
           const newProduct = {
             id: uuidv4(),
-            name: productName,
+            name: product.name,
+            hscode: product.code,
             price: parseInt(price),
             minOrder: parseInt(minOrder),
             shortDescription: shortDescription,
@@ -123,15 +124,20 @@ function UpLoadProduct({ isOpen, onClose, setProductsUpdated }) {
           Upload a new product
         </DialogTitle>
         <DialogContent>
-          <TextField
-            autoFocus
-            margin="dense"
-            label="Product name"
-            type="text"
-            fullWidth
-            value={productName}
-            onChange={(e) => setProductName(e.target.value)}
-          />
+          <FormControl fullWidth margin="dense">
+            <InputLabel id="category-label">Product Name</InputLabel>
+            <Select
+              labelId="category-label"
+              value={product}
+              onChange={(e) => setProduct(e.target.value)}
+            >
+              {HSCodes.map((codeItem, index) => (
+                <MenuItem key={index} value={codeItem}>
+                  {codeItem.name} - {codeItem.code}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
           <TextField
             autoFocus
             margin="dense"
