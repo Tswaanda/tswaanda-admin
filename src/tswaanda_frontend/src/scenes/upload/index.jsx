@@ -17,12 +17,14 @@ import { useSelector, useDispatch } from 'react-redux'
 import { uploadFile } from "../../storage-config/functions";
 import { useAuth } from "../../hooks/auth";
 import { HSCodes } from "../../hscodes/hscodes";
+import { sendOrderListedEmail } from "../../emails/orderListedMail";
 
 function UpLoadProduct({ isOpen, onClose, setProductsUpdated }) {
 
   const { storageInitiated } = useSelector((state) => state.global)
   const { backendActor } = useAuth()
 
+  const [farmer, setFarmer] = useState("");
   const [minOrder, setMinOrder] = useState(null);
   const [product, setProduct] = useState({});
   const [shortDescription, setShortDescription] = useState("");
@@ -65,6 +67,7 @@ function UpLoadProduct({ isOpen, onClose, setProductsUpdated }) {
             id: uuidv4(),
             name: product.name,
             hscode: product.code,
+            farmer: farmer,
             price: parseInt(price),
             minOrder: parseInt(minOrder),
             shortDescription: shortDescription,
@@ -76,6 +79,7 @@ function UpLoadProduct({ isOpen, onClose, setProductsUpdated }) {
           };
 
           await backendActor.createProduct(newProduct);
+          await sendOrderListedEmail(farmer, update= "listed")
           setProductsUpdated(true);
           setSaving(false)
           onClose();
@@ -138,6 +142,15 @@ function UpLoadProduct({ isOpen, onClose, setProductsUpdated }) {
               ))}
             </Select>
           </FormControl>
+          <TextField
+            autoFocus
+            margin="dense"
+            label="Farmer"
+            type="email"
+            value={farmer}
+            fullWidth
+            onChange={(e) => setFarmer(e.target.value)}
+          />
           <TextField
             autoFocus
             margin="dense"

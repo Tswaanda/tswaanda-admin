@@ -11,6 +11,9 @@ import Header from "../../components/Header";
 import UpLoadProduct from "../../scenes/upload";
 import { backendActor } from "../../config";
 import Product from "../../components/Products/Product";
+import DownloadIcon from '@mui/icons-material/Download';
+import FileUploadIcon from '@mui/icons-material/FileUpload';
+import RestoreProducts from "./RestoreProducts";
 
 
 
@@ -20,13 +23,19 @@ const Products = () => {
   const [products, setProducts] = useState(null);
   const [loading, setLoading] = useState(false);
   const [productsUpdated, setProductsUpdated] = useState(false);
+  const [openRestoreModal, setRestoreModal] = useState(false);
 
   const getProducts = async () => {
-    setLoading(true);
-    const products = await backendActor.getAllProducts();
-    setProducts(products);
-    setLoading(false);
-    setProductsUpdated(false);
+    try {
+      setLoading(true);
+      const products = await backendActor.getAllProducts();
+      setProducts(products);
+      setLoading(false);
+      setProductsUpdated(false);
+    } catch (error) {
+      console.log("An error occurred while getting products:", error)
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -50,6 +59,19 @@ const Products = () => {
   const handleUpLoadPopClose = () => {
     setIsOpen(false);
   };
+
+  const handleBackup = async () => {
+    const products = await backendActor.getAllProducts();
+    const dataStr =
+      "data:text/json;charset=utf-8," +
+      encodeURIComponent(JSON.stringify(products));
+    const downloadAnchorNode = document.createElement("a");
+    downloadAnchorNode.setAttribute("href", dataStr);
+    downloadAnchorNode.setAttribute("download", "products.json");
+    document.body.appendChild(downloadAnchorNode); // required for firefox
+    downloadAnchorNode.click();
+    downloadAnchorNode.remove();
+  }
 
   return (
     <Box m="1.5rem 2.5rem">
@@ -77,6 +99,38 @@ const Products = () => {
           />
         )}
       </Box>
+      <Box display="flex" justifyContent="end" alignItems="center">
+        <Button
+          variant="contained"
+          onClick={handleBackup}
+          sx={{
+            backgroundColor: theme.palette.secondary.light,
+            color: theme.palette.background.alt,
+            fontSize: "14px",
+            fontWeight: "bold",
+            marginRight: "10px",
+            padding: "10px 20px",
+          }}
+        >
+          <DownloadIcon sx={{ mr: "10px" }} />
+          Backup to JSON
+        </Button>
+        <Button
+          variant="contained"
+          onClick={() => setRestoreModal(true)}
+          sx={{
+            backgroundColor: theme.palette.secondary.light,
+            color: theme.palette.background.alt,
+            fontSize: "14px",
+            fontWeight: "bold",
+            padding: "10px 20px",
+          }}
+        >
+          < FileUploadIcon sx={{ mr: "10px" }} />
+          Restore from JSON
+        </Button>
+      </Box>
+
 
       {products || !loading ? (
         <Box
@@ -91,16 +145,19 @@ const Products = () => {
           }}
         >
           {products?.map((product, index) => (
-              <Product
-                key={index}
-                {...{product, stat: "stats", setProductsUpdated}}
-              />
-            )
+            <Product
+              key={index}
+              {...{ product, stat: "stats", setProductsUpdated }}
+            />
+          )
           )}
         </Box>
       ) : (
         <>Loading...</>
       )}
+      <>
+        {openRestoreModal && <RestoreProducts {...{ openRestoreModal, setRestoreModal, setProductsUpdated }} />}
+      </>
     </Box>
   );
 };

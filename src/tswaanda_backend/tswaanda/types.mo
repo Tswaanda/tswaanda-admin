@@ -20,8 +20,8 @@ module {
     public type Product = {
         id : Text;
         name : Text;
-        // hscode: Text;
-        // farmer: Text;
+        hscode: Text;
+        farmer: Text;
         price : Int32;
         minOrder : Int32;
         shortDescription : Text;
@@ -30,7 +30,7 @@ module {
         images : [Text];
         weight : Int32;
         availability : Text;
-        // created: ?Int;
+        created: Int;
     };
 
     public type Farmer = {

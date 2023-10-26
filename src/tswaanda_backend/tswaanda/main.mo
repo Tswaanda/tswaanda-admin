@@ -30,6 +30,7 @@ import Utils "./utils";
 shared ({ caller = initializer }) actor class TswaandaAdmin() = this {
 
     type Id = Text;
+    type farmerEmail = Text;
     type Product = Type.Product;
     type Role = Type.Role;
     type Permission = Type.Permission;
@@ -47,7 +48,7 @@ shared ({ caller = initializer }) actor class TswaandaAdmin() = this {
     var productReviews = HashMap.HashMap<Text, List.List<ProductReview>>(0, Text.equal, Text.hash);
 
     //Farmers map
-    var farmers = HashMap.HashMap<Text, Farmer>(0, Text.equal, Text.hash);
+    var farmers = HashMap.HashMap<farmerEmail, Farmer>(0, Text.equal, Text.hash);
 
     var staff = HashMap.HashMap<Principal, Staff>(0, Principal.equal, Principal.hash);
 
@@ -242,16 +243,8 @@ shared ({ caller = initializer }) actor class TswaandaAdmin() = this {
     };
 
     public func updateProduct(id : Text, product : Product) : async Bool {
-        switch (products.get(id)) {
-            case (null) {
-                return false;
-            };
-            case (?result) {
-                let updateProduct : Product = product;
-                ignore products.replace(id, updateProduct);
-                return true;
-            };
-        };
+        products.put(id, product);
+        return true;
     };
 
     public shared func deleteProduct(id : Text) : async Bool {
@@ -464,7 +457,7 @@ shared ({ caller = initializer }) actor class TswaandaAdmin() = this {
         Cycles.balance();
     };
 
-    public shared ({ caller }) func getCanisterStatus(id: Principal) : async Result.Result<Status, Text> {
+    public shared ({ caller }) func getCanisterStatus(id : Principal) : async Result.Result<Status, Text> {
         var check : Bool = await _isController(caller);
         if (check == false) {
             return #err("You are not a controller");
