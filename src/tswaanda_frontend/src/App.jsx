@@ -35,6 +35,7 @@ import Documents from "./scenes/documents/index";
 import Support from "./scenes/support/index";
 import { useAuth } from "./hooks/auth";
 import Unauthorized from "./components/Unauthorized";
+import Newsletter from "./scenes/newsletters";
 
 function App() {
   const dispatch = useDispatch()
@@ -128,6 +129,7 @@ function App() {
                 <Route path="/monthly" element={<Monthly />} />
                 <Route path="/breakdown" element={<Breakdown />} />
                 <Route path="/admin" element={<Admin />} />
+                <Route path="/newsletters" element={<Newsletter />} />
                 <Route path="/support" element={<Support />} />
                 <Route path="/performance" element={<Performance />} />
                 <Route path="/storage" element={<Storage />} />

@@ -26,6 +26,7 @@ import {
   TrendingUpOutlined,
   PieChartOutlined,
   PaidOutlined,
+  NewspaperOutlined,
 } from "@mui/icons-material";
 import AgricultureIcon from '@mui/icons-material/Agriculture';
 import SupportAgentIcon from '@mui/icons-material/SupportAgent';
@@ -129,6 +130,10 @@ const Sidebar = ({
     {
       text: "Admin",
       icon: <AdminPanelSettingsOutlined />,
+    },
+    {
+      text: "Newsletters",
+      icon: <NewspaperOutlined />,
     },
     {
       text: "Support",
