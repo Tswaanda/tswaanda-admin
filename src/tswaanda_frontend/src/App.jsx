@@ -37,6 +37,9 @@ import { useAuth } from "./hooks/auth";
 import Unauthorized from "./components/Unauthorized";
 import Newsletter from "./scenes/newsletters";
 
+
+const network = process.env.DFX_NETWORK
+
 function App() {
   const dispatch = useDispatch()
 

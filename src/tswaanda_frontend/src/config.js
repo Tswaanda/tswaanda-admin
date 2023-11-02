@@ -6,6 +6,8 @@ import {
 import icblast from "@infu/icblast";
 import { idlFactory as marketIdlFactory } from "../../declarations/marketplace_backend";
 
+const network = process.env.DFX_NETWORK
+
 let ic = icblast({ local: false });
 
 export const canister = await ic("55ger-liaaa-aaaal-qb33q-cai");
@@ -21,7 +23,7 @@ const agent = new HttpAgent({ host: host });
 const marketCanisterId = "55ger-liaaa-aaaal-qb33q-cai";
 
 export const backendActor = Actor.createActor(idlFactory, {
-  agent: localagent,
+  agent: network === "local" ? localagent : agent,
   canisterId: canisterId,
 });
 

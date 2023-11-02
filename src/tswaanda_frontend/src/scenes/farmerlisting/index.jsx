@@ -13,10 +13,16 @@ import {
 } from "@mui/material";
 import { categories } from "../constants/index";
 import { v4 as uuidv4 } from "uuid";
-import { backendActor } from "../../config";
+// import { backendActor } from "../../config";
 import { toast } from "react-toastify";
+import { uploadFile } from "../../storage-config/functions";
+import { useAuth } from "../../hooks/auth";
+import { useSelector, useDispatch } from 'react-redux'
 
-function FarmerListing({ isOpen, onClose }) {
+function FarmerListing({ isOpen, onClose, getPendingFarmers }) {
+
+  const { storageInitiated } = useSelector((state) => state.global)
+  const { backendActor } = useAuth()
 
 
   const [farmerName, setFarmerName] = useState("");
@@ -26,6 +32,8 @@ function FarmerListing({ isOpen, onClose }) {
   const [farmLocation, setFarmLocation] = useState("");
   const [farmDescription, setFarmDescription] = useState("");
   const [produceCategory, setProduceCategory] = useState("");
+  const [proofOfAddress, setProofOfAddress] = useState(null);
+  const [idCopy, setIdCopy] = useState(null);
 
   const [saving, setSaving] = useState(false);
 
@@ -34,6 +42,14 @@ function FarmerListing({ isOpen, onClose }) {
     event.preventDefault();
     try {
       setSaving(true);
+      let proofOfAddressUrl = null;
+      let idCopyUrl = null;
+      if (proofOfAddress) {
+        proofOfAddressUrl = await uploadAssets(proofOfAddress);
+      }
+      if (idCopy) {
+        idCopyUrl = await uploadAssets(idCopy);
+      }
       const farmer = {
         id: uuidv4(),
         fullName: farmerName,
@@ -43,19 +59,21 @@ function FarmerListing({ isOpen, onClose }) {
         location: farmLocation,
         description: farmDescription,
         produceCategories: produceCategory,
-        listedProducts: [], 
+        listedProducts: [],
         soldProducts: [],
+        proofOfAddress: proofOfAddressUrl ? [proofOfAddressUrl] : [],
+        idCopy: idCopyUrl ? [idCopyUrl] : [],
         isSuspended: false,
         isVerified: false,
         created: BigInt(Date.now()),
       };
-      console.log(farmer)
       await backendActor.createFarmer(farmer);
       toast.success("Farmer added successfully", {
         autoClose: 5000,
         position: "top-center",
         hideProgressBar: true,
       });
+      getPendingFarmers();
       setSaving(false);
 
     } catch (error) {
@@ -63,6 +81,19 @@ function FarmerListing({ isOpen, onClose }) {
       setSaving(false);
     }
 
+  };
+
+  const uploadAssets = async (image) => {
+    if (storageInitiated) {
+      try {
+        const file_path = location.pathname;
+        const assetUrl = await uploadFile(image, file_path);
+        console.log("This file was successfully uploaded:", image.name);
+        return assetUrl;
+      } catch (error) {
+        console.error("Error uploading file:", image.name, error);
+      }
+    }
   };
 
 
@@ -128,6 +159,20 @@ function FarmerListing({ isOpen, onClose }) {
             fullWidth
             value={farmDescription}
             onChange={(e) => setFarmDescription(e.target.value)}
+          />
+          <TextField
+            margin="dense"
+            label="Proof of address (Optional)"
+            type="file"
+            fullWidth
+            onChange={(e) => setProofOfAddress(e.target.files[0])}
+          />
+          <TextField
+            margin="dense"
+            label="Id Copy (Optional)"
+            type="file"
+            fullWidth
+            onChange={(e) => setIdCopy(e.target.files[0])}
           />
 
           <FormControl fullWidth margin="dense">

@@ -13,9 +13,11 @@ import PendingFarmers from "../../components/Farmers/PendingFarmers";
 import ApprovedFarmers from "../../components/Farmers/ApprovedFarmers";
 import FarmerListing from "../../scenes/farmerlisting";
 import SuspendedFarmers from "../../components/Farmers/SuspendedFarmers";
-import { backendActor } from "../../config";
+import { useAuth } from "../../hooks/auth";
+// import { backendActor } from "../../config";
 
 const Farmers = () => {
+  const {backendActor} = useAuth()
   const [expanded, setExpanded] = useState(false);
   const [showStatus, setShowStatus] = useState(false);
   const [updating, setUpdating] = useState(false);
@@ -53,29 +55,41 @@ const Farmers = () => {
   };
 
   const getPendingFarmers = async () => {
-    const res = await backendActor.getUnverifiedFarmers()
-    const sortedData = res.sort(
-      (a, b) => Number(b.created) - Number(a.created)
-    );
-    const convertedFarmers = convertData(sortedData);
-    setPendingFarmers(convertedFarmers);
+    try {
+      const res = await backendActor.getUnverifiedFarmers()
+      const sortedData = res.sort(
+        (a, b) => Number(b.created) - Number(a.created)
+      );
+      const convertedFarmers = convertData(sortedData);
+      setPendingFarmers(convertedFarmers);
+    } catch (error) {
+      console.log("Error getting pending farmers", error)
+    }
   }
   const getSuspended = async () => {
-    const res = await backendActor.getSuspendedFarmers()
-    const sortedData = res.sort(
-      (a, b) => Number(b.created) - Number(a.created)
-    );
-    const convertedFarmers = convertData(sortedData);
-    setSuspendedFarmers(convertedFarmers);
+    try {
+      const res = await backendActor.getSuspendedFarmers()
+      const sortedData = res.sort(
+        (a, b) => Number(b.created) - Number(a.created)
+      );
+      const convertedFarmers = convertData(sortedData);
+      setSuspendedFarmers(convertedFarmers);
+    } catch (error) {
+      console.log("Error getting suspended farmers", error)
+    }
   }
 
   const getApprovedFarmers = async () => {
-    const res = await backendActor.getVerifiedFarmers()
-    const sortedData = res.sort(
-      (a, b) => Number(b.created) - Number(a.created)
-    );
-    const convertedFarmers = convertData(sortedData);
-    setApprovedFarmers(convertedFarmers);
+    try {
+      const res = await backendActor.getVerifiedFarmers()
+      const sortedData = res.sort(
+        (a, b) => Number(b.created) - Number(a.created)
+      );
+      const convertedFarmers = convertData(sortedData);
+      setApprovedFarmers(convertedFarmers);
+    } catch (error) {
+      console.log("Error getting approved farmers", error)
+    }
   }
 
   const convertData = (data) => {
@@ -122,8 +136,13 @@ const Farmers = () => {
 
   const getFarmers = async () => {
     setIsLoading(true);
-    const res = await backendActor.getAllFarmers();
-    setData(res);
+    try {
+      const res = await backendActor.getAllFarmers();
+      setData(res);
+    } catch (error) {
+      console.log("Error getting farmers", error)
+      setIsLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -175,7 +194,7 @@ const Farmers = () => {
         }
         if (farmerStatus === "suspended") {
           data[farmerIndex].isSuspended = true;
-          
+
         }
         if (farmerStatus === "pending") {
           data[farmerIndex].isVerified = false;
@@ -302,6 +321,7 @@ const Farmers = () => {
             <FarmerListing
               isOpen={isOpen}
               onClose={handleListPopClose}
+              getPendingFarmers={getPendingFarmers}
             />
           )}
         </Box>
