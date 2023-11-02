@@ -51,19 +51,6 @@ const Product = ({
         setIsOpen(false);
     };
 
-    const productInfo = {
-        id: product.id,
-        name: product.name,
-        price: product.price,
-        minOrder: product.minOrder,
-        shortDescription: product.shortDescription,
-        fullDescription: product.fullDescription,
-        category: product.category,
-        images: product.images,
-        weight: product.weight,
-        availability: product.availability,
-    };
-
     const getProductReviews = async () => {
         const res = await backendActor.getProductReviews(product.id);
         if (Array.isArray(res)) {
@@ -199,7 +186,7 @@ const Product = ({
                 </Button>
                 {isOpen && (
                     <UpdateProduct
-                        productInfo={productInfo}
+                        productInfo={product}
                         setProductsUpdated={setProductsUpdated}
                         isOpen={isOpen}
                         onClose={handleUpdatePopClose}

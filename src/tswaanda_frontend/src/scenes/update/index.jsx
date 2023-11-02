@@ -46,6 +46,7 @@ const UpdateProduct = ({
   const [availability, setAvailability] = useState(
     productInfo.availability
   );
+  const [farmer, setFarmer] = useState(productInfo.farmer);
   const [newImages, setNewImages] = useState(null);
   const [deletingAssets, setDeleting] = useState(false)
 
@@ -90,6 +91,7 @@ const UpdateProduct = ({
     const updatedProduct = {
       id: id,
       name: productItem.name,
+      farmer: farmer,
       hscode: productItem.code,
       price: parseInt(price),
       minOrder: parseInt(minOrder),
@@ -98,8 +100,10 @@ const UpdateProduct = ({
       category: category,
       weight: parseInt(weight),
       availability: availability,
-      images: filesUrls
+      images: filesUrls,
+      created: productInfo.created,
     };
+    console.log("Updated product", updatedProduct)
     await backendActor.updateProduct(id, updatedProduct);
     setProductsUpdated(true);
     setUpdating(false);
@@ -153,15 +157,6 @@ const UpdateProduct = ({
           Update product {productInfo.id}
         </DialogTitle>
         <DialogContent>
-          <TextField
-            autoFocus
-            margin="dense"
-            label="Product name"
-            type="text"
-            fullWidth
-            value={productItem}
-            onChange={(e) => setProductItem(e.target.value)}
-          />
           <FormControl fullWidth margin="dense">
             <InputLabel id="category-label">Product Name</InputLabel>
             <Select
@@ -179,6 +174,15 @@ const UpdateProduct = ({
           <TextField
             autoFocus
             margin="dense"
+            label="Farmer email"
+            type="email"
+            value={farmer}
+            fullWidth
+            onChange={(e) => setFarmer(e.target.value)}
+          />
+          <TextField
+            autoFocus
+            margin="dense"
             label="Minimum order"
             type="number"
             fullWidth
@@ -190,6 +194,7 @@ const UpdateProduct = ({
             label="Description"
             type="text"
             fullWidth
+            required
             value={shortDescription}
             onChange={(e) => setShortDescription(e.target.value)}
           />
@@ -200,6 +205,7 @@ const UpdateProduct = ({
             rows={3}
             type="text"
             fullWidth
+            required
             value={fullDesc}
             onChange={(e) => setFullDesc(e.target.value)}
           />

@@ -76,10 +76,11 @@ function UpLoadProduct({ isOpen, onClose, setProductsUpdated }) {
             weight: parseInt(weight),
             availability: availability,
             images: urls,
+            created: BigInt(Date.now()),
           };
 
           await backendActor.createProduct(newProduct);
-          await sendOrderListedEmail(farmer, update= "listed")
+          await sendOrderListedEmail(farmer, "listed")
           setProductsUpdated(true);
           setSaving(false)
           onClose();
@@ -145,7 +146,7 @@ function UpLoadProduct({ isOpen, onClose, setProductsUpdated }) {
           <TextField
             autoFocus
             margin="dense"
-            label="Farmer"
+            label="Farmer email"
             type="email"
             value={farmer}
             fullWidth
