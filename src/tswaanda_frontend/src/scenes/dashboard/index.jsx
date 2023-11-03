@@ -24,10 +24,10 @@ import { useNavigate } from "react-router-dom";
 import { adminBlast, marketBlast, useAuth } from "../../hooks/auth";
 
 const Dashboard = () => {
-const [adminStats, setAdminStats] = useState(null)
-const [marketStats, setMarketStats] = useState(null)
-const [customers, setCustomers] = useState(null)
-const [orders, setOrders] = useState(null)
+  const [adminStats, setAdminStats] = useState(null)
+  const [marketStats, setMarketStats] = useState(null)
+  const [customers, setCustomers] = useState([])
+  const [orders, setOrders] = useState(null)
 
 
   const theme = useTheme();
@@ -63,8 +63,37 @@ const [orders, setOrders] = useState(null)
     const orders = await marketBlast.getAllOrders()
     setOrders(orders)
   }
+  function groupCustomersByMonth(customers) {
+    return customers?.reduce((acc, customer) => {
+      const date = new Date(Number(customer.dateCreated));
+      const month = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+      if (!acc[month]) {
+        acc[month] = 0;
+      }
+      acc[month]++;
+      return acc;
+    }, {});
+  }
 
-  console.log(customers)
+  function calculateGrowthRate(customersByMonth) {
+    let previousMonthCount = 0;
+    const growthRates = {};
+
+    Object.keys(customersByMonth).sort().forEach(month => {
+      const currentMonthCount = customersByMonth[month];
+      if (previousMonthCount > 0) {
+        const growthRate = ((currentMonthCount - previousMonthCount) / previousMonthCount) * 100;
+        growthRates[month] = `${growthRate.toFixed(2)}%`;
+      }
+      previousMonthCount = currentMonthCount;
+    });
+
+    return growthRates;
+  }
+
+  const customersByMonth = groupCustomersByMonth(customers);
+  const growthRates = calculateGrowthRate(customersByMonth);
+  console.log("Growth rate", growthRates, "Customers by month", customersByMonth);
 
   const columns = [
     {
