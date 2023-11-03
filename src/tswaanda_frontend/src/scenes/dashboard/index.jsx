@@ -22,6 +22,7 @@ import { useGetDashboardQuery } from "../../state/api";
 import StatBox from "../../components/StatBox";
 import { useNavigate } from "react-router-dom";
 import { adminBlast, marketBlast, useAuth } from "../../hooks/auth";
+import NewOrders from "../../components/Dashboard/NewOrders";
 
 const Dashboard = () => {
   const [adminStats, setAdminStats] = useState(null)
@@ -344,12 +345,7 @@ const Dashboard = () => {
             },
           }}
         >
-          <DataGrid
-            loading={isLoading || !data}
-            getRowId={(row) => row._id}
-            rows={(data && data.transactions) || []}
-            columns={columns}
-          />
+          <NewOrders orders={newOrders}/>
         </Box>
         <Box
           gridColumn="span 4"
