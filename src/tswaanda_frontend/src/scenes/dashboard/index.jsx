@@ -27,7 +27,14 @@ const Dashboard = () => {
   const [adminStats, setAdminStats] = useState(null)
   const [marketStats, setMarketStats] = useState(null)
   const [customers, setCustomers] = useState([])
-  const [orders, setOrders] = useState(null)
+  const [orders, setOrders] = useState([])
+  const [customersGrowthRates, setCustomersGrowthRates] = useState(null)
+  const [customersByMonth, setCustomersByMonth] = useState(null)
+  const [currentMonthRate, setCurrentMonthRate] = useState(null)
+
+  const [ordersGrowthRates, setOrdersGrowthRates] = useState(null)
+  const [ordersByMonth, setOrdersByMonth] = useState(null)
+  const [currentMonthOrderRate, setCurrentMonthOrderRate] = useState(null)
 
 
   const theme = useTheme();
@@ -63,7 +70,9 @@ const Dashboard = () => {
     const orders = await marketBlast.getAllOrders()
     setOrders(orders)
   }
-  function groupCustomersByMonth(customers) {
+
+  // Customers growth rate
+  const groupCustomersByMonth = (customers) => {
     return customers?.reduce((acc, customer) => {
       const date = new Date(Number(customer.dateCreated));
       const month = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
@@ -75,25 +84,74 @@ const Dashboard = () => {
     }, {});
   }
 
-  function calculateGrowthRate(customersByMonth) {
+  const calculateGrowthRate = (customersByMonth) => {
     let previousMonthCount = 0;
-    const growthRates = {};
+    const customersGrowthRates = {};
 
     Object.keys(customersByMonth).sort().forEach(month => {
       const currentMonthCount = customersByMonth[month];
       if (previousMonthCount > 0) {
         const growthRate = ((currentMonthCount - previousMonthCount) / previousMonthCount) * 100;
-        growthRates[month] = `${growthRate.toFixed(2)}%`;
+        customersGrowthRates[month] = `${growthRate.toFixed(2)}%`;
       }
       previousMonthCount = currentMonthCount;
     });
 
-    return growthRates;
+    const currentMonth = Object.keys(customersByMonth).sort().pop();
+    setCurrentMonthRate(customersGrowthRates[currentMonth]);
+
+    return customersGrowthRates;
   }
 
-  const customersByMonth = groupCustomersByMonth(customers);
-  const growthRates = calculateGrowthRate(customersByMonth);
-  console.log("Growth rate", growthRates, "Customers by month", customersByMonth);
+  // Orders growth rate
+  const groupOrdersByMonth = (orders) => {
+    return orders?.reduce((acc, order) => {
+      const date = new Date(Number(order.dateCreated));
+      const month = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+      if (!acc[month]) {
+        acc[month] = 0;
+      }
+      acc[month]++;
+      return acc;
+    }, {});
+  }
+
+  const calculateOrdersGrowthRate = (ordersByMonth) => {
+    let previousMonthCount = 0;
+    const customersGrowthRates = {};
+
+    Object.keys(ordersByMonth).sort().forEach(month => {
+      const currentMonthCount = ordersByMonth[month];
+      if (previousMonthCount > 0) {
+        const growthRate = ((currentMonthCount - previousMonthCount) / previousMonthCount) * 100;
+        customersGrowthRates[month] = `${growthRate.toFixed(2)}%`;
+      }
+      previousMonthCount = currentMonthCount;
+    });
+
+    const currentMonth = Object.keys(ordersByMonth).sort().pop();
+    setCurrentMonthOrderRate(customersGrowthRates[currentMonth]);
+
+    return customersGrowthRates;
+  }
+
+  useEffect(() => {
+    if (customers && orders) {
+      const customersByMonth = groupCustomersByMonth(customers);
+      const customersGrowthRates = calculateGrowthRate(customersByMonth);
+      const ordersByMonth = groupOrdersByMonth(orders);
+      const orderGrowthRates = calculateOrdersGrowthRate(ordersByMonth);
+      setOrdersByMonth(ordersByMonth);
+      setOrdersGrowthRates(orderGrowthRates);
+      setCustomersByMonth(customersByMonth);
+      setCustomersGrowthRates(customersGrowthRates);
+    
+    }
+  }, [ customers, orders ])
+
+  console.log("Orders growth rates", ordersGrowthRates)
+  console.log("Orders by month", ordersByMonth)
+  console.log("Orders current month rate", currentMonthOrderRate)
 
   const columns = [
     {
@@ -165,13 +223,13 @@ const Dashboard = () => {
         <StatBox
           title="Total Customers"
           value={Number(marketStats?.totalCustomers)}
-          increase="+14%"
+          increase={currentMonthRate}
           description="Since last month"
         />
         <StatBox
-          title="Sales Today"
-          value={data && data.todayStats.totalSales}
-          increase="+21%"
+          title="Total Orders"
+          value={Number(marketStats?.totalOrders)}
+          increase={currentMonthOrderRate}
           description="Since last month"
           icon={
             <PointOfSale
@@ -189,7 +247,7 @@ const Dashboard = () => {
           <OverviewChart view="sales" isDashboard={true} />
         </Box>
         <StatBox
-          title="Monthly Sales"
+          title="Pending KYC request"
           value={data && data.thisMonthStats.totalSales}
           increase="+5%"
           description="Since last month"
