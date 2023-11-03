@@ -120,7 +120,7 @@ export const HSCodes = [
         code: "080719",
     },
     {
-        name: "Sweet Potatoes",
+        name: "Potatoes",
         code: "071420",
     },
     {

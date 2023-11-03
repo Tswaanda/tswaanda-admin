@@ -4,7 +4,9 @@ import { idlFactory as marketIdlFactory } from "../../../declarations/marketplac
 import { AuthClient } from "@dfinity/auth-client";
 import { canisterId as identityCanId } from "../../../declarations/internet_identity/index";
 import { canisterId, idlFactory } from "../../../declarations/tswaanda_backend/index";
+import icblast from "@infu/icblast";
 
+const marketCanisterId = "55ger-liaaa-aaaal-qb33q-cai";
 
 const authClient = await AuthClient.create({
   idleOptions: {
@@ -12,6 +14,13 @@ const authClient = await AuthClient.create({
     disableDefaultIdleCallback: true, // disable the default reload behavior
   },
 })
+
+
+// ICBLAST
+const identity = await authClient.getIdentity()
+let ic = icblast({ local: false, identity: identity  });
+export const adminBlast = await ic(canisterId);
+export const marketBlast = await ic(marketCanisterId);
 
 
 // Context
@@ -46,8 +55,8 @@ export const ContextProvider = ({ children }) => {
     const hours = BigInt(24);
     const nanoseconds = BigInt(3600000000000);
     await authClient.login({
-      // identityProvider: "https://identity.ic0.app/#authorize",
-      identityProvider: `http://localhost:4943?canisterId=${identityCanId}`,
+      identityProvider: "https://identity.ic0.app/#authorize",
+      // identityProvider: `http://localhost:4943?canisterId=${identityCanId}`,
       maxTimeToLive: days * hours * nanoseconds,
       onSuccess: () => {
         setIsAuthenticated(true)
@@ -79,16 +88,14 @@ export const ContextProvider = ({ children }) => {
     setContextIdentity(null)
   }
 
-  const host = "http://localhost:8080";
-  // const host = "https://icp0.io";
+  // const host = "http://localhost:8080";
+  const host = "https://icp0.io";
 
   let agent = new HttpAgent({
     host: host,
     identity: identity
   })
-  agent.fetchRootKey()
-
-  const marketCanisterId = "55ger-liaaa-aaaal-qb33q-cai";
+  // agent.fetchRootKey()
 
   const backendActor = Actor.createActor(idlFactory, {
     agent,

@@ -29,6 +29,7 @@ module {
         category : Text;
         images : [Text];
         weight : Int32;
+        odersPlaced : Int32;
         availability : Text;
         created: Int;
     };
@@ -70,6 +71,12 @@ module {
         principal : Principal;
         suspended : Bool;
         created : Int;
+    };
+
+    public type Stats = {
+        totalProducts : Int;
+        totalFarmers : Int;
+        totalStaff : Int;
     };
 
     public type Health = {

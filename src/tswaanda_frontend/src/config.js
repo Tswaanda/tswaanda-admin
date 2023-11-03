@@ -14,7 +14,7 @@ export const canister = await ic("55ger-liaaa-aaaal-qb33q-cai");
 
 const localhost = "http://localhost:4943";
 const localagent = new HttpAgent({ host: localhost });
-localagent.fetchRootKey();
+// localagent.fetchRootKey();
 
 
 const host = "https://icp0.io";

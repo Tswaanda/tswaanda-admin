@@ -38,6 +38,7 @@ shared ({ caller = initializer }) actor class TswaandaAdmin() = this {
     type ProductReview = Type.ProductReview;
     type Staff = Type.Staff;
     type Health = Type.Health;
+    type Stats = Type.Stats;
 
     //Access control variables
     private stable var roles : AssocList.AssocList<Principal, Role> = List.nil();
@@ -358,6 +359,21 @@ shared ({ caller = initializer }) actor class TswaandaAdmin() = this {
             };
         };
         return Buffer.toArray<Farmer>(suspendedFarmers);
+    };
+
+    // --------------------------------------------STATS MANAGEMENT--------------------------------------------------------
+
+    public shared query func getAdminStats() : async Stats {
+        let totalProducts = products.size();
+        let totalFarmers = farmers.size();
+        let totalStaff = staff.size();
+
+        let stats : Stats = {
+            totalProducts;
+            totalFarmers;
+            totalStaff;
+        };
+        return stats;
     };
 
     // --------------------------------------------CANISTERS MANAGEMENT----------------------------------------------------

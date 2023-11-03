@@ -21,15 +21,50 @@ import OverviewChart from "../../components/OverviewChart";
 import { useGetDashboardQuery } from "../../state/api";
 import StatBox from "../../components/StatBox";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../hooks/auth";
+import { adminBlast, marketBlast, useAuth } from "../../hooks/auth";
 
 const Dashboard = () => {
+const [adminStats, setAdminStats] = useState(null)
+const [marketStats, setMarketStats] = useState(null)
+const [customers, setCustomers] = useState(null)
+const [orders, setOrders] = useState(null)
+
+
   const theme = useTheme();
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
   const isNonMediumScreens = useMediaQuery("(min-width: 1200px");
   const { data, isLoading } = useGetDashboardQuery();
+
+  useEffect(() => {
+    getAdminStatistics()
+    getMarketStatistics()
+    getCustomers()
+    getOrders()
+  }, []);
+
+  const getAdminStatistics = async () => {
+    const stats = await adminBlast.getAdminStats()
+    setAdminStats(stats)
+  }
+
+  const getMarketStatistics = async () => {
+    const stats = await marketBlast.getMarketPlaceStats()
+    setMarketStats(stats)
+  }
+
+  const getCustomers = async () => {
+    const customers = await marketBlast.getAllKYC()
+    setCustomers(customers)
+  }
+
+  const getOrders = async () => {
+    const orders = await marketBlast.getAllOrders()
+    setOrders(orders)
+  }
+
+  console.log(customers)
 
   const columns = [
     {
@@ -100,14 +135,9 @@ const Dashboard = () => {
         {/* ROW 1 */}
         <StatBox
           title="Total Customers"
-          value={data && data.totalCustomers}
+          value={Number(marketStats?.totalCustomers)}
           increase="+14%"
           description="Since last month"
-          icon={
-            <Email
-              sx={{ color: theme.palette.secondary[300], fontSize: "26px" }}
-            />
-          }
         />
         <StatBox
           title="Sales Today"
