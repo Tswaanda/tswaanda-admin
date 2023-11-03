@@ -32,6 +32,21 @@ const Dashboard = () => {
   const [customersByMonth, setCustomersByMonth] = useState(null)
   const [currentMonthRate, setCurrentMonthRate] = useState(null)
 
+  const [newOrdersNum, setNewOrdersNum] = useState(null);
+  const [newKYCNum, setNewKYCNum] = useState(null);
+
+  const [newOrders, setNewOrders] = useState(null);
+  const [newKYC, setNewKYC] = useState(null);
+  const [newCustomersGrowthRates, setNewCustomersGrowthRates] = useState(null)
+  const [newCustomersByMonth, setNewCustomersByMonth] = useState(null)
+  const [NCCurrentMonthNewRate, setCurrentMonthNewRate] = useState(null)
+
+  const [newoOrdersGrowthRates, setNewOrdersGrowthRates] = useState(null)
+  const [newOrdersByMonth, setNewOrdersByMonth] = useState(null)
+  const [newOrderscurrentMonthOrderRate, setNewOrderCurrentMonthOrderRate] = useState(null)
+
+
+
   const [ordersGrowthRates, setOrdersGrowthRates] = useState(null)
   const [ordersByMonth, setOrdersByMonth] = useState(null)
   const [currentMonthOrderRate, setCurrentMonthOrderRate] = useState(null)
@@ -49,6 +64,7 @@ const Dashboard = () => {
     getMarketStatistics()
     getCustomers()
     getOrders()
+    getSize();
   }, []);
 
   const getAdminStatistics = async () => {
@@ -63,13 +79,25 @@ const Dashboard = () => {
 
   const getCustomers = async () => {
     const customers = await marketBlast.getAllKYC()
+
+    const newCustomers = customers.filter(customer => customer.status === "pending")
+    setNewKYC(newCustomers)
     setCustomers(customers)
   }
 
   const getOrders = async () => {
     const orders = await marketBlast.getAllOrders()
+    const newOrders = orders.filter(order => order.status === "pending")
+    setNewOrders(newOrders)
     setOrders(orders)
   }
+
+  const getSize = async () => {
+    const orderSize = await marketBlast.getPendingOrdersSize();
+    const kycSize = await marketBlast.getPendingKYCReaquestSize();
+    setNewOrdersNum(Number(orderSize));
+    setNewKYCNum(Number(kycSize));
+  };
 
   // Customers growth rate
   const groupCustomersByMonth = (customers) => {
@@ -96,9 +124,6 @@ const Dashboard = () => {
       }
       previousMonthCount = currentMonthCount;
     });
-
-    const currentMonth = Object.keys(customersByMonth).sort().pop();
-    setCurrentMonthRate(customersGrowthRates[currentMonth]);
 
     return customersGrowthRates;
   }
@@ -129,9 +154,6 @@ const Dashboard = () => {
       previousMonthCount = currentMonthCount;
     });
 
-    const currentMonth = Object.keys(ordersByMonth).sort().pop();
-    setCurrentMonthOrderRate(customersGrowthRates[currentMonth]);
-
     return customersGrowthRates;
   }
 
@@ -140,18 +162,41 @@ const Dashboard = () => {
       const customersByMonth = groupCustomersByMonth(customers);
       const customersGrowthRates = calculateGrowthRate(customersByMonth);
       const ordersByMonth = groupOrdersByMonth(orders);
+
+      const currentMonth = Object.keys(ordersByMonth).sort().pop();
+      setCurrentMonthOrderRate(customersGrowthRates[currentMonth]);
       const orderGrowthRates = calculateOrdersGrowthRate(ordersByMonth);
+
+      const currentMonthC = Object.keys(customersByMonth).sort().pop();
+      setCurrentMonthRate(customersGrowthRates[currentMonthC]);
+
       setOrdersByMonth(ordersByMonth);
       setOrdersGrowthRates(orderGrowthRates);
       setCustomersByMonth(customersByMonth);
       setCustomersGrowthRates(customersGrowthRates);
-    
-    }
-  }, [ customers, orders ])
 
-  console.log("Orders growth rates", ordersGrowthRates)
-  console.log("Orders by month", ordersByMonth)
-  console.log("Orders current month rate", currentMonthOrderRate)
+    }
+  }, [customers, orders])
+
+ useEffect(() => {
+    if (newOrders && newKYC) {
+      const newCustomersByMonth = groupCustomersByMonth(newKYC);
+      const newCustomersGrowthRates = calculateGrowthRate(newCustomersByMonth);
+      const newOrdersByMonth = groupOrdersByMonth(newOrders);
+
+      const currentMonth = Object.keys(newOrdersByMonth).sort().pop();
+      setNewOrderCurrentMonthOrderRate(newCustomersGrowthRates[currentMonth]);
+      const newOrderGrowthRates = calculateOrdersGrowthRate(newOrdersByMonth);
+
+      const currentMonthC = Object.keys(newCustomersByMonth).sort().pop();
+      setCurrentMonthNewRate(newCustomersGrowthRates[currentMonthC]);
+
+      setNewOrdersByMonth(newOrdersByMonth);
+      setNewOrdersGrowthRates(newOrderGrowthRates);
+      setNewCustomersByMonth(newCustomersByMonth);
+      setNewCustomersGrowthRates(newCustomersGrowthRates);
+    }
+ } , [newOrders, newKYC])
 
   const columns = [
     {
@@ -247,9 +292,9 @@ const Dashboard = () => {
           <OverviewChart view="sales" isDashboard={true} />
         </Box>
         <StatBox
-          title="Pending KYC request"
-          value={data && data.thisMonthStats.totalSales}
-          increase="+5%"
+          title="New KYC request"
+          value={Number(newKYCNum)}
+          increase={NCCurrentMonthNewRate}
           description="Since last month"
           icon={
             <PersonAdd
@@ -258,9 +303,9 @@ const Dashboard = () => {
           }
         />
         <StatBox
-          title="Yearly Sales"
-          value={data && data.yearlySalesTotal}
-          increase="+43%"
+          title="New Orders"
+          value={Number(newOrdersNum)}
+          increase={newOrderscurrentMonthOrderRate}
           description="Since last month"
           icon={
             <Traffic
