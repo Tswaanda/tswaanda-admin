@@ -14,7 +14,12 @@ import {
   Typography,
   useTheme,
   useMediaQuery,
+  CardMedia,
+  CardContent,
+  Card,
+  CardActionArea
 } from "@mui/material";
+
 import { DataGrid } from "@mui/x-data-grid";
 import BreakdownChart from "../../components/BreakdownChart";
 import OverviewChart from "../../components/OverviewChart";
@@ -25,10 +30,13 @@ import { adminBlast, marketBlast, useAuth } from "../../hooks/auth";
 import NewOrders from "../../components/Dashboard/NewOrders";
 
 const Dashboard = () => {
+  const [products, setProducts] = useState([]);
+
   const [adminStats, setAdminStats] = useState(null)
   const [marketStats, setMarketStats] = useState(null)
   const [customers, setCustomers] = useState([])
   const [orders, setOrders] = useState([])
+  const [modifiedOrders, setModifiedOrders] = useState([])
   const [customersGrowthRates, setCustomersGrowthRates] = useState(null)
   const [customersByMonth, setCustomersByMonth] = useState(null)
   const [currentMonthRate, setCurrentMonthRate] = useState(null)
@@ -58,12 +66,12 @@ const Dashboard = () => {
   const navigate = useNavigate();
 
   const isNonMediumScreens = useMediaQuery("(min-width: 1200px");
-  const { data, isLoading } = useGetDashboardQuery();
 
   useEffect(() => {
-    getAdminStatistics()
     getMarketStatistics()
+    getAdminStatistics()
     getCustomers()
+    getProducts()
     getOrders()
     getSize();
   }, []);
@@ -89,6 +97,8 @@ const Dashboard = () => {
   const getOrders = async () => {
     const orders = await marketBlast.getAllOrders()
     const newOrders = orders.filter(order => order.status === "pending")
+    const convertedOrders = convertData(newOrders);
+    setModifiedOrders(convertedOrders)
     setNewOrders(newOrders)
     setOrders(orders)
   }
@@ -99,6 +109,12 @@ const Dashboard = () => {
     setNewOrdersNum(Number(orderSize));
     setNewKYCNum(Number(kycSize));
   };
+
+  const getProducts = async () => {
+    const products = await adminBlast.getAllProducts()
+    products.splice(3, products.length - 1)
+    setProducts(products)
+  }
 
   // Customers growth rate
   const groupCustomersByMonth = (customers) => {
@@ -165,8 +181,8 @@ const Dashboard = () => {
       const ordersByMonth = groupOrdersByMonth(orders);
 
       const currentMonth = Object.keys(ordersByMonth).sort().pop();
-      setCurrentMonthOrderRate(customersGrowthRates[currentMonth]);
       const orderGrowthRates = calculateOrdersGrowthRate(ordersByMonth);
+      setCurrentMonthOrderRate(orderGrowthRates[currentMonth]);
 
       const currentMonthC = Object.keys(customersByMonth).sort().pop();
       setCurrentMonthRate(customersGrowthRates[currentMonthC]);
@@ -179,7 +195,7 @@ const Dashboard = () => {
     }
   }, [customers, orders])
 
- useEffect(() => {
+  useEffect(() => {
     if (newOrders && newKYC) {
       const newCustomersByMonth = groupCustomersByMonth(newKYC);
       const newCustomersGrowthRates = calculateGrowthRate(newCustomersByMonth);
@@ -197,7 +213,49 @@ const Dashboard = () => {
       setNewCustomersByMonth(newCustomersByMonth);
       setNewCustomersGrowthRates(newCustomersGrowthRates);
     }
- } , [newOrders, newKYC])
+  }, [newOrders, newKYC])
+
+  const convertData = (data) => {
+    if (!data) {
+      return [];
+    }
+
+    const formatOrderDate = (timestamp) => {
+      const date = new Date(Number(timestamp));
+      const options = {
+        weekday: "short",
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      };
+      return date.toLocaleDateString("en-US", options);
+    };
+
+    const formatOrderTime = (timestamp) => {
+      const date = new Date(Number(timestamp));
+      const options = {
+        hour: "numeric",
+        minute: "numeric",
+        hour12: true,
+      };
+      return date.toLocaleTimeString("en-US", options);
+    };
+
+    const modifiedOrder = data.map((order) => {
+
+
+      const formattedDate = formatOrderDate(order.dateCreated);
+      const formattedTime = formatOrderTime(order.dateCreated);
+
+      return {
+        ...order,
+        step: Number(order.step),
+        dateCreated: `${formattedDate} at ${formattedTime}`,
+      };
+    });
+
+    return modifiedOrder;
+  }
 
   const columns = [
     {
@@ -229,6 +287,12 @@ const Dashboard = () => {
       renderCell: (params) => `$${Number(params.value).toFixed(2)}`,
     },
   ];
+
+  const getRandom = () => {
+    const min = 5;
+    const max = 10;
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
 
   useEffect(() => {
     if (!isAuthenticated) navigate("/login");
@@ -287,10 +351,43 @@ const Dashboard = () => {
           gridColumn="span 8"
           gridRow="span 2"
           backgroundColor={theme.palette.background.alt}
-          p="1rem"
+          p="0.5rem"
           borderRadius="0.55rem"
         >
-          <OverviewChart view="sales" isDashboard={true} />
+          <h2>Popular products products</h2>
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              "& > div": {
+                width: "30%",
+              },
+            }}
+          >
+            {products?.map((product, index) =>
+              <Card
+                key={index}
+                sx={{ maxWidth: 345, backgroundColor: theme.palette.background.alt }}>
+                <CardActionArea>
+                  <CardMedia
+                    component="img"
+                    height="140"
+                    image={product.images[0]}
+                    alt="green iguana"
+                  />
+                  <CardContent>
+                    <Typography gutterBottom variant="h5" component="div">
+                      <span style={{ fontWeight: "bold" }} >{product.name}</span> - {getRandom()} sold
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {/* Limit the number of characters that gets displayed for the description, and put a ... at the end */}
+                      {product.fullDescription.length > 100 ? product.fullDescription.slice(0, 100) + "..." : product.fullDescription} <a style={{color: "white"}} href={`https://tswaanda.com/product/${product.id}`}>Visit product page</a>
+                    </Typography>
+                  </CardContent>
+                </CardActionArea>
+              </Card>)}
+          </Box>
         </Box>
         <StatBox
           title="New KYC request"
@@ -318,34 +415,14 @@ const Dashboard = () => {
 
         <Box
           gridColumn="span 8"
+          backgroundColor={theme.palette.background.alt}
           gridRow="span 3"
-          sx={{
-            "& .MuiDataGrid-root": {
-              border: "none",
-              borderRadius: "5rem",
-            },
-            "& .MuiDataGrid-cell": {
-              borderBottom: "none",
-            },
-            "& .MuiDataGrid-columnHeaders": {
-              backgroundColor: theme.palette.background.alt,
-              color: theme.palette.secondary[100],
-              borderBottom: "none",
-            },
-            "& .MuiDataGrid-virtualScroller": {
-              backgroundColor: theme.palette.background.alt,
-            },
-            "& .MuiDataGrid-footerContainer": {
-              backgroundColor: theme.palette.background.alt,
-              color: theme.palette.secondary[100],
-              borderTop: "none",
-            },
-            "& .MuiDataGrid-toolbarContainer .MuiButton-text": {
-              color: `${theme.palette.secondary[200]} !important`,
-            },
-          }}
+          p="1rem"
+          borderRadius="0.55rem"
+          
         >
-          <NewOrders orders={newOrders}/>
+          <h2>New Orders</h2>
+          <NewOrders orders={modifiedOrders} />
         </Box>
         <Box
           gridColumn="span 4"

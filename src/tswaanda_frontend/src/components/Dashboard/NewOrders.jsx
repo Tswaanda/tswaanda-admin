@@ -2,7 +2,9 @@ import React, { useState } from "react";
 import {
     Box,
     Typography,
-    useTheme
+    useTheme,
+    CardActions,
+    Button,
 } from "@mui/material";
 import Accordion from "@mui/material/Accordion";
 import AccordionDetails from "@mui/material/AccordionDetails";
@@ -53,7 +55,21 @@ const NewOrders = ({
                         </Typography>
                     </AccordionSummary>
                     <AccordionDetails>
-                        <Link to="/orders">View More</Link>
+                      <CardActions>
+                            <Button
+                                component={Link}
+                                to={`/orders`}
+                                variant="outlined"
+                                size="small"
+                                style={{
+                                    backgroundColor: "green",
+                                    color: "white",
+                                }}
+                            >
+                                View more
+                            </Button>
+                        </CardActions>
+                      
                     </AccordionDetails>
                 </Accordion>
             ))}

@@ -86,7 +86,7 @@ const Orders = () => {
     setDeliverdOrders(convertedOrders);
   };
 
-  function convertData(data) {
+  const convertData = (data) => {
     if (!data) {
       return [];
     }
