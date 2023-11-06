@@ -18,9 +18,9 @@ const authClient = await AuthClient.create({
 
 // ICBLAST
 const identity = await authClient.getIdentity()
-let ic = icblast({ local: false, identity: identity  });
+let ic = icblast({ local: true, identity: identity  });
 export const adminBlast = await ic(canisterId);
-export const marketBlast = await ic(marketCanisterId);
+export const marketBlast = await ic("avqkn-guaaa-aaaaa-qaaea-cai");
 
 
 // Context
@@ -55,8 +55,8 @@ export const ContextProvider = ({ children }) => {
     const hours = BigInt(24);
     const nanoseconds = BigInt(3600000000000);
     await authClient.login({
-      identityProvider: "https://identity.ic0.app/#authorize",
-      // identityProvider: `http://localhost:4943?canisterId=${identityCanId}`,
+      // identityProvider: "https://identity.ic0.app/#authorize",
+      identityProvider: `http://localhost:4943?canisterId=${identityCanId}`,
       maxTimeToLive: days * hours * nanoseconds,
       onSuccess: () => {
         setIsAuthenticated(true)
@@ -88,14 +88,14 @@ export const ContextProvider = ({ children }) => {
     setContextIdentity(null)
   }
 
-  // const host = "http://localhost:8080";
-  const host = "https://icp0.io";
+  const host = "http://localhost:8080";
+  // const host = "https://icp0.io";
 
   let agent = new HttpAgent({
     host: host,
     identity: identity
   })
-  // agent.fetchRootKey()
+  agent.fetchRootKey()
 
   const backendActor = Actor.createActor(idlFactory, {
     agent,

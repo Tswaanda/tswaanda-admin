@@ -18,6 +18,7 @@ import { uploadFile } from "../../storage-config/functions";
 import { useAuth } from "../../hooks/auth";
 import { HSCodes } from "../../hscodes/hscodes";
 import { sendOrderListedEmail } from "../../emails/orderListedMail";
+import { toast } from "react-toastify";
 
 function UpLoadProduct({ isOpen, onClose, setProductsUpdated }) {
 
@@ -60,6 +61,20 @@ function UpLoadProduct({ isOpen, onClose, setProductsUpdated }) {
       console.log("Currently busy")
     } else {
       try {
+        // Get farmer by email and return if not found and toast error
+        const farmerRes = await backendActor.getFarmerByEmail(farmer)
+        if (!farmerRes.ok) {
+          console.log("Farmer not found, please check email address or register farmer first")
+          toast.error(
+            `Farmer not found, please check email address or register farmer first`,
+            {
+              autoClose: 5000,
+              position: "top-center",
+              hideProgressBar: true,
+            }
+          );
+          return
+        }
         const urls = await uploadAssets();
         setSaving(true);
         if (urls) {
@@ -72,6 +87,7 @@ function UpLoadProduct({ isOpen, onClose, setProductsUpdated }) {
             minOrder: parseInt(minOrder),
             shortDescription: shortDescription,
             fullDescription: fullDesc,
+            odersPlaced : 0,
             category: category,
             weight: parseInt(weight),
             availability: availability,
@@ -79,8 +95,19 @@ function UpLoadProduct({ isOpen, onClose, setProductsUpdated }) {
             created: BigInt(Date.now()),
           };
 
+          // Create product and update farmer
           await backendActor.createProduct(newProduct);
-          await sendOrderListedEmail(farmer, "listed")
+          let updatedFarmer = {
+            ...farmerRes.ok,
+            listedProducts: [[...farmerRes.ok.listedProducts, newProduct.id]]
+          }
+          await backendActor.updateFarmer(updatedFarmer)
+
+          // Send email to farmer to notify them of new product
+          const res = await sendOrderListedEmail(farmerRes.ok, product)
+          if (res) {
+            console.log("Email sent")
+          }
           setProductsUpdated(true);
           setSaving(false)
           onClose();

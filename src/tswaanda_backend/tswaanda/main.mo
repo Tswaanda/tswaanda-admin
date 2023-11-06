@@ -314,16 +314,8 @@ shared ({ caller = initializer }) actor class TswaandaAdmin() = this {
         };
     };
 
-    public shared func updateFarmer(args : Farmer) : async Bool {
-        switch (farmers.get(args.email)) {
-            case (null) {
-                return false;
-            };
-            case (?result) {
-                ignore farmers.replace(result.email, args);
-                return true;
-            };
-        };
+    public shared func updateFarmer(args : Farmer) : () {
+        farmers.put(args.email, args);
     };
 
     public shared ({ caller }) func deleteFarmer(email : Text) : () {
