@@ -18,16 +18,12 @@ const DeliveredComponent = ({
   setUpdated,
   deliveredOrders,
   handleChange,
-  handleShowCustomerForm,
-  handleShowStatusForm,
   updateDeliverdOrderStatus,
   expanded,
   theme,
-  selectedOrderId,
-  showContact,
-  showStatus,
   updating,
   setOrderStatus,
+  orderStatus
 }) => {
 
   const [orders, setOrders] = useState([])
@@ -211,7 +207,7 @@ const DeliveredComponent = ({
       <>
         {updateSatus && (
           <UpdateOrderStatusModal {...{
-            updateOrderStatus, setOrderStatus, updating, theme, setStatusModal, openStatusModal, modalOrder, updated,
+            updateOrderStatus, setOrderStatus, orderStatus, updating, theme, setStatusModal, openStatusModal, modalOrder, updated,
             setUpdated
           }} />
         )}

@@ -29,7 +29,7 @@ module {
         category : Text;
         images : [Text];
         weight : Int32;
-        odersPlaced : Int32;
+        ordersPlaced : Int32;
         availability : Text;
         created: Int;
     };

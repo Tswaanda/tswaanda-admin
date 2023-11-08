@@ -96,7 +96,7 @@ function App() {
     } else if (!isAuthenticated) {
       return <Navigate to="/login" />;
     } else if (isAuthenticated && authorized === false) {
-      return <Unauthorized {...{user}}/>;
+      return <Unauthorized {...{ user }} />;
     } else if (isAuthenticated && authorized === null) {
       return <h3>Checking authorization</h3>;
     }

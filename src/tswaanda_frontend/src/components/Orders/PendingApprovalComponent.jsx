@@ -18,16 +18,12 @@ const PendingApprovalComponent = ({
   setUpdated,
   pendingOrders,
   handleChange,
-  handleShowCustomerForm,
-  handleShowStatusForm,
   updatePendingOrderStatus,
   expanded,
   theme,
-  selectedOrderId,
-  showContact,
-  showStatus,
   updating,
   setOrderStatus,
+  orderStatus
 }) => {
 
   const [orders, setOrders] = useState([])
@@ -210,7 +206,7 @@ const PendingApprovalComponent = ({
       <>
         {updateSatus && (
           <UpdateOrderStatusModal {...{
-            updateOrderStatus, setOrderStatus, updating, theme, setStatusModal, openStatusModal, modalOrder, updated,
+            updateOrderStatus, setOrderStatus, orderStatus, updating, theme, setStatusModal, openStatusModal, modalOrder, updated,
             setUpdated
           }} />
         )}

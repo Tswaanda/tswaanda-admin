@@ -46,8 +46,6 @@ const RestoreProducts = ({ openRestoreModal, setRestoreModal, setProductsUpdated
         reader.onload = async (e) => {
             try {
                 setUpLoading(true);
-
-                // Parse e.target.result, not jsonFile
                 const restoredProducts = JSON.parse(e.target.result);
                 if (Array.isArray(restoredProducts)) {
                     setCount(restoredProducts.length);
@@ -55,12 +53,8 @@ const RestoreProducts = ({ openRestoreModal, setRestoreModal, setProductsUpdated
                         setCount(prevCount => prevCount - 1);
                         let updatedProduct = {
                             ...product,
-                            price: BigInt(product.price),
-                            minOrder: BigInt(product.minOrder),
-                            weight: BigInt(product.weight),
-                            hscode: "00000000",
-                            farmer: "00000000",
-                            created: BigInt(Date.now())
+                            ordersPlaced: 0,
+                            created: BigInt(product.created),
                         }
                         console.log("Restoring product:", updatedProduct);
                         await backendActor.createProduct(updatedProduct);
@@ -123,7 +117,7 @@ const RestoreProducts = ({ openRestoreModal, setRestoreModal, setProductsUpdated
                         <Button
                             type="submit"
                             disabled={!jsonFile}
-                            onClick={uploading ? null : handleUpload }
+                            onClick={uploading ? null : handleUpload}
                             variant="contained"
                             color="success"
                             sx={{

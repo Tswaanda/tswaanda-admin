@@ -14,6 +14,8 @@ import {
 } from "@mui/material";
 import CloseIcon from '@mui/icons-material/Close';
 import AccordionDetails from "@mui/material/AccordionDetails";
+import { sendOrderApprovedEmail, sendOrderDeliveredEmail, sendOrderShippedEmail } from '../../emails/orderUpdateEmails';
+import { useAuth } from '../../hooks/auth';
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
     '& .MuiDialogContent-root': {
@@ -24,15 +26,36 @@ const BootstrapDialog = styled(Dialog)(({ theme }) => ({
     },
 }));
 
-const UpdateOrderStatusModal = ({ openStatusModal, updateOrderStatus, setStatusModal, setOrderStatus, updating, theme, modalOrder, updated,
+const UpdateOrderStatusModal = ({ openStatusModal, updateOrderStatus, orderStatus, setStatusModal, setOrderStatus, updating, theme, modalOrder, updated,
     setUpdated }) => {
+
+        const {backendActor} = useAuth()
 
     const handleStatusModalClose = () => {
         setStatusModal(false);
     }
 
     const handleUpdateOrderStatus = async () => {
-        updateOrderStatus(modalOrder.orderId)
+        const product = await backendActor.getProductById(modalOrder.orderProducts.id)
+        if (product.ok) {
+            const farmerInfo = await backendActor.getFarmerByEmail(product.ok.farmer)
+            if (farmerInfo.ok) {
+                try {
+                    if (orderStatus === "approved") {
+                        sendOrderApprovedEmail(farmerInfo.ok, modalOrder)
+                    } else if (orderStatus === "shipped") {
+                        sendOrderShippedEmail(farmerInfo.ok, modalOrder)
+                    } else if (orderStatus === "delivered") {
+                        sendOrderDeliveredEmail(farmerInfo.ok, modalOrder)
+                    } else {
+                        console.log("No email sent")
+                    }
+                } catch (error) {
+                    console.log("Error sending email", error)
+                }
+            }
+        }
+        // updateOrderStatus(modalOrder.orderId)
     }
 
     useEffect(() => {
@@ -41,7 +64,6 @@ const UpdateOrderStatusModal = ({ openStatusModal, updateOrderStatus, setStatusM
             setUpdated(false)
         }
     }, [updated])
-
 
     return (
         <div>

@@ -16,6 +16,7 @@ import { deleteAsset, uploadFile } from "../../storage-config/functions";
 import { useSelector, useDispatch } from 'react-redux'
 import { useAuth } from "../../hooks/auth";
 import { HSCodes } from "../../hscodes/hscodes";
+import { toast } from "react-toastify";
 
 const UpdateProduct = ({
   productInfo,
@@ -88,6 +89,20 @@ const UpdateProduct = ({
   };
 
   const saveUpdatedProduct = async (filesUrls) => {
+    const farmerRes = await backendActor.getFarmerByEmail(farmer)
+    if (!farmerRes.ok) {
+      console.log("Farmer not found, please check email address or register farmer first")
+      toast.error(
+        `Farmer not found, please check email address or register farmer first`,
+        {
+          autoClose: 5000,
+          position: "top-center",
+          hideProgressBar: true,
+        }
+      );
+      setUpdating(false);
+      return
+    }
     const updatedProduct = {
       id: id,
       name: productItem.name,
@@ -101,6 +116,7 @@ const UpdateProduct = ({
       weight: parseInt(weight),
       availability: availability,
       images: filesUrls,
+      ordersPlaced: productInfo.ordersPlaced,
       created: productInfo.created,
     };
     console.log("Updated product", updatedProduct)

@@ -21,10 +21,10 @@ const Orders = () => {
   const [deliveredOrders, setDeliverdOrders] = useState(null);
   const [approvedOrders, setApprovedOrders] = useState(null);
 
-  const [selectedOrderId, setSelectedOrderId] = useState(null);
-  const [showStatus, setShowStatus] = useState(false);
+
+
   const [showStep, setShowStep] = useState(false);
-  const [showContact, setShowContact] = useState(false);
+
 
   const [orderStatus, setOrderStatus] = useState("");
   const [orderStep, setOrderStep] = useState(null);
@@ -165,7 +165,7 @@ const Orders = () => {
 
         }
         setUpdated(true);
-        toast.success(`Order status have been updated${orderStatus !== "pending" ? `. Order update email sent to the customer ${data[orderIndex].userEmail}`: ``}`, {
+        toast.success(`Order status have been updated${orderStatus !== "pending" ? `. Order update email sent to the customer ${data[orderIndex].userEmail}` : ``}`, {
           autoClose: 5000,
           position: "top-center",
           hideProgressBar: true,
@@ -173,7 +173,7 @@ const Orders = () => {
         const orderPosition = orders.findIndex((order) => order.orderId === id);
         orders[orderPosition].status = orderStatus;
         setUpdating(false);
-        setSelectedOrderId(null);
+
         if (value === 0) {
           const filteredOrders = pendingOrders.filter(
             (order) => order.orderId !== id
@@ -196,7 +196,7 @@ const Orders = () => {
           setDeliverdOrders(filteredOrders);
         }
         setOrderStatus("");
-        setSelectedOrderId(null);
+
       } else {
         toast.warning("Order not found", {
           autoClose: 5000,
@@ -207,23 +207,8 @@ const Orders = () => {
     }
   };
 
-  const handleShowStatusForm = (id) => {
-    setSelectedOrderId(id);
-    setShowStatus(true);
-    setShowContact(false);
-    setShowStep(false);
-  };
-  const handleShowCustomerForm = (id) => {
-    setSelectedOrderId(id);
-    setShowContact(true);
-    setShowStatus(false);
-    setShowStep(false);
-  };
   const handleShowStepForm = (id) => {
-    setSelectedOrderId(id);
     setShowStep(true);
-    setShowStatus(false);
-    setShowContact(false);
   };
 
   const handleChange = (panel) => (event, isExpanded) => {
@@ -241,18 +226,14 @@ const Orders = () => {
               pendingOrders,
               handleShowStepForm,
               handleChange,
-              handleShowCustomerForm,
-              handleShowStatusForm,
               updatePendingOrderStatus,
               expanded,
               theme,
-              selectedOrderId,
-              showContact,
-              showStatus,
               showStep,
               updating,
               setOrderStep,
               setOrderStatus,
+              orderStatus
             }}
           />
         );
@@ -265,18 +246,14 @@ const Orders = () => {
               approvedOrders,
               handleShowStepForm,
               handleChange,
-              handleShowCustomerForm,
-              handleShowStatusForm,
               updateProcessingOrderStatus,
               expanded,
               theme,
-              selectedOrderId,
-              showContact,
-              showStatus,
               showStep,
               updating,
               setOrderStep,
               setOrderStatus,
+              orderStatus
             }}
           />
         );
@@ -289,18 +266,14 @@ const Orders = () => {
               shippedOrders,
               handleShowStepForm,
               handleChange,
-              handleShowCustomerForm,
-              handleShowStatusForm,
               updateShippedOrderStatus,
               expanded,
               theme,
-              selectedOrderId,
-              showContact,
-              showStatus,
               showStep,
               updating,
               setOrderStep,
               setOrderStatus,
+              orderStatus
             }}
           />
         );
@@ -313,18 +286,14 @@ const Orders = () => {
               deliveredOrders,
               handleShowStepForm,
               handleChange,
-              handleShowCustomerForm,
-              handleShowStatusForm,
               updateDeliverdOrderStatus,
               expanded,
               theme,
-              selectedOrderId,
-              showContact,
-              showStatus,
               showStep,
               updating,
               setOrderStep,
               setOrderStatus,
+              orderStatus
             }}
           />
         );

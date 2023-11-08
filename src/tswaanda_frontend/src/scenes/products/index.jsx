@@ -62,13 +62,19 @@ const Products = () => {
 
   const handleBackup = async () => {
     const products = await backendActor.getAllProducts();
+  
+    const productsWithBigIntAsString = products.map(product => ({
+      ...product,
+      created: product.created.toString(),
+    }));
+  
     const dataStr =
       "data:text/json;charset=utf-8," +
-      encodeURIComponent(JSON.stringify(products));
+      encodeURIComponent(JSON.stringify(productsWithBigIntAsString));
     const downloadAnchorNode = document.createElement("a");
     downloadAnchorNode.setAttribute("href", dataStr);
     downloadAnchorNode.setAttribute("download", "products.json");
-    document.body.appendChild(downloadAnchorNode); // required for firefox
+    document.body.appendChild(downloadAnchorNode); 
     downloadAnchorNode.click();
     downloadAnchorNode.remove();
   }
