@@ -28,6 +28,7 @@ import StatBox from "../../components/StatBox";
 import { useNavigate } from "react-router-dom";
 import { adminBlast, marketBlast, useAuth } from "../../hooks/auth";
 import NewOrders from "../../components/Dashboard/NewOrders";
+import { Link } from "react-router-dom";
 
 const Dashboard = () => {
   const [products, setProducts] = useState([]);
@@ -98,6 +99,7 @@ const Dashboard = () => {
     const orders = await marketBlast.getAllOrders()
     const newOrders = orders.filter(order => order.status === "pending")
     const convertedOrders = convertData(newOrders);
+    convertedOrders.splice(7, convertedOrders.length - 1)
     setModifiedOrders(convertedOrders)
     setNewOrders(newOrders)
     setOrders(orders)
@@ -382,7 +384,7 @@ const Dashboard = () => {
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
                       {/* Limit the number of characters that gets displayed for the description, and put a ... at the end */}
-                      {product.fullDescription.length > 100 ? product.fullDescription.slice(0, 100) + "..." : product.fullDescription} <a style={{color: "white"}} href={`https://tswaanda.com/product/${product.id}`}>Visit product page</a>
+                      {product.fullDescription.length > 100 ? product.fullDescription.slice(0, 100) + "..." : product.fullDescription} <a style={{ color: "white" }} href={`https://tswaanda.com/product/${product.id}`}>Visit product page</a>
                     </Typography>
                   </CardContent>
                 </CardActionArea>
@@ -419,10 +421,26 @@ const Dashboard = () => {
           gridRow="span 3"
           p="1rem"
           borderRadius="0.55rem"
-          
+
         >
           <h2>New Orders</h2>
           <NewOrders orders={modifiedOrders} />
+          <Button
+            variant="contained"
+            component={Link}
+            to={`/orders`}
+            color="primary"
+            sx={{
+              color: "white",
+              fontSize: "14px",
+              fontWeight: "bold",
+              padding: "10px 20px",
+              width: "20%",
+              marginTop: "10px"
+            }}
+          >
+            View more
+          </Button>
         </Box>
         <Box
           gridColumn="span 4"
