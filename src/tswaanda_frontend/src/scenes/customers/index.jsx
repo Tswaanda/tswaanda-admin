@@ -54,7 +54,7 @@ const Customers = () => {
     setApprovedCustomers(convertedCustomers);
   }
 
-  function convertData(data) {
+  const convertData = (data) => {
     if (!data) {
       return [];
     }
@@ -80,7 +80,7 @@ const Customers = () => {
       return date.toLocaleTimeString("en-US", options);
     };
 
-    const modifiedOrder = data.map((customer) => {
+    const modfifiedCustomers = data.map((customer) => {
 
 
       const formattedDate = formatCustomerDate(customer.dateCreated);
@@ -93,7 +93,7 @@ const Customers = () => {
       };
     });
 
-    return modifiedOrder;
+    return modfifiedCustomers;
   }
 
   const getCustomers = async () => {

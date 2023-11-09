@@ -73,7 +73,6 @@ const Unauthorized = ({ user }) => {
         logout()
         window.location.reload()
       }, 10000)
-
     }
 
   }

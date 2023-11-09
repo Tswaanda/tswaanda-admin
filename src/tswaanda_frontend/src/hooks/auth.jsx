@@ -111,7 +111,7 @@ export const ContextProvider = ({ children }) => {
   })
 
   const marketActor = Actor.createActor(marketIdlFactory, {
-    marketAgent,
+    agent: marketAgent,
     canisterId: marketCanisterId,
   });
 
