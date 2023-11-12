@@ -29,7 +29,7 @@ const BootstrapDialog = styled(Dialog)(({ theme }) => ({
 const UpdateOrderStatusModal = ({ openStatusModal, updateOrderStatus, orderStatus, setStatusModal, setOrderStatus, updating, theme, modalOrder, updated,
     setUpdated }) => {
 
-        const {backendActor} = useAuth()
+    const { backendActor } = useAuth()
 
     const handleStatusModalClose = () => {
         setStatusModal(false);
@@ -42,11 +42,12 @@ const UpdateOrderStatusModal = ({ openStatusModal, updateOrderStatus, orderStatu
             if (farmerInfo.ok) {
                 try {
                     if (orderStatus === "approved") {
-                        sendOrderApprovedEmail(farmerInfo.ok, modalOrder)
+                        // sendOrderApprovedEmail(farmerInfo.ok, modalOrder)
                     } else if (orderStatus === "shipped") {
-                        sendOrderShippedEmail(farmerInfo.ok, modalOrder)
+                        // sendOrderShippedEmail(farmerInfo.ok, modalOrder)
                     } else if (orderStatus === "delivered") {
-                        sendOrderDeliveredEmail(farmerInfo.ok, modalOrder)
+                        // sendOrderDeliveredEmail(farmerInfo.ok, modalOrder)
+                        console.log(modalOrder)
                     } else {
                         console.log("No email sent")
                     }

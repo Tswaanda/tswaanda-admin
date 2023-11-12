@@ -3,6 +3,7 @@ import Header from "../../components/Header";
 import React, { useState } from "react";
 import StorageFiles from "../../components/storage/StorageFiles";
 import Canisters from "../../components/storage/Canisters";
+import Backup from "../../components/storage/Backup";
 
 const Storage = () => {
 
@@ -21,6 +22,10 @@ const Storage = () => {
         return (
           <StorageFiles />
         );
+      case 2:
+        return (
+          <Backup />
+        );
       default:
         return null;
     }
@@ -36,6 +41,7 @@ const Storage = () => {
           <Tabs value={value} onChange={handleTabChange}>
             <Tab label="Canisters" />
             <Tab label="Storage Files" />
+            <Tab label="Backups" />
           </Tabs>
         </Box>
         {renderTabContent()}

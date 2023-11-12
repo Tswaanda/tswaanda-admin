@@ -23,7 +23,7 @@ const BootstrapDialog = styled(Dialog)(({ theme }) => ({
     },
 }));
 
-const RestoreProducts = ({ openRestoreModal, setRestoreModal, setProductsUpdated }) => {
+const RestoreProducts = ({ openRestoreProductsModal, setRestoreProductsModal, getAdminStatistics }) => {
 
     const { backendActor } = useAuth()
 
@@ -34,7 +34,7 @@ const RestoreProducts = ({ openRestoreModal, setRestoreModal, setProductsUpdated
     const theme = useTheme();
 
     const handleRestoreModalClose = () => {
-        setRestoreModal(false);
+        setRestoreProductsModal(false);
     }
 
     const handleInputChange = (e) => {
@@ -58,7 +58,7 @@ const RestoreProducts = ({ openRestoreModal, setRestoreModal, setProductsUpdated
                         }
                         console.log("Restoring product:", updatedProduct);
                         await backendActor.createProduct(updatedProduct);
-                        setProductsUpdated(true);
+                        getAdminStatistics();
                     }
                     console.log("Data restored successfully!");
                 } else {
@@ -87,7 +87,7 @@ const RestoreProducts = ({ openRestoreModal, setRestoreModal, setProductsUpdated
             <BootstrapDialog
                 onClose={handleRestoreModalClose}
                 aria-labelledby="customized-dialog-title"
-                open={openRestoreModal}
+                open={openRestoreProductsModal}
             >
                 <DialogTitle sx={{ m: 0, p: 2, backgroundColor: theme.palette.background.alt, font: "bold" }} id="customized-dialog-title">
                     <h3> Restore products from JSON  </h3>

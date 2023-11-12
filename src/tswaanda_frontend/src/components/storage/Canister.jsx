@@ -12,7 +12,6 @@ import Accordion from "@mui/material/Accordion";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import AccordionSummary from "@mui/material/AccordionSummary";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import icblast from "@infu/icblast";
 import { Principal } from "@dfinity/principal";
 import { useAuth } from '../../hooks/auth';
 
@@ -31,9 +30,6 @@ const Canister = ({ canister, unauthorized, setUnauthorized }) => {
     const getCanisterInfo = async () => {
         try {
             setLoading(true)
-            let ic = icblast({ local: true, identity });
-            let actor = await ic(canister.id)
-
             const modifyStatus = (status) => {
                 if ("running" in status) {
                     return "Running"

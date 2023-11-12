@@ -157,12 +157,9 @@ const Orders = () => {
         } else if (orderStatus === "delivered") {
           data[orderIndex].step = Number(3);
         }
-        const res = await marketActor.updatePOrder(id, data[orderIndex]);
+        await marketActor.updatePOrder(id, data[orderIndex]);
         if (orderStatus !== "pending") {
           await sendAutomaticOrderUpdateEmail(data[orderIndex].fistName, data[orderIndex].userEmail, orderStatus);
-          console.log("id", id)
-          console.log(data[orderIndex].fistName, data[orderIndex].userEmail, orderStatus, data[orderIndex], data);
-
         }
         setUpdated(true);
         toast.success(`Order status have been updated${orderStatus !== "pending" ? `. Order update email sent to the customer ${data[orderIndex].userEmail}` : ``}`, {

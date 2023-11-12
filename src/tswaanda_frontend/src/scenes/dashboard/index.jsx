@@ -3,7 +3,6 @@ import FlexBetween from "../../components/FlexBetween";
 import Header from "../../components/Header";
 import {
   DownloadOutlined,
-  Email,
   PointOfSale,
   PersonAdd,
   Traffic,
@@ -20,10 +19,7 @@ import {
   CardActionArea
 } from "@mui/material";
 
-import { DataGrid } from "@mui/x-data-grid";
 import BreakdownChart from "../../components/BreakdownChart";
-import OverviewChart from "../../components/OverviewChart";
-import { useGetDashboardQuery } from "../../state/api";
 import StatBox from "../../components/StatBox";
 import { useNavigate } from "react-router-dom";
 import { adminBlast, marketBlast, useAuth } from "../../hooks/auth";
@@ -383,7 +379,6 @@ const Dashboard = () => {
                       <span style={{ fontWeight: "bold" }} >{product.name}</span> - {getRandom()} sold
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
-                      {/* Limit the number of characters that gets displayed for the description, and put a ... at the end */}
                       {product.fullDescription.length > 100 ? product.fullDescription.slice(0, 100) + "..." : product.fullDescription} <a style={{ color: "white" }} href={`https://tswaanda.com/product/${product.id}`}>Visit product page</a>
                     </Typography>
                   </CardContent>
