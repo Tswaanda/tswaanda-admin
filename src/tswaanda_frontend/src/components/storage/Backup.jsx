@@ -10,6 +10,7 @@ import {
 import { adminBlast, marketBlast, useAuth } from "../../hooks/auth";
 import RestoreProducts from "../../scenes/products/RestoreProducts";
 import RestoreUsersModal from "../../scenes/products/RestoreUsersModal";
+import { Principal } from "@dfinity/principal";
 
 const Backup = () => {
   const { backendActor } = useAuth();
@@ -56,7 +57,25 @@ const Backup = () => {
   }
 
   const handleMarketplaceUsersBackup = async () => {
-    // const users = await backendActor.getAllUsers();
+    const users = await marketBlast.getAllKYC();
+  
+    const usersWithBigIntAsString = users.map(user => ({
+      ...user,
+      userId: user.userId.toString(),
+      zipCode: user.zipCode.toString(),
+      phoneNumber: user.phoneNumber.toString(),
+      dateCreated: user.dateCreated.toString(),
+    }));
+  
+    const dataStr =
+      "data:text/json;charset=utf-8," +
+      encodeURIComponent(JSON.stringify(usersWithBigIntAsString));
+    const downloadAnchorNode = document.createElement("a");
+    downloadAnchorNode.setAttribute("href", dataStr);
+    downloadAnchorNode.setAttribute("download", "marketplace_users.json");
+    document.body.appendChild(downloadAnchorNode);
+    downloadAnchorNode.click();
+    downloadAnchorNode.remove();
   }
 
   console.log("adminStats", adminStats)
@@ -118,7 +137,7 @@ const Backup = () => {
         {/* Market place users backup */}
 
         <Box>
-          <Typography style={{fontSize: "20", fontWeight: "bold", marginBottom: "10px" }}>Products</Typography>
+          <Typography style={{fontSize: "20", fontWeight: "bold", marginTop: "10px" }}>Users</Typography>
           <Box display="flex" justifyContent="start" alignItems="center">
             <Button
               variant="contained"
@@ -150,7 +169,7 @@ const Backup = () => {
               Restore users from JSON
             </Button>
             <Typography style={{ fontSize: "18px", fontWeight: "bold", marginLeft: "50px" }}>
-              Total products: {marketStats?.totalCustomers}
+              Total Users: {marketStats?.totalCustomers}
             </Typography>
           </Box>
         </Box>
