@@ -95,7 +95,7 @@ const Backup = () => {
       >
         {/* Products backup section */}
         <Box>
-          <Typography style={{fontSize: "20", fontWeight: "bold", marginBottom: "10px" }}>Products</Typography>
+          <Typography style={{fontSize: "20px", fontWeight: "bold", marginBottom: "10px" }}>Products</Typography>
           <Box display="flex" justifyContent="start" alignItems="center">
             <Button
               variant="contained"
@@ -137,7 +137,7 @@ const Backup = () => {
         {/* Market place users backup */}
 
         <Box>
-          <Typography style={{fontSize: "20", fontWeight: "bold", marginTop: "10px" }}>Users</Typography>
+          <Typography style={{fontSize: "20px", fontWeight: "bold", marginTop: "10px" }}>Users</Typography>
           <Box display="flex" justifyContent="start" alignItems="center">
             <Button
               variant="contained"

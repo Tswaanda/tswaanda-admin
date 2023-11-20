@@ -32,6 +32,10 @@ export const HSCodes = [
         code: "070920",
     },
     {
+        name: "Broccoli (Batavia)",
+        code: "070410"
+    },
+    {
         name: "Cherries",
         code: "080920",
     },
@@ -60,6 +64,10 @@ export const HSCodes = [
         code: "080610",
     },
     {
+        name: "Groundnuts",
+        code: "120242",
+    },
+    {
         name: "Kiwi",
         code: "081050",
     },
@@ -74,6 +82,10 @@ export const HSCodes = [
     {
         name: "Ladies Finger",
         code: "070990",
+    },
+    {
+        name: "Macadamia nuts",
+        code: "080262",
     },
     {
         name: "Naartjie",
