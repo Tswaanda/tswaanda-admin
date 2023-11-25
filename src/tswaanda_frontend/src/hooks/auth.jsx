@@ -7,7 +7,7 @@ import { canisterId, idlFactory } from "../../../declarations/tswaanda_backend/i
 import icblast from "@infu/icblast";
 
 const marketCanisterId = "55ger-liaaa-aaaal-qb33q-cai";
-const localMarketCanId = "avqkn-guaaa-aaaaa-qaaea-cai";
+const localMarketCanId = "by6od-j4aaa-aaaaa-qaadq-cai";
 
 const network = process.env.DFX_NETWORK || "local";
 
@@ -21,7 +21,7 @@ const authClient = await AuthClient.create({
 
 // ICBLAST
 const identity = await authClient.getIdentity()
-let ic = icblast({ local: false, identity: identity });
+let ic = icblast({ local: true, identity: identity });
 export const adminBlast = await ic(canisterId);
 export const marketBlast = await ic(network === "local" ? localMarketCanId : marketCanisterId);
 
