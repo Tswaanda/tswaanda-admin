@@ -10,6 +10,7 @@ module {
         #admin;
         #staff;
         #authorized;
+        #unauthorized;
     };
 
     public type Permission = {

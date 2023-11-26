@@ -15,9 +15,12 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ContactStaff from './ContactStaff';
 import UpdateAccessLevel from './UpdateAccessLevel';
 import { useAuth } from '../../hooks/auth';
+import { toast } from 'react-toastify';
+import { formatDate } from '../../scenes/constants/index';
 
 const Staff = ({ expanded, handleChange }) => {
   const [staff, setStaff] = useState([])
+  const [updating, setUpdating] = useState(false)
 
   const { backendActor } = useAuth()
 
@@ -32,16 +35,24 @@ const Staff = ({ expanded, handleChange }) => {
 
   useEffect(() => {
     getStaff()
-}, [])
+  }, [])
 
-const getStaff = async () => {
+  const getStaff = async () => {
     try {
-        const _staff = await backendActor.getApprovedStaff()
-        setStaff(_staff)
+      const _staff = await backendActor.getApprovedStaff()
+      let unsuspended = _staff.filter((member) => member.suspended === false)
+      // modify the date of each member to be more readable
+      unsuspended = unsuspended.map((member) => {
+        return {
+          ...member,
+          created: formatDate(member.created)
+        }
+      })
+      setStaff(unsuspended)
     } catch (error) {
-        console.log("Error getting staff members", error)
+      console.log("Error getting staff members", error)
     }
-}
+  }
 
   const handleShowStatusForm = (member) => {
     setMember(member);
@@ -56,135 +67,181 @@ const getStaff = async () => {
     setContactModal(true)
     setShowAccessForm(false);
   }
+
+
+  const handleSuspend = async (memberToupdate) => {
+    try {
+      setUpdating(true)
+      let updatedStaff = {
+        ...memberToupdate,
+        role: [{ 'unauthorized': null }],
+        created: BigInt(Date.parse(memberToupdate.created)),
+        suspended: true,
+      }
+      await backendActor.updateStaffMember(updatedStaff)
+      await backendActor.assign_role(updatedStaff.principal, [{ 'unauthorized': null }])
+      toast.success(
+        `Staff member suspended successfully`,
+        {
+          autoClose: 5000,
+          position: "top-center",
+          hideProgressBar: true,
+        }
+      );
+      setUpdating(false)
+      getStaff()
+    } catch (error) {
+      setUpdating(false)
+      console.log(error)
+    }
+  }
+
   return (
     <Box m="1rem 0 0 0">
-      {staff?.map((staff) => (
-        <Accordion
-          key={staff.id}
-          expanded={expanded === staff.id}
-          onChange={handleChange(staff.id)}
-          sx={{ backgroundColor: theme.palette.background.alt }}
-        >
-          <AccordionSummary
-            expandIcon={<ExpandMoreIcon />}
-            aria-controls="panel1bh-content"
-            id="panel1bh-header"
+      {staff.length > 0 ? <>
+        {staff?.map((staff) => (
+          <Accordion
+            key={staff.id}
+            expanded={expanded === staff.id}
+            onChange={handleChange(staff.id)}
+            sx={{ backgroundColor: theme.palette.background.alt }}
           >
-            <Typography sx={{ width: "25%", flexShrink: 0 }}>
-              <span style={{ fontWeight: "bold" }}>Username</span>: @
-              {staff.fullName}
-            </Typography>
-            <Typography
-              sx={{ color: "text.secondary", width: "25%", flexShrink: 0 }}
+            <AccordionSummary
+              expandIcon={<ExpandMoreIcon />}
+              aria-controls="panel1bh-content"
+              id="panel1bh-header"
             >
-              <span style={{ fontWeight: "bold" }}>Email</span>:{" "}
-              {staff.email}
-            </Typography>
+              <Typography sx={{ width: "25%", flexShrink: 0 }}>
+                <span style={{ fontWeight: "bold" }}>Username</span>: @
+                {staff.fullName}
+              </Typography>
+              <Typography
+                sx={{ color: "text.secondary", width: "25%", flexShrink: 0 }}
+              >
+                <span style={{ fontWeight: "bold" }}>Email</span>:{" "}
+                {staff.email}
+              </Typography>
 
-            <Typography sx={{ color: "text.secondary", width: "25%" }}>
-              <span style={{ fontWeight: "bold" }}>Created at</span>:{" "}
-              {staff.created}
-            </Typography>
-          </AccordionSummary>
-          <AccordionDetails>
-            <Box
-              sx={{
-                backgroundImage: "none",
-                backgroundColor: theme.palette.background.alt,
-                borderRadius: "0.55rem",
-              }}
-            >
-              <Container maxWidth="md" style={{ marginTop: "2rem" }}>
-                <Grid
-                  container
-                  style={{ display: "flex", alignItems: "center" }}
-                  spacing={4}
-                  m="0 0.1rem 0 0.1rem"
-                >
+              <Typography sx={{ color: "text.secondary", width: "25%" }}>
+                <span style={{ fontWeight: "bold" }}>Created at</span>:{" "}
+                {staff.created}
+              </Typography>
+            </AccordionSummary>
+            <AccordionDetails>
+              <Box
+                sx={{
+                  backgroundImage: "none",
+                  backgroundColor: theme.palette.background.alt,
+                  borderRadius: "0.55rem",
+                }}
+              >
+                <Container maxWidth="md" style={{ marginTop: "2rem" }}>
                   <Grid
+                    container
                     style={{ display: "flex", alignItems: "center" }}
-                    staff
-                    xs={6}
+                    spacing={4}
+                    m="0 0.1rem 0 0.1rem"
+                  >
+                    <Grid
+                      style={{ display: "flex", alignItems: "center" }}
+                      staff
+                      xs={6}
+                    >
+                      <Typography
+                        style={{ fontSize: "2rem", fontWeight: "bold" }}
+                      >
+                        {staff.fullName}
+                      </Typography>
+                    </Grid>
+                  </Grid>
+                  <hr />
+                  <AccordionSummary
+                    aria-controls="panel1bh-content"
+                    id="panel1bh-header"
                   >
                     <Typography
-                      style={{ fontSize: "2rem", fontWeight: "bold" }}
+                      sx={{
+                        width: "50%",
+                        flexShrink: 0,
+                      }}
                     >
-                      {staff.fullName}
+                      <span style={{ fontWeight: "bold" }}>Phone Number</span>:{" "}
+                      {staff.phone}
                     </Typography>
-                  </Grid>
-                </Grid>
-                <hr />
-                <AccordionSummary
-                  aria-controls="panel1bh-content"
-                  id="panel1bh-header"
-                >
-                  <Typography
-                    sx={{
-                      width: "50%",
-                      flexShrink: 0,
-                    }}
-                  >
-                    <span style={{ fontWeight: "bold" }}>Phone Number</span>:{" "}
-                    {staff.phone}
-                  </Typography>
-                </AccordionSummary>
-                <hr />
-                <CardActions>
-                  <Button
-                    onClick={
-                      () => handleShowStatusForm(staff)
-                    }
-                    variant="outlined"
-                    size="small"
-                    style={{
-                      backgroundColor:
-                        showAccessForm
-                          ? "white"
-                          : undefined,
-                      color:
-                        showAccessForm
-                          ? "green"
-                          : "white",
-                    }}
-                  >
-                    Update Access Level
-                  </Button>
-                  <Button
-                    onClick={
-                      () => showContactForm(staff)
-                    }
-                    variant="outlined"
-                    size="small"
-                    style={{
-                      backgroundColor:
-                        showContact
-                          ? "white"
-                          : undefined,
-                      color:
-                        showContact
-                          ? "green"
-                          : "white",
-                    }}
-                  >
-                    Contact Member
-                  </Button>
-                </CardActions>
-              </Container>
-            </Box>
-          </AccordionDetails>
-        </Accordion>
-      ))}
-      <>
+                  </AccordionSummary>
+                  <hr />
+                  <CardActions>
+                    <Button
+                      onClick={
+                        () => handleShowStatusForm(staff)
+                      }
+                      variant="outlined"
+                      size="small"
+                      style={{
+                        backgroundColor:
+                          showAccessForm
+                            ? "white"
+                            : undefined,
+                        color:
+                          showAccessForm
+                            ? "green"
+                            : "white",
+                      }}
+                    >
+                      Update Access Level
+                    </Button>
+                    <Button
+                      onClick={
+                        () => showContactForm(staff)
+                      }
+                      variant="outlined"
+                      size="small"
+                      style={{
+                        backgroundColor:
+                          showContact
+                            ? "white"
+                            : undefined,
+                        color:
+                          showContact
+                            ? "green"
+                            : "white",
+                      }}
+                    >
+                      Contact Member
+                    </Button>
+                    <Button
+                      onClick={() => {
+                        handleSuspend(staff)
+                      }}
+                      variant="outlined"
+                      size="small"
+                      style={{
+                        backgroundColor: "#FF5733",
+                        color: "white",
+                      }}
+                    >
+                      {updating ? "Suspending..." : "Suspend Member"}
+                    </Button>
+                  </CardActions>
+                </Container>
+              </Box>
+            </AccordionDetails>
+          </Accordion>
+        ))}
+        <>
 
-        {showAccessForm && (
-          <UpdateAccessLevel {...{
-            openAccessModal, setAccessModal, setShowAccessForm, theme, member
-          }} />
-        )}
-        {showContact && (
-          <ContactStaff {...{ openContactModal, setContactModal, setShowContactForm, theme, member }} />
-        )}
-      </>
+          {showAccessForm && (
+            <UpdateAccessLevel {...{
+              openAccessModal, setAccessModal, setShowAccessForm, theme, member
+            }} />
+          )}
+          {showContact && (
+            <ContactStaff {...{ openContactModal, setContactModal, setShowContactForm, theme, member }} />
+          )}
+        </>
+      </> :
+        <Typography variant="h5" style={{ textAlign: "center", fontSize: "20px", fontWeight: "bold", marginTop: "100px" }}>No data to show for now</Typography>
+      }
     </Box>
   )
 }

@@ -123,6 +123,9 @@ shared ({ caller = initializer }) actor class TswaandaAdmin() = this {
             case (? #authorized) {
                 return "authorized";
             };
+            case (? #unauthorized) {
+                return "unauthorized";
+            };
         };
     };
 
@@ -216,6 +219,17 @@ shared ({ caller = initializer }) actor class TswaandaAdmin() = this {
                 return #ok(result);
             };
         };
+    };
+
+    public shared query ({ caller }) func getSuspendedStaff() : async [Staff] {
+        assert (isAdmin(caller) or isAuthorized(caller));
+        let suspendedStaff = Buffer.Buffer<Staff>(0);
+        for (staffMember in staff.vals()) {
+            if (staffMember.suspended == true) {
+                suspendedStaff.add(staffMember);
+            };
+        };
+        return Buffer.toArray<Staff>(suspendedStaff);
     };
 
     //-----------------------------------------Products implimentation------------------------------------------------

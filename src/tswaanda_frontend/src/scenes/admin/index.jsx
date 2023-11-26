@@ -8,6 +8,7 @@ import Header from "../../components/Header";
 import Staff from '../../components/Admin/Staff';
 import AccessRequest from '../../components/Admin/AccessRequest';
 import { useAuth } from "../../hooks/auth";
+import Suspended from "../../components/Admin/Suspended";
 
 const Support = () => {
     const { backendActor } = useAuth()
@@ -42,6 +43,15 @@ const Support = () => {
                         }}
                     />
                 );
+            case 2:
+                return (
+                    <Suspended
+                        {...{
+                            expanded,
+                            handleChange,
+                        }}
+                    />
+                );
             default:
                 return null;
         }
@@ -57,6 +67,7 @@ const Support = () => {
                     <Tabs value={value} onChange={handleTabChange}>
                         <Tab label="Staff" />
                         <Tab label="Access Request" />
+                        <Tab label="Suspended" />
                     </Tabs>
                 </Box>
                 {renderTabContent()}
