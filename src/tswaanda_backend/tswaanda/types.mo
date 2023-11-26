@@ -42,8 +42,8 @@ module {
         farmName : Text;
         location : Text;
         description : Text;
-        listedProducts : ?[Text];
-        soldProducts : ?[Text];
+        listedProducts : [Text];
+        soldProducts : [Text];
         produceCategories : Text;
         proofOfAddress : ?Text;
         idCopy: ?Text;

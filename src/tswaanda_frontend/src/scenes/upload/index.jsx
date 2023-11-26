@@ -87,7 +87,7 @@ function UpLoadProduct({ isOpen, onClose, setProductsUpdated }) {
             minOrder: parseInt(minOrder),
             shortDescription: shortDescription,
             fullDescription: fullDesc,
-            odersPlaced : 0,
+            ordersPlaced : 0,
             category: category,
             weight: parseInt(weight),
             availability: availability,
@@ -96,18 +96,24 @@ function UpLoadProduct({ isOpen, onClose, setProductsUpdated }) {
           };
 
           // Create product and update farmer
-          await backendActor.createProduct(newProduct);
           let updatedFarmer = {
             ...farmerRes.ok,
-            listedProducts: [[...farmerRes.ok.listedProducts, newProduct.id]]
+            listedProducts:  [...farmerRes.ok.listedProducts, newProduct.id]
           }
+          console.log("Updated farmer", updatedFarmer)
           await backendActor.updateFarmer(updatedFarmer)
+          await backendActor.createProduct(newProduct);
 
           // Send email to farmer to notify them of new product
           const res = await sendOrderListedEmail(farmerRes.ok, product)
           if (res) {
             console.log("Email sent")
           }
+          toast.success(`Product saved! Notification email sent to the farmer.`, {
+            autoClose: 5000,
+            position: "top-center",
+            hideProgressBar: true,
+          });
           setProductsUpdated(true);
           setSaving(false)
           onClose();

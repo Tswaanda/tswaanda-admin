@@ -21,7 +21,7 @@ const authClient = await AuthClient.create({
 
 // ICBLAST
 const identity = await authClient.getIdentity()
-let ic = icblast({ local: true, identity: identity });
+let ic = icblast({ local: false, identity: identity });
 export const adminBlast = await ic(canisterId);
 export const marketBlast = await ic(network === "local" ? localMarketCanId : marketCanisterId);
 

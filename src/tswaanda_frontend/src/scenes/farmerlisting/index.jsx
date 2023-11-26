@@ -78,6 +78,14 @@ function FarmerListing({ isOpen, onClose, getPendingFarmers }) {
 
     } catch (error) {
       console.log(error);
+      toast.error(
+        `Error adding farmer, please try again`,
+        {
+          autoClose: 5000,
+          position: "top-center",
+          hideProgressBar: true,
+        }
+      );
       setSaving(false);
     }
 

@@ -145,7 +145,8 @@ const Dashboard = () => {
 
   // Orders growth rate
   const groupOrdersByMonth = (orders) => {
-    return orders?.reduce((acc, order) => {
+    const sortedOrders = orders.slice().sort((a, b) => Number(a.dateCreated) - Number(b.dateCreated));
+    return sortedOrders.reduce((acc, order) => {
       const date = new Date(Number(order.dateCreated));
       const month = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
       if (!acc[month]) {
@@ -154,23 +155,29 @@ const Dashboard = () => {
       acc[month]++;
       return acc;
     }, {});
-  }
+  };
+
 
   const calculateOrdersGrowthRate = (ordersByMonth) => {
-    let previousMonthCount = 0;
-    const customersGrowthRates = {};
+    let previousMonthCount = -1;
+    const ordersGrowthRates = {};
 
-    Object.keys(ordersByMonth).sort().forEach(month => {
+    const sortedMonths = Object.keys(ordersByMonth).sort();
+
+    sortedMonths.forEach(month => {
       const currentMonthCount = ordersByMonth[month];
-      if (previousMonthCount > 0) {
+      if (previousMonthCount === -1) {
+        ordersGrowthRates[month] = 'N/A';
+      } else if (previousMonthCount > 0) {
         const growthRate = ((currentMonthCount - previousMonthCount) / previousMonthCount) * 100;
-        customersGrowthRates[month] = `${growthRate.toFixed(2)}%`;
+        ordersGrowthRates[month] = `${growthRate.toFixed(2)}%`;
       }
       previousMonthCount = currentMonthCount;
     });
 
-    return customersGrowthRates;
-  }
+    return ordersGrowthRates;
+  };
+
 
   useEffect(() => {
     if (customers && orders) {
@@ -200,8 +207,8 @@ const Dashboard = () => {
       const newOrdersByMonth = groupOrdersByMonth(newOrders);
 
       const currentMonth = Object.keys(newOrdersByMonth).sort().pop();
-      setNewOrderCurrentMonthOrderRate(newCustomersGrowthRates[currentMonth]);
       const newOrderGrowthRates = calculateOrdersGrowthRate(newOrdersByMonth);
+      setNewOrderCurrentMonthOrderRate(newOrderGrowthRates[currentMonth]);
 
       const currentMonthC = Object.keys(newCustomersByMonth).sort().pop();
       setCurrentMonthNewRate(newCustomersGrowthRates[currentMonthC]);
