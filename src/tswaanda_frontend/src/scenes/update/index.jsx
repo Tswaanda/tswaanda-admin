@@ -14,7 +14,9 @@ import {
 import { categories } from "../constants/index";
 import { deleteAsset, uploadFile } from "../../storage-config/functions";
 import { useSelector, useDispatch } from 'react-redux'
-import { backendActor } from "../../config";
+import { useAuth } from "../../hooks/auth";
+import { HSCodes } from "../../hscodes/hscodes";
+import { toast } from "react-toastify";
 
 const UpdateProduct = ({
   productInfo,
@@ -23,11 +25,16 @@ const UpdateProduct = ({
   onClose,
 }) => {
 
+  const { backendActor } = useAuth()
+
   const { storageInitiated } = useSelector((state) => state.global)
 
   const [id, setId] = useState(productInfo.id);
   const [minOrder, setMinOrder] = useState(productInfo.minOrder);
-  const [productName, setProductName] = useState(productInfo.name);
+  const [productItem, setProductItem] = useState({
+    name: productInfo.name,
+    code: productInfo.hscode,
+  });
   const [shortDescription, setShortDescription] = useState(
     productInfo.shortDescription
   );
@@ -40,6 +47,7 @@ const UpdateProduct = ({
   const [availability, setAvailability] = useState(
     productInfo.availability
   );
+  const [farmer, setFarmer] = useState(productInfo.farmer);
   const [newImages, setNewImages] = useState(null);
   const [deletingAssets, setDeleting] = useState(false)
 
@@ -81,9 +89,25 @@ const UpdateProduct = ({
   };
 
   const saveUpdatedProduct = async (filesUrls) => {
+    const farmerRes = await backendActor.getFarmerByEmail(farmer)
+    if (!farmerRes.ok) {
+      console.log("Farmer not found, please check email address or register farmer first")
+      toast.error(
+        `Farmer not found, please check email address or register farmer first`,
+        {
+          autoClose: 5000,
+          position: "top-center",
+          hideProgressBar: true,
+        }
+      );
+      setUpdating(false);
+      return
+    }
     const updatedProduct = {
       id: id,
-      name: productName,
+      name: productItem.name,
+      farmer: farmer,
+      hscode: productItem.code,
       price: parseInt(price),
       minOrder: parseInt(minOrder),
       shortDescription: shortDescription,
@@ -91,8 +115,11 @@ const UpdateProduct = ({
       category: category,
       weight: parseInt(weight),
       availability: availability,
-      images: filesUrls
+      images: filesUrls,
+      ordersPlaced: productInfo.ordersPlaced,
+      created: productInfo.created,
     };
+    console.log("Updated product", updatedProduct)
     await backendActor.updateProduct(id, updatedProduct);
     setProductsUpdated(true);
     setUpdating(false);
@@ -146,14 +173,28 @@ const UpdateProduct = ({
           Update product {productInfo.id}
         </DialogTitle>
         <DialogContent>
+          <FormControl fullWidth margin="dense">
+            <InputLabel id="category-label">Product Name</InputLabel>
+            <Select
+              labelId="category-label"
+              value={productItem}
+              onChange={(e) => setProductItem(e.target.value)}
+            >
+              {HSCodes.map((codeItem, index) => (
+                <MenuItem key={index} value={codeItem}>
+                  {codeItem.name} - {codeItem.code}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
           <TextField
             autoFocus
             margin="dense"
-            label="Product name"
-            type="text"
+            label="Farmer email"
+            type="email"
+            value={farmer}
             fullWidth
-            value={productName}
-            onChange={(e) => setProductName(e.target.value)}
+            onChange={(e) => setFarmer(e.target.value)}
           />
           <TextField
             autoFocus
@@ -169,6 +210,7 @@ const UpdateProduct = ({
             label="Description"
             type="text"
             fullWidth
+            required
             value={shortDescription}
             onChange={(e) => setShortDescription(e.target.value)}
           />
@@ -179,6 +221,7 @@ const UpdateProduct = ({
             rows={3}
             type="text"
             fullWidth
+            required
             value={fullDesc}
             onChange={(e) => setFullDesc(e.target.value)}
           />

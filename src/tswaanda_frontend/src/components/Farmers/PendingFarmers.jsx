@@ -68,7 +68,7 @@ const PendingFarmers = ({
 
     return (
         <Box m="1rem 0 0 0">
-            {pendingFarmers?.map((farmer) => (
+            {pendingFarmers && pendingFarmers.length > 0 ? <>{pendingFarmers?.map((farmer) => (
                 <Accordion
                     key={farmer.id}
                     expanded={expanded === farmer.id}
@@ -226,34 +226,36 @@ const PendingFarmers = ({
                                 </CardActions>
                             </Container>
 
-                           
+
                         </Box>
                     </AccordionDetails>
                 </Accordion>
             ))}
-            <>
-                {showContact && (
-                    <ContactFarmer {...{ farmer, setShowContactForm, theme, openContactModal, setContactModal }} />
-                )}
-                 {showStatusForm && (
-                           <UpdateFarmerStatus {...{
-                                farmer,
-                                theme,
-                                openStatusModal,
-                                setStatusModal,
-                                updateFarmerStatus,
-                                setFarmerStatus,
-                                updating,
-                                updated,
-                                setUpdated,
-                            }}/>
-                            )}
+                <>
+                    {showContact && (
+                        <ContactFarmer {...{ farmer, setShowContactForm, theme, openContactModal, setContactModal }} />
+                    )}
+                    {showStatusForm && (
+                        <UpdateFarmerStatus {...{
+                            farmer,
+                            theme,
+                            openStatusModal,
+                            setStatusModal,
+                            updateFarmerStatus,
+                            setFarmerStatus,
+                            updating,
+                            updated,
+                            setUpdated,
+                        }} />
+                    )}
 
-                {isOpen && <UpdateFarmer
-                    {...{
-                        farmer, isOpen, onClose
-                    }} />}
-            </>
+                    {isOpen && <UpdateFarmer
+                        {...{
+                            farmer, isOpen, onClose
+                        }} />}
+                </></> :
+                <Typography variant="h5" style={{ textAlign: "center", fontSize: "20px", fontWeight: "bold", marginTop: "100px" }}>No farmers data to show for now</Typography>
+            }
         </Box>
     )
 }

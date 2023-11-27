@@ -4,11 +4,13 @@ import { updateChecksum } from "./utils";
 
 import { idlFactory as fileStorageIdlFactory } from "../../../declarations/file_storage/index";
 import { idlFactory as fileScalingManagerIdlFactory } from "../../../declarations/file_scaling_manager/index";
-// import { canisterId as scalingCanId } from "../../declarations/file_scaling_manager/index";
-// import { canisterId as storageCanid } from "../../declarations/file_storage/index";
+import { canisterId as scalingCanId } from "../../../declarations/file_scaling_manager/index";
+import { canisterId as storageCanId } from "../../../declarations/file_storage/index";
 
-const scalingCanId = "7t3jl-kyaaa-aaaal-qcamq-cai";
-const storageCanId = "72ycx-4qaaa-aaaal-qcana-cai";
+const network = process.env.DFX_NETWORK || "local";
+
+// const icscalingCanId = "7t3jl-kyaaa-aaaal-qcamq-cai";
+// const icstorageCanId = "72ycx-4qaaa-aaaal-qcana-cai";
 
 
 let motoko_identity = Ed25519KeyIdentity.generate();

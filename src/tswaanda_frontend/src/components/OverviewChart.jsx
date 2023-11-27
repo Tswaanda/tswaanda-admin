@@ -1,11 +1,28 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { ResponsiveLine } from "@nivo/line";
 import { useTheme } from "@mui/material";
-import { useGetSalesQuery } from "../state/api";
+
+
+
+const data = {
+  monthlyData: {
+    'January': { month: 'January', totalSales: 15000, totalUnits: 30 },
+    'February': { month: 'February', totalSales: 30000, totalUnits: 60 },
+    'March': { month: 'March', totalSales: 45000, totalUnits: 90 },
+    'April': { month: 'April', totalSales: 60000, totalUnits: 120 },
+    'May': { month: 'May', totalSales: 75000, totalUnits: 150 },
+    'June': { month: 'June', totalSales: 65000, totalUnits: 124 },
+    'July': { month: 'July', totalSales: 70000, totalUnits: 147 },
+    'August': { month: 'August', totalSales: 120000, totalUnits: 240 },
+    'September': { month: 'September', totalSales: 135000, totalUnits: 270 },
+    'October': { month: 'October', totalSales: 150000, totalUnits: 300 },
+  }
+};
+
 
 const OverviewChart = ({ isDashboard = false, view }) => {
   const theme = useTheme();
-  const { data, isLoading } = useGetSalesQuery();
+  const [isLoading, setIsLoading] = useState(false);
 
   const [totalSalesLine, totalUnitsLine] = useMemo(() => {
     if (!data) return [];
@@ -131,31 +148,31 @@ const OverviewChart = ({ isDashboard = false, view }) => {
       legends={
         !isDashboard
           ? [
-              {
-                anchor: "bottom-right",
-                direction: "column",
-                justify: false,
-                translateX: 30,
-                translateY: -40,
-                itemsSpacing: 0,
-                itemDirection: "left-to-right",
-                itemWidth: 80,
-                itemHeight: 20,
-                itemOpacity: 0.75,
-                symbolSize: 12,
-                symbolShape: "circle",
-                symbolBorderColor: "rgba(0, 0, 0, .5)",
-                effects: [
-                  {
-                    on: "hover",
-                    style: {
-                      itemBackground: "rgba(0, 0, 0, .03)",
-                      itemOpacity: 1,
-                    },
+            {
+              anchor: "bottom-right",
+              direction: "column",
+              justify: false,
+              translateX: 30,
+              translateY: -40,
+              itemsSpacing: 0,
+              itemDirection: "left-to-right",
+              itemWidth: 80,
+              itemHeight: 20,
+              itemOpacity: 0.75,
+              symbolSize: 12,
+              symbolShape: "circle",
+              symbolBorderColor: "rgba(0, 0, 0, .5)",
+              effects: [
+                {
+                  on: "hover",
+                  style: {
+                    itemBackground: "rgba(0, 0, 0, .03)",
+                    itemOpacity: 1,
                   },
-                ],
-              },
-            ]
+                },
+              ],
+            },
+          ]
           : undefined
       }
     />

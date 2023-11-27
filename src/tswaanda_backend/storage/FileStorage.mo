@@ -14,6 +14,7 @@ import Result "mo:base/Result";
 import Text "mo:base/Text";
 import Time "mo:base/Time";
 import Timer "mo:base/Timer";
+import Cycles "mo:base/ExperimentalCycles";
 
 import { ofBlob } "./CRC32";
 
@@ -39,7 +40,7 @@ actor class FileStorage(is_prod : Bool) = this {
 	let { nhash; thash } = Map;
 
 	// change me when in production
-	let IS_PROD : Bool = true;
+	let IS_PROD : Bool = is_prod;
 
 	private var assets = Map.new<Asset_ID, Asset>(thash);
 	private var chunks = Map.new<Chunk_ID, AssetChunk>(nhash);

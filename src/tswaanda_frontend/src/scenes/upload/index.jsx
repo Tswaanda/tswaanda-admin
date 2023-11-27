@@ -13,16 +13,21 @@ import {
 } from "@mui/material";
 import { categories } from "../constants/index";
 import { v4 as uuidv4 } from "uuid";
-import { backendActor } from "../../config";
 import { useSelector, useDispatch } from 'react-redux'
 import { uploadFile } from "../../storage-config/functions";
+import { useAuth } from "../../hooks/auth";
+import { HSCodes } from "../../hscodes/hscodes";
+import { sendOrderListedEmail } from "../../emails/orderListedMail";
+import { toast } from "react-toastify";
 
 function UpLoadProduct({ isOpen, onClose, setProductsUpdated }) {
 
   const { storageInitiated } = useSelector((state) => state.global)
+  const { backendActor } = useAuth()
 
+  const [farmer, setFarmer] = useState("");
   const [minOrder, setMinOrder] = useState(null);
-  const [productName, setProductName] = useState("");
+  const [product, setProduct] = useState({});
   const [shortDescription, setShortDescription] = useState("");
   const [fullDesc, setFullDesc] = useState("");
   const [price, setPrice] = useState("");
@@ -56,24 +61,59 @@ function UpLoadProduct({ isOpen, onClose, setProductsUpdated }) {
       console.log("Currently busy")
     } else {
       try {
+        // Get farmer by email and return if not found and toast error
+        const farmerRes = await backendActor.getFarmerByEmail(farmer)
+        if (!farmerRes.ok) {
+          console.log("Farmer not found, please check email address or register farmer first")
+          toast.error(
+            `Farmer not found, please check email address or register farmer first`,
+            {
+              autoClose: 5000,
+              position: "top-center",
+              hideProgressBar: true,
+            }
+          );
+          return
+        }
         const urls = await uploadAssets();
-        console.log("Images saved, urls here", urls);
         setSaving(true);
         if (urls) {
           const newProduct = {
             id: uuidv4(),
-            name: productName,
+            name: product.name,
+            hscode: product.code,
+            farmer: farmer,
             price: parseInt(price),
             minOrder: parseInt(minOrder),
             shortDescription: shortDescription,
             fullDescription: fullDesc,
+            ordersPlaced : 0,
             category: category,
             weight: parseInt(weight),
             availability: availability,
             images: urls,
+            created: BigInt(Date.now()),
           };
 
+          // Create product and update farmer
+          let updatedFarmer = {
+            ...farmerRes.ok,
+            listedProducts:  [...farmerRes.ok.listedProducts, newProduct.id]
+          }
+          console.log("Updated farmer", updatedFarmer)
+          await backendActor.updateFarmer(updatedFarmer)
           await backendActor.createProduct(newProduct);
+
+          // Send email to farmer to notify them of new product
+          const res = await sendOrderListedEmail(farmerRes.ok, product)
+          if (res) {
+            console.log("Email sent")
+          }
+          toast.success(`Product saved! Notification email sent to the farmer.`, {
+            autoClose: 5000,
+            position: "top-center",
+            hideProgressBar: true,
+          });
           setProductsUpdated(true);
           setSaving(false)
           onClose();
@@ -122,14 +162,28 @@ function UpLoadProduct({ isOpen, onClose, setProductsUpdated }) {
           Upload a new product
         </DialogTitle>
         <DialogContent>
+          <FormControl fullWidth margin="dense">
+            <InputLabel id="category-label">Product Name</InputLabel>
+            <Select
+              labelId="category-label"
+              value={product}
+              onChange={(e) => setProduct(e.target.value)}
+            >
+              {HSCodes.map((codeItem, index) => (
+                <MenuItem key={index} value={codeItem}>
+                  {codeItem.name} - {codeItem.code}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
           <TextField
             autoFocus
             margin="dense"
-            label="Product name"
-            type="text"
+            label="Farmer email"
+            type="email"
+            value={farmer}
             fullWidth
-            value={productName}
-            onChange={(e) => setProductName(e.target.value)}
+            onChange={(e) => setFarmer(e.target.value)}
           />
           <TextField
             autoFocus

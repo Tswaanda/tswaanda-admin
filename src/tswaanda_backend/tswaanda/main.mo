@@ -15,6 +15,7 @@ import Text "mo:base/Text";
 import AssocList "mo:base/AssocList";
 import Error "mo:base/Error";
 import List "mo:base/List";
+import Cycles "mo:base/ExperimentalCycles";
 
 import Type "types";
 import Debug "mo:base/Debug";
@@ -23,15 +24,21 @@ import Iter "mo:base/Iter";
 import Result "mo:base/Result";
 import Buffer "mo:base/Buffer";
 import Principal "mo:base/Principal";
+import Map "mo:hashmap/Map/Map";
+import Utils "./utils";
 
-shared ({ caller = initializer }) actor class () {
+shared ({ caller = initializer }) actor class TswaandaAdmin() = this {
 
     type Id = Text;
+    type farmerEmail = Text;
     type Product = Type.Product;
     type Role = Type.Role;
     type Permission = Type.Permission;
     type Farmer = Type.Farmer;
     type ProductReview = Type.ProductReview;
+    type Staff = Type.Staff;
+    type Health = Type.Health;
+    type Stats = Type.Stats;
 
     //Access control variables
     private stable var roles : AssocList.AssocList<Principal, Role> = List.nil();
@@ -42,11 +49,30 @@ shared ({ caller = initializer }) actor class () {
     var productReviews = HashMap.HashMap<Text, List.List<ProductReview>>(0, Text.equal, Text.hash);
 
     //Farmers map
-    var farmers = HashMap.HashMap<Text, Farmer>(0, Text.equal, Text.hash);
+    var farmers = HashMap.HashMap<farmerEmail, Farmer>(0, Text.equal, Text.hash);
+
+    var staff = HashMap.HashMap<Principal, Staff>(0, Principal.equal, Principal.hash);
 
     private stable var productsEntries : [(Text, Product)] = [];
     private stable var farmersEntries : [(Text, Farmer)] = [];
     private stable var productReviewsEntries : [(Text, List.List<ProductReview>)] = [];
+    private stable var staffEntries : [(Principal, Staff)] = [];
+
+    //----------------------------------------------Upgrade methods--------------------------------------------------------
+
+    system func preupgrade() {
+        productsEntries := Iter.toArray(products.entries());
+        farmersEntries := Iter.toArray(farmers.entries());
+        productReviewsEntries := Iter.toArray(productReviews.entries());
+        staffEntries := Iter.toArray(staff.entries());
+    };
+
+    system func postupgrade() {
+        products := HashMap.fromIter<Text, Product>(productsEntries.vals(), 0, Text.equal, Text.hash);
+        farmers := HashMap.fromIter<Text, Farmer>(farmersEntries.vals(), 0, Text.equal, Text.hash);
+        productReviews := HashMap.fromIter<Text, List.List<ProductReview>>(productReviewsEntries.vals(), 0, Text.equal, Text.hash);
+        staff := HashMap.fromIter<Principal, Staff>(staffEntries.vals(), 0, Principal.equal, Principal.hash);
+    };
 
     //-----------------------------------------Access control implimentation---------------------------------------------
 
@@ -79,8 +105,8 @@ shared ({ caller = initializer }) actor class () {
         };
     };
 
-    public shared func my_role(userId : Principal) : async Text {
-        let role = get_role(userId);
+    public shared ({ caller }) func my_role() : async Text {
+        let role = get_role(caller);
         switch (role) {
             case (null) {
                 return "unauthorized";
@@ -91,15 +117,32 @@ shared ({ caller = initializer }) actor class () {
             case (? #admin) {
                 return "admin";
             };
+            case (? #staff) {
+                return "staff";
+            };
             case (? #authorized) {
                 return "authorized";
+            };
+            case (? #unauthorized) {
+                return "unauthorized";
             };
         };
     };
 
-    public shared ({ caller }) func getAllAdmins() : async [(Principal, Role)] {
-        let admins = List.toArray(roles);
-        return admins;
+    func isAuthorized(pal : Principal) : Bool {
+        let role = get_role(pal);
+        switch (role) {
+            case (? #owner or ? #admin or ? #authorized) true;
+            case (_) false;
+        };
+    };
+
+    func isAdmin(pal : Principal) : Bool {
+        let role = get_role(pal);
+        switch (role) {
+            case (? #owner or ? #admin) true;
+            case (_) false;
+        };
     };
 
     // Assign a new role to a principal
@@ -117,6 +160,76 @@ shared ({ caller = initializer }) actor class () {
         };
         roles := AssocList.replace<Principal, Role>(roles, assignee, principal_eq, new_role).0;
         role_requests := AssocList.replace<Principal, Role>(role_requests, assignee, principal_eq, null).0;
+    };
+
+    public shared ({ caller }) func getAllAdmins() : async [(Principal, Role)] {
+        List.toArray(roles);
+    };
+
+    public shared ({ caller }) func addStaffMember(staffMember : Staff) : async () {
+        assert (isAdmin(caller) or caller == staffMember.principal);
+        staff.put(staffMember.principal, staffMember);
+    };
+
+    public shared query ({ caller }) func getAllStaffMembers() : async [Staff] {
+        assert (isAdmin(caller) or isAuthorized(caller));
+        return Iter.toArray(staff.vals());
+    };
+
+    public shared query ({ caller }) func getApprovedStaff() : async [Staff] {
+        assert (isAdmin(caller) or isAuthorized(caller));
+        let verifiedStaff = Buffer.Buffer<Staff>(0);
+        for (staffMember in staff.vals()) {
+            if (staffMember.approved == true) {
+                verifiedStaff.add(staffMember);
+            };
+        };
+        return Buffer.toArray<Staff>(verifiedStaff);
+    };
+
+    public shared query ({ caller }) func getUnapprovedStaff() : async [Staff] {
+        assert (isAdmin(caller) or isAuthorized(caller));
+        let unverifiedStaff = Buffer.Buffer<Staff>(0);
+        for (staffMember in staff.vals()) {
+            if (staffMember.approved == false) {
+                unverifiedStaff.add(staffMember);
+            };
+        };
+        return Buffer.toArray<Staff>(unverifiedStaff);
+    };
+
+    public shared ({ caller }) func deleteStaffMember(id : Principal) : async Bool {
+        assert (isAdmin(caller));
+        staff.delete(id);
+        return true;
+    };
+
+    public shared ({ caller }) func updateStaffMember(staffMember : Staff) : async () {
+        assert (isAdmin(caller) or caller == staffMember.principal);
+        staff.put(staffMember.principal, staffMember);
+    };
+
+    public shared query ({ caller }) func getStaffMember(id : Principal) : async Result.Result<Staff, Text> {
+        assert (isAdmin(caller) or caller == id);
+        switch (staff.get(id)) {
+            case (null) {
+                return #err("Invalid result ID");
+            };
+            case (?result) {
+                return #ok(result);
+            };
+        };
+    };
+
+    public shared query ({ caller }) func getSuspendedStaff() : async [Staff] {
+        assert (isAdmin(caller) or isAuthorized(caller));
+        let suspendedStaff = Buffer.Buffer<Staff>(0);
+        for (staffMember in staff.vals()) {
+            if (staffMember.suspended == true) {
+                suspendedStaff.add(staffMember);
+            };
+        };
+        return Buffer.toArray<Staff>(suspendedStaff);
     };
 
     //-----------------------------------------Products implimentation------------------------------------------------
@@ -145,16 +258,8 @@ shared ({ caller = initializer }) actor class () {
     };
 
     public func updateProduct(id : Text, product : Product) : async Bool {
-        switch (products.get(id)) {
-            case (null) {
-                return false;
-            };
-            case (?result) {
-                let updateProduct : Product = product;
-                ignore products.replace(id, updateProduct);
-                return true;
-            };
-        };
+        products.put(id, product);
+        return true;
     };
 
     public shared func deleteProduct(id : Text) : async Bool {
@@ -177,7 +282,7 @@ shared ({ caller = initializer }) actor class () {
     };
 
     public shared func addProductReview(review : ProductReview) : () {
-        var reviews: List.List<ProductReview> = switch (productReviews.get(review.productId)) {
+        var reviews : List.List<ProductReview> = switch (productReviews.get(review.productId)) {
             case (null) {
                 List.nil();
             };
@@ -200,18 +305,19 @@ shared ({ caller = initializer }) actor class () {
         };
     };
 
-
     //----------------------------------------------Farmers implimentation------------------------------------------------
 
     public shared func createFarmer(newFarmer : Farmer) : () {
         farmers.put(newFarmer.email, newFarmer);
     };
 
-    public shared query func getAllFarmers() : async [Farmer] {
+    public shared query ({ caller }) func getAllFarmers() : async [Farmer] {
+        assert (isAdmin(caller) or isAuthorized(caller));
         return Iter.toArray(farmers.vals());
     };
 
-    public shared query func getFarmerByEmail(email : Text) : async Result.Result<Farmer, Text> {
+    public shared query ({ caller }) func getFarmerByEmail(email : Text) : async Result.Result<Farmer, Text> {
+        assert (isAdmin(caller) or isAuthorized(caller));
         switch (farmers.get(email)) {
             case (null) {
                 return #err("Invalid result ID");
@@ -222,19 +328,12 @@ shared ({ caller = initializer }) actor class () {
         };
     };
 
-    public shared func updateFarmer(args : Farmer) : async Bool {
-        switch (farmers.get(args.email)) {
-            case (null) {
-                return false;
-            };
-            case (?result) {
-                ignore farmers.replace(result.email, args);
-                return true;
-            };
-        };
+    public shared func updateFarmer(args : Farmer) : () {
+        farmers.put(args.email, args);
     };
 
-    public shared func deleteFarmer(email : Text) : () {
+    public shared ({ caller }) func deleteFarmer(email : Text) : () {
+        assert (isAdmin(caller));
         farmers.delete(email);
     };
 
@@ -268,17 +367,133 @@ shared ({ caller = initializer }) actor class () {
         return Buffer.toArray<Farmer>(suspendedFarmers);
     };
 
-    //----------------------------------------------Upgrade methods--------------------------------------------------------
+    // --------------------------------------------STATS MANAGEMENT--------------------------------------------------------
 
-    system func preupgrade() {
-        productsEntries := Iter.toArray(products.entries());
-        farmersEntries := Iter.toArray(farmers.entries());
-        productReviewsEntries := Iter.toArray(productReviews.entries());
+    public shared query func getAdminStats() : async Stats {
+        let totalProducts = products.size();
+        let totalFarmers = farmers.size();
+        let totalStaff = staff.size();
+
+        let stats : Stats = {
+            totalProducts;
+            totalFarmers;
+            totalStaff;
+        };
+        return stats;
     };
 
-    system func postupgrade() {
-        products := HashMap.fromIter<Text, Product>(productsEntries.vals(), 0, Text.equal, Text.hash);
-        farmers := HashMap.fromIter<Text, Farmer>(farmersEntries.vals(), 0, Text.equal, Text.hash);
-        productReviews := HashMap.fromIter<Text, List.List<ProductReview>>(productReviewsEntries.vals(), 0, Text.equal, Text.hash);
+    // --------------------------------------------CANISTERS MANAGEMENT----------------------------------------------------
+
+    public query func get_health() : async Health {
+        let health : Health = {
+            cycles = Utils.get_cycles_balance();
+            memory_mb = Utils.get_memory_in_mb();
+            heap_mb = Utils.get_heap_in_mb();
+        };
+
+        return health;
+    };
+
+    public type canister_id = Principal;
+    public type canister_settings = {
+        freezing_threshold : ?Nat;
+        controllers : ?[Principal];
+        memory_allocation : ?Nat;
+        compute_allocation : ?Nat;
+    };
+    public type definite_canister_settings = {
+        freezing_threshold : Nat;
+        controllers : [Principal];
+        memory_allocation : Nat;
+        compute_allocation : Nat;
+    };
+    public type user_id = Principal;
+    public type wasm_module = Blob;
+
+    public type Status = {
+        status : { #stopped; #stopping; #running };
+        memory_size : Nat;
+        cycles : Nat;
+        settings : definite_canister_settings;
+        module_hash : ?[Nat8];
+    };
+
+    //IC Management Canister
+    let IC = actor ("aaaaa-aa") : actor {
+        canister_status : shared { canister_id : canister_id } -> async {
+            status : { #stopped; #stopping; #running };
+            memory_size : Nat;
+            cycles : Nat;
+            settings : definite_canister_settings;
+            module_hash : ?[Nat8];
+        };
+        create_canister : shared { settings : ?canister_settings } -> async {
+            canister_id : canister_id;
+        };
+        delete_canister : shared { canister_id : canister_id } -> async ();
+        deposit_cycles : shared { canister_id : canister_id } -> async ();
+        install_code : shared {
+            arg : Blob;
+            wasm_module : wasm_module;
+            mode : { #reinstall; #upgrade; #install };
+            canister_id : canister_id;
+        } -> async ();
+        provisional_create_canister_with_cycles : shared {
+            settings : ?canister_settings;
+            amount : ?Nat;
+        } -> async { canister_id : canister_id };
+        provisional_top_up_canister : shared {
+            canister_id : canister_id;
+            amount : Nat;
+        } -> async ();
+        raw_rand : shared () -> async [Nat8];
+        start_canister : shared { canister_id : canister_id } -> async ();
+        stop_canister : shared { canister_id : canister_id } -> async ();
+        uninstall_code : shared { canister_id : canister_id } -> async ();
+        update_settings : shared {
+            canister_id : Principal;
+            settings : canister_settings;
+        } -> async ();
+    };
+
+    private func _isController(p : Principal) : async (Bool) {
+        var status : {
+            status : { #stopped; #stopping; #running };
+            memory_size : Nat;
+            cycles : Nat;
+            settings : definite_canister_settings;
+            module_hash : ?[Nat8];
+        } = await IC.canister_status({
+            canister_id = Principal.fromActor(this);
+        });
+        var controllers : [Principal] = status.settings.controllers;
+        for (i in controllers.vals()) {
+            if (i == p) {
+                return true;
+            };
+        };
+        return false;
+    };
+
+    public query func cycleBalance() : async Nat {
+        Cycles.balance();
+    };
+
+    public shared ({ caller }) func getCanisterStatus(id : Principal) : async Result.Result<Status, Text> {
+        var check : Bool = await _isController(caller);
+        if (check == false) {
+            return #err("You are not a controller");
+        };
+        Debug.print("Caller id ," # debug_show (Principal.toText(caller)));
+        var status : {
+            status : { #stopped; #stopping; #running };
+            memory_size : Nat;
+            cycles : Nat;
+            settings : definite_canister_settings;
+            module_hash : ?[Nat8];
+        } = await IC.canister_status({
+            canister_id = id;
+        });
+        return #ok(status);
     };
 };
