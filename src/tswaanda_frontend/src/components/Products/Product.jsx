@@ -54,39 +54,39 @@ const Product = ({
     const getProductReviews = async () => {
         const res = await backendActor.getProductReviews(product.id);
         if (Array.isArray(res)) {
-          const sortedReviews = res.sort(
+            const sortedReviews = res.sort(
             (b, a) => Number(a.rating) - Number(b.rating)
-          );
-          setReviews(sortedReviews);
+            );
+            setReviews(sortedReviews);
         }
-      };
+    };
 
-      useEffect(() => {
+    useEffect(() => {
         getProductReviews();
-      }, [product]);
+    }, [product]);
 
-      const calculateAverageRating = (reviews) => {
+    const calculateAverageRating = (reviews) => {
         if (!reviews || reviews.length === 0) {
-          return 0;
+            return 0;
         }
     
         const totalRating = reviews.reduce((accumulator, review) => {
-          return accumulator + Number(review.rating);
+            return accumulator + Number(review.rating);
         }, 0);
         const averageRating = totalRating / reviews.length;
     
         const roundedAverage = Math.round(averageRating * 10) / 10;
     
         return roundedAverage;
-      };
+    };
 
-      const ratingValue = (reviews) => {
+    const ratingValue = (reviews) => {
         if (!reviews || reviews.length === 0) {
-          return 0;
+            return 0;
         }
     
         const totalRating = reviews.reduce((accumulator, review) => {
-          return accumulator + Number(review.rating);
+            return accumulator + Number(review.rating);
         }, 0);
     
         const averageRating = totalRating / reviews.length;
@@ -94,11 +94,11 @@ const Product = ({
         const roundedAverage = Math.round(averageRating);
     
         setRateValue(roundedAverage);
-      };
+    };
     
-      useEffect(() => {
+    useEffect(() => {
         ratingValue(reviews);
-      }, [reviews]);
+    }, [reviews]);
 
     const handleDelete = async () => {
         try {
@@ -164,9 +164,8 @@ const Product = ({
                 <Typography variant="body2">{product.shortDescription}</Typography>
                 {/* <Typography sx={{ color: "text.secondary" }}>
             <span> <span style={{ fontWeight: "bold" }}>Date</span>:
-              {formatOrderDate(dateCreated)}</span>
-  
-  
+            {formatOrderDate(dateCreated)}</span>
+
           </Typography> */}
             </CardContent>
             <CardActions>

@@ -19,6 +19,7 @@ import { useAuth } from "../../hooks/auth";
 import { HSCodes } from "../../hscodes/hscodes";
 import { sendOrderListedEmail } from "../../emails/orderListedMail";
 import { toast } from "react-toastify";
+import Autocomplete from '@mui/lab/Autocomplete';
 
 function UpLoadProduct({ isOpen, onClose, setProductsUpdated }) {
 
@@ -123,7 +124,6 @@ function UpLoadProduct({ isOpen, onClose, setProductsUpdated }) {
         console.log(error);
       }
     }
-
   };
 
   const uploadAssets = async () => {
@@ -163,18 +163,22 @@ function UpLoadProduct({ isOpen, onClose, setProductsUpdated }) {
         </DialogTitle>
         <DialogContent>
           <FormControl fullWidth margin="dense">
-            <InputLabel id="category-label">Product Name</InputLabel>
-            <Select
-              labelId="category-label"
+            <Autocomplete
               value={product}
-              onChange={(e) => setProduct(e.target.value)}
-            >
-              {HSCodes.map((codeItem, index) => (
-                <MenuItem key={index} value={codeItem}>
-                  {codeItem.name} - {codeItem.code}
-                </MenuItem>
-              ))}
-            </Select>
+              onChange={(event, newValue) => {
+                setProduct(newValue);
+              }}
+              options={HSCodes}
+              // getOptionLabel={(option) => `${option.name} - ${option.code}`}
+              getOptionLabel={(option) => {
+                if (!option) return "Select a product";
+                return `${option.name ? option.name : "Product Name"} - ${option.code ? option.code : "HSCode"}`;
+              }}              
+              renderInput={(params) => (
+                <TextField {...params} label="Product Name" margin="dense" />
+              )}
+            />
+            
           </FormControl>
           <TextField
             autoFocus
