@@ -78,9 +78,6 @@ const Backup = () => {
     downloadAnchorNode.remove();
   }
 
-  console.log("adminStats", adminStats)
-  console.log("marketStats", marketStats)
-
   return (
     <div className="">
       <Typography style={{ fontSize: "20px", fontWeight: "bold", marginBottom: "20px" }}>

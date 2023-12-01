@@ -11,10 +11,10 @@ export const sendCustomerEmailMessage = async (
 
     emailjs
         .send(
-            "service_515ffkj",
-            "template_mev2i6v",
+            "service_b0ld0fh",
+            "template_59amz9z",
             templateParams,
-            "ni25KjXycoHjn-cD1"
+            "cEuqVJj0eDt8tfwPN"
         )
         .then(
             (result) => {
@@ -41,10 +41,10 @@ export const sendAutomaticEmailMessage = async (
 
     emailjs
         .send(
-            "service_515ffkj",
-            "template_wcm2cyn",
+            "service_bsld0fh",
+            "template_5oamz9z",
             templateParams,
-            "ni25KjXycoHjn-cD1"
+            "cEuqVJj0eDt8tfwPN"
         )
         .then(
             (result) => {

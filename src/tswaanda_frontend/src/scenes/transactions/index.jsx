@@ -1,112 +1,122 @@
-import React, { useState } from 'react';
-import { DataGrid } from '@mui/x-data-grid';
-import { useGetTransactionsQuery } from '../../state/api';
-import Header from '../../components/Header';
-import { Box, useTheme } from '@mui/material';
-import DataGridCustomToolbar from "../../components/DataGridCustomToolbar";
+import React, { useEffect, useState, useRef } from 'react';
 
 const Transactions = () => {
-    const theme = useTheme();
+    const iframeRef = useRef();
+    const sendOfferDetailsToWallet = () => {
+        const offerDetails = { 
+            type: 'offer', 
+            value: {
+                logo: '',
+                logoWidth: 100,
+                title: '',
+                companyName: 'Your Company',
+                name: '',
+                companyAddress: '',
+                companyAddress2: '',
+                companyCountry: '',
+                billTo: '',
+                clientName: 'Clients Company',
+                clientAddress: '',
+                clientAddress2: '',
+                clientCountry: '',
+                invoiceTitleLabel: '',
+                invoiceTitle: '',
+                invoiceDateLabel: '',
+                invoiceDate: '',
+                invoiceDueDateLabel: '',
+                invoiceDueDate: '',
+                productLineDescription: 'Product',
+                productLineQuantity: 'Quantity',
+                productLineQuantityRate: 'Rate',
+                productLineQuantityAmount: 'Amount',
+                productLines: [
+                {
+                    description: '',
+                    quantity: '',
+                    rate: '',
+                },
+                ],
+                subTotalLabel: 'Sub Total',
+                taxLabel: 'Sales Tax',
+                totalLabel: 'TOTAL',
+                currency: '$',
+                notesLabel: 'Payment Method',
+                notes: 'Direct Payment',
+                termLabel: 'Terms & Conditions',
+                term: contractMarkdown,
+            }
+        }
+        iframeRef.current.style.display = "block";
+        iframeRef.current.contentWindow.postMessage(JSON.stringify(offerDetails), '*');
+    };
 
-    // values to be sent to the backend
-    const [page, setPage] = useState(0);
-    const [pageSize, setPageSize] = useState(20);
-    const [sort, setSort] = useState({});
-    const [search, setSearch] = useState("");
+    const sendSupportMessageToWallet = () => {
+        let message = { type: 'message', value: 'Hello, how can I help you?' };
+        iframeRef.current.style.display = "block";
+        iframeRef.current.contentWindow.postMessage(JSON.stringify(message), '*');
+    };
 
-    const [searchInput, setSearchInput] = useState("");
+    const sendCheckoutDetailsToWallet = () => {
+        let purchaseDetails = { type: 'name', value: 'Tswaanda' };
+        iframeRef.current.style.display = "block";
+        iframeRef.current.contentWindow.postMessage(JSON.stringify(purchaseDetails), '*');
+    };
 
-    const { data, isLoading } = useGetTransactionsQuery({
-        page,
-        pageSize,
-        sort: JSON.stringify(sort),
-        search
-    });
+    const sendPurchaseDetailsToWallet = () => {
+        let purchaseDetails = { type: 'purchase', value: { walletOwner: "", accountNumber: "", paymentDate: "", orderNumber: "" }};
+        iframeRef.current.style.display = "block";
+        iframeRef.current.contentWindow.postMessage(JSON.stringify(purchaseDetails), '*');
+    };
 
-    const columns = [
-        {
-            field: "_id",
-            headerName: "ID",
-            flex: 1,
-        },
-        {
-            field: "userId",
-            headerName: "USER ID",
-            flex: 1,
-        },
-        {
-            field: "createdAt",
-            headerName: "Created At",
-            flex: 1
-        },
-        {
-            field: "products",
-            headerName: "No. of Products",
-            flex: 0.5,
-            sortable: false,
-            renderCell: (params) => params.value.length
-        },
-        {
-            field: "cost",
-            headerName: "Cost",
-            flex: 1,
-            renderCell: (params) => `$${Number(params.value).toFixed(2)}`
-        },
-    ]
+    const sendExportDetailsToWallet = () => {
+        let purchaseDetails = { type: 'export', value: '' };
+        iframeRef.current.style.display = "block";
+        iframeRef.current.contentWindow.postMessage(JSON.stringify(purchaseDetails), '*');
+    };
+
+    const sendShipmentDetailsToWallet = () => {
+        let purchaseDetails = { type: 'shipment', value: '' };
+        iframeRef.current.style.display = "block";
+        iframeRef.current.contentWindow.postMessage(JSON.stringify(purchaseDetails), '*');
+    };
+
+    const sendFulfillmentDetailsToWallet = () => {
+        let purchaseDetails = { type: 'fulfillment', value: '' };
+        iframeRef.current.style.display = "block";
+        iframeRef.current.contentWindow.postMessage(JSON.stringify(purchaseDetails), '*');
+    };
+
+    const sendDisputeDetailsToWallet = () => {
+        let purchaseDetails = { type: 'dispute', value: '' };
+        iframeRef.current.style.display = "block";
+        iframeRef.current.contentWindow.postMessage(JSON.stringify(purchaseDetails), '*');
+    };
 
     return (
-        <Box m="1.5rem 2.5rem">
-            <Header title="TRANSACTIONS" subtitle="Entire list of transactions" />
-            <Box 
-                height="80vh"
-                sx={{
-                    "& .MuiDataGrid-root": {
-                        border: "none"
-                    },
-                    "& .MuiDataGrid-cell": {
-                        borderBottom: "none"
-                    },
-                    "& .MuiDataGrid-columnHeaders": {
-                        backgroundColor: theme.palette.background.alt,
-                        color: theme.palette.secondary[100],
-                        borderBottom: "none"
-                    },
-                    "& .MuiDataGrid-virtualScroller": {
-                        backgroundColor: theme.palette.primary.light,
-                    },
-                    "& .MuiDataGrid-footerContainer": {
-                        backgroundColor: theme.palette.background.alt,
-                        color: theme.palette.secondary[100],
-                        borderTop: "none"
-                    },
-                    "& .MuiDataGrid-toolbarContainer .MuiButton-text": {
-                        color: `${theme.palette.secondary[200]} !important`
-                    }
-                }}
-            >
-                <DataGrid
-                    loading={isLoading || !data}
-                    getRowId={(row) => row._id}
-                    rows={(data && data.transactions) || []}
-                    columns={columns}
-                    rowCount={(data && data.total) || 0}
-                    rowsPerPageOptions={[20, 50, 100]}
-                    pagination
-                    page={page}
-                    pageSize={pageSize}
-                    paginationMode='server'
-                    sortingMode='server'
-                    onPageChange={(newPage) => setPage(newPage)}
-                    onPageSizeChange={(newPageSize) => setPageSize(newPageSize)}
-                    onSortModelChange={(newSortModel) => setSort(...newSortModel)}
-                    components={{ Toolbar: DataGridCustomToolbar }}
-                    componentsProps={{
-                        toolbar: { searchInput, setSearchInput, setSearch }
-                    }}
-                />
-            </Box>
-        </Box>
-    )
-}
+        <div>
+            <div>
+                <button onClick={()=> { sendCheckoutDetailsToWallet() }}>Transaction</button>
+                <button onClick={()=> { sendOfferDetailsToWallet() }}>Offer</button>
+                <button onClick={()=> { sendPurchaseDetailsToWallet() }}>Purchase</button>
+                <button onClick={()=> { sendExportDetailsToWallet() }}>Export</button> 
+                <button onClick={()=> { sendShipmentDetailsToWallet() }}>Shipment</button>
+                <button onClick={()=> { sendFulfillmentDetailsToWallet() }}>Fulfillment</button> 
+                <button onClick={()=> { sendDisputeDetailsToWallet() }}>Dispute</button> 
+                <button onClick={()=> { sendSupportMessageToWallet() }}>Message</button> 
 
-export default Transactions
+                <iframe
+                    ref={iframeRef}
+                    src="http://localhost:3000/"
+                    title="Transaction Iframe"
+                    width="750"
+                    height="950"
+                    suppressHydrationWarning={true} 
+                    style={ {display: 'block', border: 'none', margin: "0 auto"} }
+                    sandbox="allow-same-origin allow-scripts"
+                ></iframe>
+            </div>
+        </div>
+    );
+};
+
+export default Transactions;

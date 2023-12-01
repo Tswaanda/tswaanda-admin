@@ -80,210 +80,210 @@ const Approved = ({
     return (
         <Box m="1rem 0 0 0">
             {approvedCustomers?.map((customer) => (
-                <Accordion
-                    key={customer.id}
-                    expanded={expanded === customer.id}
-                    onChange={handleChange(customer.id)}
-                    sx={{ backgroundColor: theme.palette.background.alt }}
-                >
-                    <AccordionSummary
-                        expandIcon={<ExpandMoreIcon />}
-                        aria-controls="panel1bh-content"
-                        id="panel1bh-header"
-                    >
-                        <Typography sx={{ width: "25%", flexShrink: 0 }}>
-                            <span style={{ fontWeight: "bold" }}>Username</span>: @
-                            {customer.userName}
-                        </Typography>
-                        <Typography
-                            sx={{ color: "text.secondary", width: "25%", flexShrink: 0 }}
-                        >
-                            <span style={{ fontWeight: "bold" }}>Email</span>:{" "}
-                            {customer.email}
-                        </Typography>
-                        <Typography sx={{ color: "text.secondary", width: "25%" }}>
-                            <span style={{ fontWeight: "bold" }}>Status</span>:{" "}
-                            {customer.status}
-                        </Typography>
-                        <Typography sx={{ color: "text.secondary", width: "25%" }}>
-                            <span style={{ fontWeight: "bold" }}>Date</span>:{" "}
-                            {customer.dateCreated}
-                        </Typography>
-                    </AccordionSummary>
-                    <AccordionDetails>
-                        <Box
-                            sx={{
-                                backgroundImage: "none",
-                                backgroundColor: theme.palette.background.alt,
-                                borderRadius: "0.55rem",
-                            }}
-                        >
-                            <Container maxWidth="md" style={{ marginTop: "2rem" }}>
-                                <Grid
-                                    container
-                                    style={{ display: "flex", alignItems: "center" }}
-                                    spacing={4}
-                                    m="0 0.1rem 0 0.1rem"
-                                >
-                                    <Grid
-                                        style={{ display: "flex", alignItems: "center" }}
-                                        customer
-                                        xs={6}
-                                    >
-                                        <Typography
-                                            style={{ fontSize: "2rem", fontWeight: "bold" }}
-                                        >
-                                            {customer.firstName}
-                                        </Typography>
-                                        <Typography
-                                            style={{ fontSize: "2rem", fontWeight: "bold" }}
-                                            m="0 0 0 2rem"
-                                        >
-                                            {customer.lastName}
-                                        </Typography>
-                                    </Grid>
-                                    <Grid customer xs={6}>
-                                        <Box
-                                            component="img"
-                                            alt="profile"
-                                            src={customer.profilePhoto}
-                                            height="200px"
-                                            width="200px"
-                                            sx={{ objectFit: "cover" }}
-                                        />
-                                    </Grid>
-                                </Grid>
-                                <hr />
-                                <AccordionSummary
-                                    aria-controls="panel1bh-content"
-                                    id="panel1bh-header"
-                                >
-                                    <Typography sx={{ width: "50%", flexShrink: 0 }}>
-                                        <span style={{ fontWeight: "bold" }}>Username</span>:
-                                        {customer.userName}
-                                    </Typography>
-                                    <Typography
-                                        sx={{
-                                            width: "50%",
-                                            flexShrink: 0,
-                                        }}
-                                    >
-                                        <span style={{ fontWeight: "bold" }}>Phone Number</span>:{" "}
-                                        {customer.phoneNumber}
-                                    </Typography>
-                                </AccordionSummary>
-                                <AccordionSummary>
-                                    <Typography
-                                        sx={{
-                                            width: "50%",
-                                            flexShrink: 0,
-                                        }}
-                                    >
-                                        <span style={{ fontWeight: "bold" }}>Country</span>:{" "}
-                                        {customer.country}
-                                    </Typography>
-                                    <Typography sx={{ width: "50%", flexShrink: 0 }}>
-                                        <span style={{ fontWeight: "bold" }}>Organization</span>:
-                                        {customer.organization}
-                                    </Typography>
-                                </AccordionSummary>
-                                <AccordionSummary>
-                                    <Typography sx={{ width: "50%", flexShrink: 0 }}>
-                                        <span style={{ fontWeight: "bold" }}>About</span>:{" "}
-                                        {customer.about}
-                                    </Typography>
-                                    <Typography sx={{ width: "50%", flexShrink: 0 }}>
-                                        <span style={{ fontWeight: "bold" }}>Address</span>:{" "}
-                                        {customer.streetAdrees}
-                                    </Typography>
-                                </AccordionSummary>
-                                <hr />
-                                <CardActions>
-                                    <Button
-                                        onClick={
-                                            () => handleShowStatusForm(customer)
-                                        }
-                                        variant="outlined"
-                                        size="small"
-                                        style={{
-                                            backgroundColor:
-                                                showStatusForm
-                                                    ? "white"
-                                                    : undefined,
-                                            color:
-                                                showStatusForm
-                                                    ? "green"
-                                                    : "white",
-                                        }}
-                                    >
-                                        Update Customer status
-                                    </Button>
-                                    <Button
-                                        onClick={
-                                            () => showContactForm(customer)
-                                        }
-                                        variant="outlined"
-                                        size="small"
-                                        style={{
-                                            backgroundColor:
-                                                showContact
-                                                    ? "white"
-                                                    : undefined,
-                                            color:
-                                                showContact
-                                                    ? "green"
-                                                    : "white",
-                                        }}
-                                    >
-                                        Contact customer
-                                    </Button>
-                                    <Button
-                                        onClick={
-                                            () => showIdentificationDoc(customer)
-                                        }
-                                        variant="outlined"
-                                        size="small"
-                                        style={{
-                                            backgroundColor:
-                                                showIdentification
-                                                    ? "white"
-                                                    : undefined,
-                                            color:
-                                                showIdentification
-                                                    ? "green"
-                                                    : "white",
-                                        }}
-                                    >
-                                        View Identification
-                                    </Button>
-                                    <Button
-                                        onClick={
-                                            () => showProofOfAddressDoc(customer)
-                                        }
-                                        variant="outlined"
-                                        size="small"
-                                        style={{
-                                            backgroundColor:
-                                                showProofOfAddress
-                                                    ? "white"
-                                                    : undefined,
-                                            color:
-                                                showProofOfAddress
-                                                    ? "green"
-                                                    : "white",
-                                        }}
-                                    >
-                                        View Proof of Address
-                                    </Button>
+                 <Accordion
+                 key={customer.id}
+                 expanded={expanded === customer.id}
+                 onChange={handleChange(customer.id)}
+                 sx={{ backgroundColor: theme.palette.background.alt }}
+             >
+                 <AccordionSummary
+                     expandIcon={<ExpandMoreIcon />}
+                     aria-controls="panel1bh-content"
+                     id="panel1bh-header"
+                 >
+                     <Typography sx={{ width: "25%", flexShrink: 0 }}>
+                         <span style={{ fontWeight: "bold" }}>Username</span>: @
+                         {customer.body ? customer.body.userName : "Anon"}
+                     </Typography>
+                     <Typography
+                         sx={{ color: "text.secondary", width: "25%", flexShrink: 0 }}
+                     >
+                         <span style={{ fontWeight: "bold" }}>Email</span>:{" "}
+                         {customer.body ? customer.body.email : "Anon"}
+                     </Typography>
+                     <Typography sx={{ color: "text.secondary", width: "25%" }}>
+                         <span style={{ fontWeight: "bold" }}>Status</span>:{" "}
+                         {customer.body ? customer.body.status : "Anon"}
+                     </Typography>
+                     <Typography sx={{ color: "text.secondary", width: "25%" }}>
+                         <span style={{ fontWeight: "bold" }}>Date</span>:{" "}
+                         {customer.created}
+                     </Typography>
+                 </AccordionSummary>
+                 <AccordionDetails>
+                     <Box
+                         sx={{
+                             backgroundImage: "none",
+                             backgroundColor: theme.palette.background.alt,
+                             borderRadius: "0.55rem",
+                         }}
+                     >
+                         <Container maxWidth="md" style={{ marginTop: "2rem" }}>
+                             <Grid
+                                 container
+                                 style={{ display: "flex", alignItems: "center" }}
+                                 spacing={4}
+                                 m="0 0.1rem 0 0.1rem"
+                             >
+                                 <Grid
+                                     style={{ display: "flex", alignItems: "center" }}
+                                     customer
+                                     xs={6}
+                                 >
+                                     <Typography
+                                         style={{ fontSize: "2rem", fontWeight: "bold" }}
+                                     >
+                                         {customer.body ? customer.body.firstName : "Anon"}
+                                     </Typography>
+                                     <Typography
+                                         style={{ fontSize: "2rem", fontWeight: "bold" }}
+                                         m="0 0 0 2rem"
+                                     >
+                                         {customer.body ? customer.body.lastName : "Anon"}
+                                     </Typography>
+                                 </Grid>
+                                 <Grid customer xs={6}>
+                                     <Box
+                                         component="img"
+                                         alt="profile"
+                                         src={customer.body ? customer.body.profilePicture : `/anon.png`}
+                                         height="200px"
+                                         width="200px"
+                                         sx={{ objectFit: "cover" }}
+                                     />
+                                 </Grid>
+                             </Grid>
+                             <hr />
+                             <AccordionSummary
+                                 aria-controls="panel1bh-content"
+                                 id="panel1bh-header"
+                             >
+                                 <Typography sx={{ width: "50%", flexShrink: 0 }}>
+                                     <span style={{ fontWeight: "bold" }}>Username</span>:
+                                     {customer.body ? customer.body.userName : "Anon"}
+                                 </Typography>
+                                 <Typography
+                                     sx={{
+                                         width: "50%",
+                                         flexShrink: 0,
+                                     }}
+                                 >
+                                     <span style={{ fontWeight: "bold" }}>Phone Number</span>:{" "}
+                                     {customer.body ? customer.body.phoneNumber : "Anon"}
+                                 </Typography>
+                             </AccordionSummary>
+                             <AccordionSummary>
+                                 <Typography
+                                     sx={{
+                                         width: "50%",
+                                         flexShrink: 0,
+                                     }}
+                                 >
+                                     <span style={{ fontWeight: "bold" }}>Country</span>:{" "}
+                                     {customer.body ? customer.body.country : "Anon"}
+                                 </Typography>
+                                 <Typography sx={{ width: "50%", flexShrink: 0 }}>
+                                     <span style={{ fontWeight: "bold" }}>Organization</span>:
+                                     {customer.body ? customer.body.organization : "Anon"}
+                                 </Typography>
+                             </AccordionSummary>
+                             <AccordionSummary>
+                                 <Typography sx={{ width: "50%", flexShrink: 0 }}>
+                                     <span style={{ fontWeight: "bold" }}>About</span>:{" "}
+                                     {customer.body ? customer.body.about : "Anon"}
+                                 </Typography>
+                                 <Typography sx={{ width: "50%", flexShrink: 0 }}>
+                                     <span style={{ fontWeight: "bold" }}>Address</span>:{" "}
+                                     {customer.body ? customer.body.address : "Anon"}
+                                 </Typography>
+                             </AccordionSummary>
+                             <hr />
+                            {customer.body &&  <CardActions>
+                                 <Button
+                                     onClick={
+                                         () => handleShowStatusForm(customer)
+                                     }
+                                     variant="outlined"
+                                     size="small"
+                                     style={{
+                                         backgroundColor:
+                                             showStatusForm
+                                                 ? "white"
+                                                 : undefined,
+                                         color:
+                                             showStatusForm
+                                                 ? "green"
+                                                 : "white",
+                                     }}
+                                 >
+                                     Update Customer status
+                                 </Button>
+                                 <Button
+                                     onClick={
+                                         () => showContactForm(customer)
+                                     }
+                                     variant="outlined"
+                                     size="small"
+                                     style={{
+                                         backgroundColor:
+                                             showContact
+                                                 ? "white"
+                                                 : undefined,
+                                         color:
+                                             showContact
+                                                 ? "green"
+                                                 : "white",
+                                     }}
+                                 >
+                                     Contact customer
+                                 </Button>
+                                 <Button
+                                     onClick={
+                                         () => showIdentificationDoc(customer)
+                                     }
+                                     variant="outlined"
+                                     size="small"
+                                     style={{
+                                         backgroundColor:
+                                             showIdentification
+                                                 ? "white"
+                                                 : undefined,
+                                         color:
+                                             showIdentification
+                                                 ? "green"
+                                                 : "white",
+                                     }}
+                                 >
+                                     View Identification
+                                 </Button>
+                                 <Button
+                                     onClick={
+                                         () => showProofOfAddressDoc(customer)
+                                     }
+                                     variant="outlined"
+                                     size="small"
+                                     style={{
+                                         backgroundColor:
+                                             showProofOfAddress
+                                                 ? "white"
+                                                 : undefined,
+                                         color:
+                                             showProofOfAddress
+                                                 ? "green"
+                                                 : "white",
+                                     }}
+                                 >
+                                     View Proof of Address
+                                 </Button>
 
-                                </CardActions>
-                            </Container>
+                             </CardActions>}
+                         </Container>
 
 
 
-                        </Box>
-                    </AccordionDetails>
-                </Accordion>
+                     </Box>
+                 </AccordionDetails>
+             </Accordion>
             ))}
             <>
 

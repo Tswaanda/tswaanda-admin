@@ -7,7 +7,7 @@ import { canisterId, idlFactory } from "../../../declarations/tswaanda_backend/i
 import icblast from "@infu/icblast";
 
 const marketCanisterId = "55ger-liaaa-aaaal-qb33q-cai";
-const localMarketCanId = "by6od-j4aaa-aaaaa-qaadq-cai";
+const localMarketCanId = "aax3a-h4aaa-aaaaa-qaahq-cai";
 
 const network = process.env.DFX_NETWORK || "local";
 
@@ -21,7 +21,10 @@ const authClient = await AuthClient.create({
 
 // ICBLAST
 const identity = await authClient.getIdentity()
-let ic = icblast({ local: true, identity: identity });
+let ic = icblast({
+  local: network === "local" ? true : false
+  , identity: identity
+});
 export const adminBlast = await ic(canisterId);
 export const marketBlast = await ic(network === "local" ? localMarketCanId : marketCanisterId);
 
@@ -97,22 +100,18 @@ export const ContextProvider = ({ children }) => {
     host: network === "local" ? localhost : host,
     identity: identity
   })
-  if (network === "local") {
-    agent.fetchRootKey()
-  }
+  agent.fetchRootKey()
+
 
   const backendActor = Actor.createActor(idlFactory, {
     agent,
     canisterId: canisterId,
   });
 
-  let marketAgent = new HttpAgent({
-    host: host,
-  })
 
   const marketActor = Actor.createActor(marketIdlFactory, {
-    agent: marketAgent,
-    canisterId: marketCanisterId,
+    agent: agent,
+    canisterId: network === "local" ? localMarketCanId : marketCanisterId,
   });
 
   return (
