@@ -18,7 +18,7 @@ import ProofOfAddress from './ProofOfAddress';
 import UpdateCustomerStatusForm from './UpdateCustomerStatusForm';
 
 const Anon = ({
-  approvedCustomers,
+  anonUsers,
   updateCustomerStatus,
   setCustomerStatus,
   expanded,
@@ -79,7 +79,7 @@ const Anon = ({
 
   return (
     <Box m="1rem 0 0 0">
-      {approvedCustomers?.map((customer) => (
+      {anonUsers?.map((customer) => (
         <Accordion
           key={customer.id}
           expanded={expanded === customer.id}

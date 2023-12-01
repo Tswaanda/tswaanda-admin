@@ -24,6 +24,7 @@ const Customers = () => {
   const [pendingCustomers, setPendingCustomers] = useState(null);
   const [approvedCustomers, setApprovedCustomers] = useState(null);
   const [updated, setUpdated] = useState(false);
+  const [anonUsers, setAnonUsers] = useState(null);
 
   const [selectedCustomerId, setSelectedCustomerId] = useState(null);
   const [customerStatus, setCustomerStatus] = useState("");
@@ -53,6 +54,15 @@ const Customers = () => {
     );
     const convertedCustomers = convertData(sortedData);
     setApprovedCustomers(convertedCustomers);
+  }
+
+  const getAnonUsers = async () => {
+    const res = await canister.getAnonUsers()
+    const sortedData = res.sort(
+      (a, b) => Number(b.created) - Number(a.created)
+    );
+    const convertedCustomers = convertData(sortedData);
+    setAnonUsers(convertedCustomers);
   }
 
   const convertData = (data) => {
@@ -131,6 +141,8 @@ const Customers = () => {
   useEffect(() => {
     getCustomers();
     getPendingCustomers();
+    getApprovedCustomers();
+    getAnonUsers();
   }, []);
 
   useEffect(() => {
@@ -257,7 +269,7 @@ const Customers = () => {
             {...{
               updated,
               setUpdated,
-              approvedCustomers,
+              anonUsers,
               updateCustomerStatus,
               handleShowStatusForm,
               setCustomerStatus,
@@ -276,8 +288,6 @@ const Customers = () => {
         return null;
     }
   };
-
-  console.log(customers, "customers")
 
   return (
     <div className="">
