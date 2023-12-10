@@ -315,7 +315,7 @@ const Farmers = () => {
             }}
           >
             <AddIcon sx={{ mr: "10px" }} />
-            List New Farmer
+            Add New Farmer
           </Button>
           {isOpen && (
             <FarmerListing

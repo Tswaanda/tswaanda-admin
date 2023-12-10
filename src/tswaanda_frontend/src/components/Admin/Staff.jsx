@@ -41,7 +41,6 @@ const Staff = ({ expanded, handleChange }) => {
     try {
       const _staff = await backendActor.getApprovedStaff()
       let unsuspended = _staff.filter((member) => member.suspended === false)
-      // modify the date of each member to be more readable
       unsuspended = unsuspended.map((member) => {
         return {
           ...member,
@@ -112,7 +111,7 @@ const Staff = ({ expanded, handleChange }) => {
               id="panel1bh-header"
             >
               <Typography sx={{ width: "25%", flexShrink: 0 }}>
-                <span style={{ fontWeight: "bold" }}>Username</span>: @
+                <span style={{ fontWeight: "bold" }}>Username</span>: 
                 {staff.fullName}
               </Typography>
               <Typography

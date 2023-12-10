@@ -15,6 +15,7 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ContactStaff from './ContactStaff';
 import UpdateAccessLevel from './UpdateAccessLevel';
 import { useAuth } from '../../hooks/auth';
+import { formatDate } from '../../scenes/constants/index';
 
 const AccessRequest = ({ expanded, handleChange }) => {
   const [accessRequest, setAccessRequest] = useState([])
@@ -36,7 +37,13 @@ const AccessRequest = ({ expanded, handleChange }) => {
   const getAccessRequest = async () => {
     try {
       const _accessRequest = await backendActor.getUnapprovedStaff()
-      setAccessRequest(_accessRequest)
+      let accessReq = _accessRequest.map((member) => {
+        return {
+          ...member,
+          created: formatDate(member.created)
+        }
+      })
+      setAccessRequest(accessReq)
     } catch (error) {
       console.log("Error getting access request", error)
     }
@@ -71,7 +78,7 @@ const AccessRequest = ({ expanded, handleChange }) => {
               id="panel1bh-header"
             >
               <Typography sx={{ width: "25%", flexShrink: 0 }}>
-                <span style={{ fontWeight: "bold" }}>Username</span>: @
+                <span style={{ fontWeight: "bold" }}>Username</span>: 
                 {staff.fullName}
               </Typography>
               <Typography

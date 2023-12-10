@@ -106,7 +106,7 @@ function UpLoadProduct({ isOpen, onClose, setProductsUpdated }) {
           await backendActor.createProduct(newProduct);
 
           // Send email to farmer to notify them of new product
-          const res = await sendOrderListedEmail(farmerRes.ok, product)
+          const res = await sendOrderListedEmail(farmerRes.ok, newProduct)
           if (res) {
             console.log("Email sent")
           }

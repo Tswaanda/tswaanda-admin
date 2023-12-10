@@ -59,6 +59,7 @@ const UpdateAccessLevel = ({
         ...member,
         role: [getRole()],
         approved: true,
+        created: BigInt(Date.parse(member.created))
       }
       await backendActor.updateStaffMember(updatedUser)
       setUpdating(false)

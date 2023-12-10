@@ -7,7 +7,7 @@ import { canisterId, idlFactory } from "../../../declarations/tswaanda_backend/i
 import icblast from "@infu/icblast";
 
 const marketCanisterId = "55ger-liaaa-aaaal-qb33q-cai";
-const localMarketCanId = "aax3a-h4aaa-aaaaa-qaahq-cai";
+const localMarketCanId = "asrmz-lmaaa-aaaaa-qaaeq-cai";
 
 const network = process.env.DFX_NETWORK || "local";
 

@@ -132,7 +132,7 @@ function App() {
                 <Route path="/documents" element={<Documents />} />
                 <Route path="/monthly" element={<Monthly />} />
                 <Route path="/breakdown" element={<Breakdown />} />
-                <Route path="/admin" element={<Admin />} />
+                <Route path="/admin-staff" element={<Admin />} />
                 <Route path="/newsletters" element={<Newsletter />} />
                 <Route path="/support" element={<Support />} />
                 <Route path="/performance" element={<Performance />} />

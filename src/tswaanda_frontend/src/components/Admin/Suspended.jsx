@@ -109,7 +109,7 @@ const Suspended = ({ expanded, handleChange }) => {
                             id="panel1bh-header"
                         >
                             <Typography sx={{ width: "25%", flexShrink: 0 }}>
-                                <span style={{ fontWeight: "bold" }}>Username</span>: @
+                                <span style={{ fontWeight: "bold" }}>Username</span>: 
                                 {staff.fullName}
                             </Typography>
                             <Typography

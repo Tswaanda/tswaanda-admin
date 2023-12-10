@@ -128,7 +128,7 @@ const Sidebar = ({
       icon: null,
     },
     {
-      text: "Admin",
+      text: "Admin-Staff",
       icon: <AdminPanelSettingsOutlined />,
     },
     {
