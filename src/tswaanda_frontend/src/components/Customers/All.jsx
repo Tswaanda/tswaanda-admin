@@ -21,8 +21,8 @@ import IdentficationDoc from './IdentficationDoc';
 import ProofOfAddress from './ProofOfAddress';
 import UpdateCustomerStatusForm from './UpdateCustomerStatusForm';
 
-const Pending = ({
-    pendingCustomers,
+const All = ({
+    customers,
     updateCustomerStatus,
     setCustomerStatus,
     expanded,
@@ -83,7 +83,7 @@ const Pending = ({
 
     return (
         <Box m="1rem 0 0 0">
-            {pendingCustomers?.map((customer) => (
+            {customers?.map((customer) => (
                 <Accordion
                     key={customer.id}
                     expanded={expanded === customer.id}
@@ -311,4 +311,4 @@ const Pending = ({
     )
 }
 
-export default Pending
+export default All

@@ -161,7 +161,7 @@ function UpdateFarmer({ isOpen, onClose, farmer }) {
                         }}
                     >
                         {saving && "Saving info..."}
-                        {!saving && "Add Farmer"}
+                        {!saving && "Update Farmer"}
                     </Button>
                 </DialogActions>
             </form>

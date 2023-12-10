@@ -12,7 +12,7 @@ import {
     Rating,
 } from "@mui/material";
 import CloseIcon from '@mui/icons-material/Close';
-import { marketBlast } from '../../hooks/auth';
+import { useAuth } from '../../hooks/auth';
 import { Principal } from '@dfinity/principal';
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
@@ -25,6 +25,7 @@ const BootstrapDialog = styled(Dialog)(({ theme }) => ({
 }));
 
 const RestoreUsersModal = ({ openRestoreUsersModal, setRestoreUsersModal, getMarketStatistics }) => {
+    const { marketActor } = useAuth();
 
 
     const [uploading, setUpLoading] = useState(false);
@@ -52,15 +53,42 @@ const RestoreUsersModal = ({ openRestoreUsersModal, setRestoreUsersModal, getMar
                     for (let user of restoredUsers) {
                         setCount(prevCount => prevCount - 1);
                         let updatedUser = {
-                            ...user,
-                            zipCode: BigInt(user.zipCode),
-                            phoneNumber: BigInt(user.phoneNumber),
-                            userId: Principal.fromText(user.userId),
-                            dateCreated: BigInt(user.created),
+                            id: user.id,
+                            principal: Principal.fromText(user.userId),
+                            created: BigInt(user.dateCreated),
+                            body: [
+                                {
+                                    userName: user.userName,
+                                    firstName: user.firstName,
+                                    lastName: user.lastName,
+                                    about: user.about,
+                                    email: user.email,
+                                    organization: user.organization,
+                                    country: user.country,
+                                    streetAddress: user.streetAdrees,
+                                    city: user.city,
+                                    province: user.province,
+                                    zipCode: BigInt(user.zipCode),
+                                    phoneNumber: BigInt(user.phoneNumber),
+                                    profilePhoto: user.profilePhoto,
+                                    kycIDCopy: user.kycIDCopy,
+                                    proofOfAddressCopy: user.proofOfAddressCopy,
+                                    status: "pending",
+                                    isUpdated: user.isUpdated,
+                                    isEmailVerified: user.isEmailVerified,
+                                    membershipLevel: user.membershipLevel,
+                                    userWebsite: user.userWebsite,
+                                    pushNotification: {
+                                        email: user.pushNotification.email,
+                                        sms: user.pushNotification.sms,
+                                        everything: user.pushNotification.everything,
+                                    },
+                                }
+                            ]
                         }
                         console.log("Restoring user:", updatedUser);
-                        await marketBlast.createProduct(updatedUser);
-                        getMarketStatistics
+                        await marketActor.createKYCRequest(updatedUser);
+                        getMarketStatistics()
                     }
                     console.log("Data restored successfully!");
                 } else {
@@ -68,7 +96,7 @@ const RestoreUsersModal = ({ openRestoreUsersModal, setRestoreUsersModal, getMar
                 }
 
                 setUpLoading(false);
-                setRestoreModal(false);
+                setRestoreUsersModal(false);
             } catch (error) {
                 console.log("An error occurred while restoring data:", error);
             }
@@ -80,9 +108,6 @@ const RestoreUsersModal = ({ openRestoreUsersModal, setRestoreUsersModal, getMar
 
         reader.readAsText(jsonFile);
     }
-
-
-
 
     return (
         <div>

@@ -11,6 +11,8 @@ import { canister } from "../../config";
 import Pending from "../../components/Customers/Pending";
 import Approved from "../../components/Customers/Approved";
 import { sendAutomaticEmailMessage } from "../../emails/kycApprovals";
+import Anon from "../../components/Customers/Anon";
+import All from "../../components/Customers/All";
 
 const Customers = () => {
   const [expanded, setExpanded] = useState(false);
@@ -22,6 +24,7 @@ const Customers = () => {
   const [pendingCustomers, setPendingCustomers] = useState(null);
   const [approvedCustomers, setApprovedCustomers] = useState(null);
   const [updated, setUpdated] = useState(false);
+  const [anonUsers, setAnonUsers] = useState(null);
 
   const [selectedCustomerId, setSelectedCustomerId] = useState(null);
   const [customerStatus, setCustomerStatus] = useState("");
@@ -38,20 +41,28 @@ const Customers = () => {
   const getPendingCustomers = async () => {
     const res = await canister.getPendingKYCReaquest()
     const sortedData = res.sort(
-      (a, b) => Number(b.dateCreated) - Number(a.dateCreated)
+      (a, b) => Number(b.created) - Number(a.created)
     );
     const convertedCustomers = convertData(sortedData);
     setPendingCustomers(convertedCustomers);
   }
 
   const getApprovedCustomers = async () => {
-    console.log(canister)
     const res = await canister.getApprovedKYC()
     const sortedData = res.sort(
-      (a, b) => Number(b.dateCreated) - Number(a.dateCreated)
+      (a, b) => Number(b.created) - Number(a.created)
     );
     const convertedCustomers = convertData(sortedData);
     setApprovedCustomers(convertedCustomers);
+  }
+
+  const getAnonUsers = async () => {
+    const res = await canister.getAnonUsers()
+    const sortedData = res.sort(
+      (a, b) => Number(b.created) - Number(a.created)
+    );
+    const convertedCustomers = convertData(sortedData);
+    setAnonUsers(convertedCustomers);
   }
 
   const convertData = (data) => {
@@ -83,13 +94,13 @@ const Customers = () => {
     const modfifiedCustomers = data.map((customer) => {
 
 
-      const formattedDate = formatCustomerDate(customer.dateCreated);
-      const formattedTime = formatCustomerTime(customer.dateCreated);
+      const formattedDate = formatCustomerDate(customer.created);
+      const formattedTime = formatCustomerTime(customer.created);
 
       return {
         ...customer,
         step: Number(customer.step),
-        dateCreated: `${formattedDate} at ${formattedTime}`,
+        created: `${formattedDate} at ${formattedTime}`,
       };
     });
 
@@ -112,10 +123,15 @@ const Customers = () => {
 
       const modfifiedCustomers = data.map((customer) => ({
         ...customer,
-        userId: customer.userId.toString(),
-        zipCode: Number(customer.zipCode),
-        phoneNumber: Number(customer.phoneNumber),
-        dateCreated: formatCustomerDate(customer.dateCreated),
+        principal: customer.principal.toString(),
+        created: formatCustomerDate(customer.created),
+        body: customer.body ?
+          {
+            ...customer.body,
+            zipCode: Number(customer.zipCode),
+            phoneNumber: Number(customer.phoneNumber),
+          }
+          : undefined
       }));
       setCustomers(modfifiedCustomers);
       setIsLoading(false);
@@ -125,6 +141,8 @@ const Customers = () => {
   useEffect(() => {
     getCustomers();
     getPendingCustomers();
+    getApprovedCustomers();
+    getAnonUsers();
   }, []);
 
   useEffect(() => {
@@ -142,40 +160,42 @@ const Customers = () => {
 
   const updateCustomerStatus = async (id) => {
     if (data && customerStatus != "") {
-      setUpdating(true);
-      const customerIndex = data.findIndex((customer) => customer.id === id);
+      try {
+        setUpdating(true);
+        const customerIndex = data.findIndex((customer) => customer.id === id);
 
-      if (customerIndex !== -1) {
-        data[customerIndex].status = customerStatus;
-        let userId = data[customerIndex].userId;
-        const res = await canister.updateKYCRequest(
-          userId,
-          data[customerIndex]
-        );
-        if (customerStatus === "approved") {
-          await sendAutomaticEmailMessage(data[customerIndex].firstName, data[customerIndex].email)
-        }
-        setUpdated(true);
-        toast.success(
-          `Customer status have been updated to ${customerStatus} ${customerStatus === "approved" ? ", Approval email have been sent" : ""} `,
-          {
+        if (customerIndex !== -1) {
+          data[customerIndex].body.status = customerStatus;
+          await canister.updateKYCRequest(
+            data[customerIndex]
+          );
+          if (customerStatus === "approved") {
+            await sendAutomaticEmailMessage(data[customerIndex].body.firstName, data[customerIndex].body.email)
+          }
+          setUpdated(true);
+          toast.success(
+            `Customer status have been updated to ${customerStatus} ${customerStatus === "approved" ? ", Approval email have been sent" : ""} `,
+            {
+              autoClose: 5000,
+              position: "top-center",
+              hideProgressBar: true,
+            }
+          );
+          const customerPosition = customers.findIndex(
+            (customer) => customer.id === id
+          );
+          customers[customerPosition].body.status = customerStatus;
+          setUpdating(false);
+          setSelectedCustomerId(null);
+        } else {
+          toast.warning("Customer not found", {
             autoClose: 5000,
             position: "top-center",
             hideProgressBar: true,
-          }
-        );
-        const customerPosition = customers.findIndex(
-          (customer) => customer.id === id
-        );
-        customers[customerPosition].status = customerStatus;
-        setUpdating(false);
-        setSelectedCustomerId(null);
-      } else {
-        toast.warning("Customer not found", {
-          autoClose: 5000,
-          position: "top-center",
-          hideProgressBar: true,
-        });
+          });
+        }
+      } catch (error) {
+        console.log("Error updating the customer status", error)
       }
     }
   };
@@ -183,6 +203,26 @@ const Customers = () => {
   const renderTabContent = () => {
     switch (value) {
       case 0:
+        return (
+          <All
+            {...{
+              updated,
+              setUpdated,
+              customers,
+              updateCustomerStatus,
+              handleShowStatusForm,
+              setCustomerStatus,
+              expanded,
+              showStatus,
+              updating,
+              isLoading,
+              selectedCustomerId,
+              customerStatus,
+              handleChange,
+            }}
+          />
+        );
+      case 1:
         return (
           <Pending
             {...{
@@ -202,13 +242,34 @@ const Customers = () => {
             }}
           />
         );
-      case 1:
+      case 2:
         return (
           <Approved
             {...{
               updated,
               setUpdated,
               approvedCustomers,
+              updateCustomerStatus,
+              handleShowStatusForm,
+              setCustomerStatus,
+              expanded,
+              showStatus,
+              updating,
+              isLoading,
+              selectedCustomerId,
+              customerStatus,
+              handleChange,
+
+            }}
+          />
+        );
+      case 3:
+        return (
+          <Anon
+            {...{
+              updated,
+              setUpdated,
+              anonUsers,
               updateCustomerStatus,
               handleShowStatusForm,
               setCustomerStatus,
@@ -237,8 +298,10 @@ const Customers = () => {
 
         <Box m="2.5rem 0 0 0">
           <Tabs value={value} onChange={handleTabChange}>
+            <Tab label="All" />
             <Tab label="Pending Approval" />
             <Tab label="Approved" />
+            <Tab label="Anon" />
           </Tabs>
         </Box>
         {renderTabContent()}

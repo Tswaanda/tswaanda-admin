@@ -58,7 +58,7 @@ const Backup = () => {
 
   const handleMarketplaceUsersBackup = async () => {
     const users = await marketBlast.getAllKYC();
-  
+
     const usersWithBigIntAsString = users.map(user => ({
       ...user,
       userId: user.userId.toString(),
@@ -66,7 +66,7 @@ const Backup = () => {
       phoneNumber: user.phoneNumber.toString(),
       dateCreated: user.dateCreated.toString(),
     }));
-  
+
     const dataStr =
       "data:text/json;charset=utf-8," +
       encodeURIComponent(JSON.stringify(usersWithBigIntAsString));
@@ -78,8 +78,7 @@ const Backup = () => {
     downloadAnchorNode.remove();
   }
 
-  console.log("adminStats", adminStats)
-  console.log("marketStats", marketStats)
+  console.log(adminStats, marketStats)
 
   return (
     <div className="">
@@ -95,7 +94,7 @@ const Backup = () => {
       >
         {/* Products backup section */}
         <Box>
-          <Typography style={{fontSize: "20px", fontWeight: "bold", marginBottom: "10px" }}>Products</Typography>
+          <Typography style={{ fontSize: "20px", fontWeight: "bold", marginBottom: "10px" }}>Products</Typography>
           <Box display="flex" justifyContent="start" alignItems="center">
             <Button
               variant="contained"
@@ -127,7 +126,7 @@ const Backup = () => {
               Restore products from JSON
             </Button>
             <Typography style={{ fontSize: "18px", fontWeight: "bold", marginLeft: "50px" }}>
-              Total products: {adminStats?.totalProducts}
+              Total products: {Number(adminStats?.totalProducts)}
             </Typography>
           </Box>
         </Box>
@@ -137,7 +136,7 @@ const Backup = () => {
         {/* Market place users backup */}
 
         <Box>
-          <Typography style={{fontSize: "20px", fontWeight: "bold", marginTop: "10px" }}>Users</Typography>
+          <Typography style={{ fontSize: "20px", fontWeight: "bold", marginTop: "10px" }}>Users</Typography>
           <Box display="flex" justifyContent="start" alignItems="center">
             <Button
               variant="contained"
@@ -169,16 +168,57 @@ const Backup = () => {
               Restore users from JSON
             </Button>
             <Typography style={{ fontSize: "18px", fontWeight: "bold", marginLeft: "50px" }}>
-              Total Users: {marketStats?.totalCustomers}
+              Total Users: {Number(marketStats?.totalCustomers)}
             </Typography>
           </Box>
         </Box>
         <hr />
-        
+
+        {/* Orders */}
+
+        <Box>
+          <Typography style={{ fontSize: "20px", fontWeight: "bold", marginTop: "10px" }}>Orders</Typography>
+          <Box display="flex" justifyContent="start" alignItems="center">
+            <Button
+              variant="contained"
+              // onClick={handleMarketplaceUsersBackup}
+              sx={{
+                backgroundColor: theme.palette.secondary.light,
+                color: theme.palette.background.alt,
+                fontSize: "14px",
+                fontWeight: "bold",
+                marginRight: "10px",
+                padding: "10px 20px",
+              }}
+            >
+              <DownloadIcon sx={{ mr: "10px" }} />
+              Backup Orders to JSON
+            </Button>
+            <Button
+              variant="contained"
+              onClick={() => setRestoreUsersModal(true)}
+              sx={{
+                backgroundColor: theme.palette.secondary.light,
+                color: theme.palette.background.alt,
+                fontSize: "14px",
+                fontWeight: "bold",
+                padding: "10px 20px",
+              }}
+            >
+              < FileUploadIcon sx={{ mr: "10px" }} />
+              Restore orders from JSON
+            </Button>
+            <Typography style={{ fontSize: "18px", fontWeight: "bold", marginLeft: "50px" }}>
+              Total Orders: {Number(marketStats?.totalOrders)}
+            </Typography>
+          </Box>
+        </Box>
+        <hr />
+
       </Box>
       <>
-        {openRestoreProductsModal && <RestoreProducts {...{ openRestoreProductsModal, setRestoreProductsModal, getAdminStatistics}} />}
-        {openRestoreUsersModal && <RestoreUsersModal {...{ openRestoreUsersModal, setRestoreUsersModal, getMarketStatistics}} />}
+        {openRestoreProductsModal && <RestoreProducts {...{ openRestoreProductsModal, setRestoreProductsModal, getAdminStatistics }} />}
+        {openRestoreUsersModal && <RestoreUsersModal {...{ openRestoreUsersModal, setRestoreUsersModal, getMarketStatistics }} />}
       </>
     </div>
   )

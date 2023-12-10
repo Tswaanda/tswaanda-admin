@@ -42,11 +42,11 @@ const UpdateOrderStatusModal = ({ openStatusModal, updateOrderStatus, orderStatu
             if (farmerInfo.ok) {
                 try {
                     if (orderStatus === "approved") {
-                        // sendOrderApprovedEmail(farmerInfo.ok, modalOrder)
+                        sendOrderApprovedEmail(farmerInfo.ok, modalOrder)
                     } else if (orderStatus === "shipped") {
-                        // sendOrderShippedEmail(farmerInfo.ok, modalOrder)
+                        sendOrderShippedEmail(farmerInfo.ok, modalOrder)
                     } else if (orderStatus === "delivered") {
-                        // sendOrderDeliveredEmail(farmerInfo.ok, modalOrder)
+                        sendOrderDeliveredEmail(farmerInfo.ok, modalOrder)
                         console.log(modalOrder)
                     } else {
                         console.log("No email sent")
@@ -56,7 +56,7 @@ const UpdateOrderStatusModal = ({ openStatusModal, updateOrderStatus, orderStatu
                 }
             }
         }
-        // updateOrderStatus(modalOrder.orderId)
+        updateOrderStatus(modalOrder.orderId)
     }
 
     useEffect(() => {
