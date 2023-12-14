@@ -17,6 +17,10 @@ import Error "mo:base/Error";
 import List "mo:base/List";
 import Cycles "mo:base/ExperimentalCycles";
 
+import IcWebSocketCdk "mo:ic-websocket-cdk";
+import IcWebSocketCdkState "mo:ic-websocket-cdk/State";
+import IcWebSocketCdkTypes "mo:ic-websocket-cdk/Types";
+
 import Type "types";
 import Debug "mo:base/Debug";
 import HashMap "mo:base/HashMap";
@@ -39,6 +43,11 @@ shared ({ caller = initializer }) actor class TswaandaAdmin() = this {
     type Staff = Type.Staff;
     type Health = Type.Health;
     type Stats = Type.Stats;
+
+    type AppMessage = {
+        #Notification;
+        #Product;
+    };
 
     //Access control variables
     private stable var roles : AssocList.AssocList<Principal, Role> = List.nil();
@@ -72,6 +81,39 @@ shared ({ caller = initializer }) actor class TswaandaAdmin() = this {
         farmers := HashMap.fromIter<Text, Farmer>(farmersEntries.vals(), 0, Text.equal, Text.hash);
         productReviews := HashMap.fromIter<Text, List.List<ProductReview>>(productReviewsEntries.vals(), 0, Text.equal, Text.hash);
         staff := HashMap.fromIter<Principal, Staff>(staffEntries.vals(), 0, Principal.equal, Principal.hash);
+    };
+
+    // * -----------------------------------------WEBSOCKETS----------------------------------------------------
+
+    let params = IcWebSocketCdkTypes.WsInitParams(null, null, null);
+    let ws_state = IcWebSocketCdkState.IcWebSocketState(params);
+
+    let handlers = IcWebSocketCdkTypes.WsHandlers(
+        ?on_open,
+        ?on_message,
+        ?on_close,
+    );
+
+    let ws = IcWebSocketCdk.IcWebSocket(ws_state, params, handlers);
+
+    // method called by the WS Gateway after receiving FirstMessage from the client
+    public shared ({ caller }) func ws_open(args : IcWebSocketCdk.CanisterWsOpenArguments) : async IcWebSocketCdk.CanisterWsOpenResult {
+        await ws.ws_open(caller, args);
+    };
+
+    // method called by the Ws Gateway when closing the IcWebSocket connection
+    public shared ({ caller }) func ws_close(args : IcWebSocketCdk.CanisterWsCloseArguments) : async IcWebSocketCdk.CanisterWsCloseResult {
+        await ws.ws_close(caller, args);
+    };
+
+    // method called by the frontend SDK to send a message to the canister
+    public shared ({ caller }) func ws_message(args : IcWebSocketCdk.CanisterWsMessageArguments, msg_type : ?AppMessage) : async IcWebSocketCdk.CanisterWsMessageResult {
+        await ws.ws_message(caller, args, msg_type);
+    };
+
+    // method called by the WS Gateway to get messages for all the clients it serves
+    public shared query ({ caller }) func ws_get_messages(args : IcWebSocketCdk.CanisterWsGetMessagesArguments) : async IcWebSocketCdk.CanisterWsGetMessagesResult {
+        ws.ws_get_messages(caller, args);
     };
 
     //-----------------------------------------Access control implimentation---------------------------------------------

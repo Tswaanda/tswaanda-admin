@@ -1,3 +1,4 @@
 [dependencies]
 base = "0.8.8"
 hashmap = "https://github.com/ZhenyaUsenko/motoko-hash-map#master"
+ic-websocket-cdk = "0.3.1"

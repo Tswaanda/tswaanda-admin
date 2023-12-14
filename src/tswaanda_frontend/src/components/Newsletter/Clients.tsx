@@ -7,7 +7,7 @@ import {
 import Accordion from "@mui/material/Accordion";
 import AccordionSummary from "@mui/material/AccordionSummary";
 import { useAuth } from '../../hooks/auth'
-import Header from "../../components/Header";
+import Header from "../Header";
 
 const Clients = ({ clients }) => {
     const theme = useTheme();

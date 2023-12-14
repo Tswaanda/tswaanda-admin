@@ -8,7 +8,7 @@ import {
 import AddIcon from "@mui/icons-material/Add";
 import Header from "../../components/Header";
 
-import UpLoadProduct from "../../scenes/upload";
+import UpLoadProduct from "../upload";
 import { backendActor } from "../../config";
 import Product from "../../components/Products/Product";
 

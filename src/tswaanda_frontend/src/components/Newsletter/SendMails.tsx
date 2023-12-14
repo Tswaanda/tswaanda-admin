@@ -9,7 +9,7 @@ import {
     InputLabel,
     Button,
 } from "@mui/material";
-import Header from "../../components/Header";
+import Header from "../Header";
 import { useAuth } from '../../hooks/auth';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
