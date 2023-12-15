@@ -340,6 +340,7 @@ const Dashboard = () => {
           value={Number(marketStats?.totalCustomers)}
           increase={currentMonthRate}
           description="Since last month"
+          icon={null}
         />
         <StatBox
           title="Total Orders"

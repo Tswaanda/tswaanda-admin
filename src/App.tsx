@@ -26,7 +26,7 @@ import Login from "./scenes/login";
 import Wallet from "./scenes/wallet/index";
 import Orders from "./scenes/orders/index";
 import { initActors } from "./storage-config/functions";
-import { useSelector, useDispatch } from 'react-redux'
+import { useSelector, useDispatch } from "react-redux";
 import { setInit } from "./state/globalSlice";
 import Farmers from "./scenes/farmers/index";
 import Storage from "./scenes/storage/index";
@@ -36,28 +36,27 @@ import Support from "./scenes/support/index";
 import { useAuth } from "./hooks/auth";
 import Unauthorized from "./components/Unauthorized";
 import Newsletter from "./scenes/newsletters";
-
-
-const network = process.env.DFX_NETWORK
+import NotificationsPage from "./scenes/notifications";
 
 function App() {
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
 
-  const { isAuthenticated, identity, checkAuth, backendActor } = useAuth()
-  const [authorized, setAuthorized] = useState(null);
-  const [user, setUser] = useState(null)
+  const { isAuthenticated, identity, checkAuth, backendActor } = useAuth();
+  const [authorized, setAuthorized] = useState<boolean | null>(null);
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
-    if (identity) (async () => {
-      const user = await backendActor.getStaffMember(identity.getPrincipal())
-      if (user.ok) {
-        setUser(user)
-      }
-    })()
-  }, [identity])
+    if (identity)
+      (async () => {
+        const user = await backendActor.getStaffMember(identity.getPrincipal());
+        if (user.ok) {
+          setUser(user);
+        }
+      })();
+  }, [identity]);
 
   const getRole = async () => {
-    console.log("Your principal id:", identity.getPrincipal().toString())
+    console.log("Your principal id:", identity.getPrincipal().toString());
     try {
       const role = await backendActor.my_role();
       if (role === "unauthorized") {
@@ -70,12 +69,12 @@ function App() {
       setAuthorized(false);
       console.log("Error on checking authorization", error);
     }
-  }
+  };
 
   useEffect(() => {
     if (isAuthenticated) {
       getRole();
-      initializeRepositoryCanister()
+      initializeRepositoryCanister();
     }
   }, [isAuthenticated]);
 
@@ -88,8 +87,8 @@ function App() {
 
   useEffect(() => {
     init();
-    checkAuth()
-  }, [])
+    checkAuth();
+  }, []);
   const ProtectedRoutes = () => {
     if (isAuthenticated && authorized) {
       return <Outlet />;
@@ -101,7 +100,6 @@ function App() {
       return <h3>Checking authorization</h3>;
     }
   };
-
 
   const mode = useSelector((state) => state.global.mode);
   const theme = useMemo(() => createTheme(themeSettings(mode)), [mode]);
@@ -136,6 +134,7 @@ function App() {
                 <Route path="/newsletters" element={<Newsletter />} />
                 <Route path="/support" element={<Support />} />
                 <Route path="/performance" element={<Performance />} />
+                <Route path="/notifications" element={<NotificationsPage />} />
                 <Route path="/storage" element={<Storage />} />
               </Route>
             </Route>

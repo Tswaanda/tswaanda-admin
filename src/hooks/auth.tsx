@@ -84,12 +84,11 @@ export const ContextProvider = ({ children }) => {
     setPrincipleId(localStorage.getItem("principleId") || "");
   }, []);
 
-  const setContextPrincipleID = (_value) => {
-    localStorage.setItem("principleId", _value);
+  const setContextPrincipleID = (_value: any) => {
     setPrincipleId(_value);
   };
 
-  const setContextIdentity = (_value) => {
+  const setContextIdentity = (_value: any) => {
     setIdentity(_value);
   };
 
@@ -111,6 +110,7 @@ export const ContextProvider = ({ children }) => {
   const checkAuth = async () => {
     if (await authClient.isAuthenticated()) {
       setIsAuthenticated(true)
+      console.log("Authenticated")
       const identity = authClient.getIdentity()
       setContextIdentity(identity)
       setContextPrincipleID(identity.getPrincipal().toText())
