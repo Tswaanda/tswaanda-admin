@@ -1,13 +1,12 @@
 import React, { useContext, useState, useEffect, createContext } from "react";
 import { Actor, HttpAgent } from "@dfinity/agent"
-import { idlFactory as marketIdlFactory } from "../../../declarations/marketplace_backend";
+import { idlFactory as marketIdlFactory } from "../declarations/marketplace_backend";
 import { AuthClient } from "@dfinity/auth-client";
-import { canisterId as identityCanId } from "../../../declarations/internet_identity/index";
-import { canisterId, idlFactory } from "../../../declarations/tswaanda_backend/index";
-import icblast from "@infu/icblast";
+import { canisterId as identityCanId } from "../declarations/internet_identity/index";
+import { canisterId, idlFactory } from "../declarations/tswaanda_backend/index";
 
 const marketCanisterId = "55ger-liaaa-aaaal-qb33q-cai";
-const localMarketCanId = "asrmz-lmaaa-aaaaa-qaaeq-cai";
+const localMarketCanId = "by6od-j4aaa-aaaaa-qaadq-cai";
 
 const network = process.env.DFX_NETWORK || "local";
 
@@ -18,19 +17,57 @@ const authClient = await AuthClient.create({
   },
 })
 
+type Context = {
+  accessLevel: string,
+  setAccessLevel (args: string): void,
+  principleId : string,
+  marketActor : any,
+  storageInitiated : boolean,
+  setStorageInitiated (args: boolean): void,
+  setContextPrincipleID (arg: string): void,
+  identity : any,
+  setContextIdentity (arg: any): void,
+  backendActor : any,
+  isAuthenticated : boolean,
+  login (): void,
+  logout (): void,
+  checkAuth (): void,
+};
 
-// ICBLAST
-const identity = await authClient.getIdentity()
-let ic = icblast({
-  local: network === "local" ? true : false
-  , identity: identity
-});
-export const adminBlast = await ic(canisterId);
-export const marketBlast = await ic(network === "local" ? localMarketCanId : marketCanisterId);
+const initialContext: Context = {
+  accessLevel: "",
+  setAccessLevel: (string): void => {
+    throw new Error("setContext function must be overridden");
+  },
+  principleId: "",
+  marketActor: null,
+  storageInitiated: false,
+  setStorageInitiated: (boolean): void => {
+    throw new Error("setContext function must be overridden");
+  },
+  setContextPrincipleID: (string): void => {
+    throw new Error("setContext function must be overridden");
+  },
+  identity: null,
+  setContextIdentity: (any): void => {
+    throw new Error("setContext function must be overridden");
+  },
+  backendActor: null,
+  isAuthenticated: false,
+  login: (): void => {
+    throw new Error("login function must be overridden");
+  },
+  logout: (): void => {
+    throw new Error("logout function must be overridden");
+  },
+  checkAuth: (): void => {
+    throw new Error("checkAuth function must be overridden");
+  }
+};
 
 
 // Context
-const ContextWrapper = createContext();
+const ContextWrapper =  createContext<Context>(initialContext);
 
 export const useAuth = () => {
   return useContext(ContextWrapper);

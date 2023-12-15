@@ -7,13 +7,13 @@ import {
   Typography,
   useTheme,
 } from "@mui/material";
-import { adminBlast, marketBlast, useAuth } from "../../hooks/auth";
+import { useAuth } from "../../hooks/auth";
 import RestoreProducts from "../../scenes/products/RestoreProducts";
 import RestoreUsersModal from "../../scenes/products/RestoreUsersModal";
 import { Principal } from "@dfinity/principal";
 
 const Backup = () => {
-  const { backendActor } = useAuth();
+  const { backendActor, marketActor } = useAuth();
   const [adminStats, setAdminStats] = useState(null)
   const [marketStats, setMarketStats] = useState(null)
 
@@ -28,12 +28,12 @@ const Backup = () => {
   }, []);
 
   const getAdminStatistics = async () => {
-    const stats = await adminBlast.getAdminStats()
+    const stats = await backendActor.getAdminStats()
     setAdminStats(stats)
   }
 
   const getMarketStatistics = async () => {
-    const stats = await marketBlast.getMarketPlaceStats()
+    const stats = await marketActor.getMarketPlaceStats()
     setMarketStats(stats)
   }
 
@@ -57,7 +57,7 @@ const Backup = () => {
   }
 
   const handleMarketplaceUsersBackup = async () => {
-    const users = await marketBlast.getAllKYC();
+    const users = await marketActor.getAllKYC();
 
     const usersWithBigIntAsString = users.map(user => ({
       ...user,

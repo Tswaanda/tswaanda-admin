@@ -2,10 +2,10 @@ import { Ed25519KeyIdentity } from "@dfinity/identity";
 import { getActor } from "./actor";
 import { updateChecksum } from "./utils";
 
-import { idlFactory as fileStorageIdlFactory } from "../../../declarations/file_storage/index";
-import { idlFactory as fileScalingManagerIdlFactory } from "../../../declarations/file_scaling_manager/index";
-import { canisterId as scalingCanId } from "../../../declarations/file_scaling_manager/index";
-import { canisterId as storageCanId } from "../../../declarations/file_storage/index";
+import { idlFactory as fileStorageIdlFactory } from "../declarations/file_storage/index";
+import { idlFactory as fileScalingManagerIdlFactory } from "../declarations/file_scaling_manager/index";
+import { canisterId as scalingCanId } from "../declarations/file_scaling_manager/index";
+import { canisterId as storageCanId } from "../declarations/file_storage/index";
 
 const network = process.env.DFX_NETWORK || "local";
 

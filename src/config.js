@@ -2,13 +2,23 @@ import { Actor, HttpAgent } from "@dfinity/agent";
 import {
   canisterId,
   idlFactory,
-} from "../../declarations/tswaanda_backend/index";
+} from "./declarations/tswaanda_backend";
 import icblast from "@infu/icblast";
-import { idlFactory as marketIdlFactory } from "../../declarations/marketplace_backend";
+import { idlFactory as marketIdlFactory } from "./declarations/marketplace_backend";
+import { AuthClient } from "@dfinity/auth-client";
 
-const network = process.env.DFX_NETWORK
+const authClient = await AuthClient.create();
 
-let ic = icblast({ local: false });
+const network = process.env.DFX_NETWORK || "local";
+
+
+const marketCanisterId = "55ger-liaaa-aaaal-qb33q-cai";
+
+const identity = authClient.getIdentity()
+let ic = icblast({
+  local: network === "local" ? true : false
+  , identity: identity
+});
 
 export const canister = await ic("55ger-liaaa-aaaal-qb33q-cai");
 
@@ -19,8 +29,6 @@ localagent.fetchRootKey();
 
 const host = "https://icp0.io";
 const agent = new HttpAgent({ host: host });
-
-const marketCanisterId = "55ger-liaaa-aaaal-qb33q-cai";
 
 export const backendActor = Actor.createActor(idlFactory, {
   agent: network === "local" ? localagent : agent,

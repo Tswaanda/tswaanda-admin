@@ -85,6 +85,18 @@ shared ({ caller = initializer }) actor class TswaandaAdmin() = this {
 
     // * -----------------------------------------WEBSOCKETS----------------------------------------------------
 
+    func on_open(args : IcWebSocketCdk.OnOpenCallbackArgs) : async () {
+        Debug.print("on_open");
+    };
+
+    func on_message(args : IcWebSocketCdk.OnMessageCallbackArgs) : async () {
+        Debug.print("on_message");
+    };
+
+    func on_close(args : IcWebSocketCdk.OnCloseCallbackArgs) : async () {
+        Debug.print("Client " # debug_show (args.client_principal) # " disconnected");
+    };
+
     let params = IcWebSocketCdkTypes.WsInitParams(null, null, null);
     let ws_state = IcWebSocketCdkState.IcWebSocketState(params);
 

@@ -22,9 +22,9 @@ import {
 import BreakdownChart from "../../components/BreakdownChart";
 import StatBox from "../../components/StatBox";
 import { useNavigate } from "react-router-dom";
-import { adminBlast, marketBlast, useAuth } from "../../hooks/auth";
 import NewOrders from "../../components/Dashboard/NewOrders";
 import { Link } from "react-router-dom";
+import { useAuth } from "../../hooks/auth";
 
 const Dashboard = () => {
   const [products, setProducts] = useState([]);
@@ -59,7 +59,7 @@ const Dashboard = () => {
 
 
   const theme = useTheme();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, backendActor, marketActor } = useAuth();
   const navigate = useNavigate();
 
   const isNonMediumScreens = useMediaQuery("(min-width: 1200px");
@@ -74,17 +74,17 @@ const Dashboard = () => {
   }, []);
 
   const getAdminStatistics = async () => {
-    const stats = await adminBlast.getAdminStats()
+    const stats = await backendActor.getAdminStats()
     setAdminStats(stats)
   }
 
   const getMarketStatistics = async () => {
-    const stats = await marketBlast.getMarketPlaceStats()
+    const stats = await marketActor.getMarketPlaceStats()
     setMarketStats(stats)
   }
 
   const getCustomers = async () => {
-    const customers = await marketBlast.getAllKYC()
+    const customers = await marketActor.getAllKYC()
 
     const newCustomers = customers.filter(customer => customer.status === "pending")
     setNewKYC(newCustomers)
@@ -92,7 +92,7 @@ const Dashboard = () => {
   }
 
   const getOrders = async () => {
-    const orders = await marketBlast.getAllOrders()
+    const orders = await marketActor.getAllOrders()
     const newOrders = orders.filter(order => order.status === "pending")
     const convertedOrders = convertData(newOrders);
     convertedOrders.splice(7, convertedOrders.length - 1)
@@ -102,14 +102,14 @@ const Dashboard = () => {
   }
 
   const getSize = async () => {
-    const orderSize = await marketBlast.getPendingOrdersSize();
-    const kycSize = await marketBlast.getPendingKYCReaquestSize();
+    const orderSize = await marketActor.getPendingOrdersSize();
+    const kycSize = await marketActor.getPendingKYCReaquestSize();
     setNewOrdersNum(Number(orderSize));
     setNewKYCNum(Number(kycSize));
   };
 
   const getProducts = async () => {
-    const products = await adminBlast.getAllProducts()
+    const products = await backendActor.getAllProducts()
     products.splice(3, products.length - 1)
     setProducts(products)
   }
