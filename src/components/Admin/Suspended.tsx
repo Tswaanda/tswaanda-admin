@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { FC, useEffect, useState } from 'react'
 import {
     Box,
     Container,
@@ -17,9 +17,15 @@ import UpdateAccessLevel from './UpdateAccessLevel';
 import { useAuth } from '../../hooks/auth';
 import { toast } from 'react-toastify';
 import { formatDate } from '../../scenes/constants/index';
+import { Staff } from '../../declarations/tswaanda_backend/tswaanda_backend.did';
 
-const Suspended = ({ expanded, handleChange }) => {
-    const [suspendedStaff, setSuspendedStaff] = useState([])
+type SuspendedProps = {
+    expanded: string | false;
+    handleChange: (panel: string) => (event: React.SyntheticEvent, isExpanded: boolean) => void;
+}
+
+const Suspended: FC<SuspendedProps> = ({ expanded, handleChange }) => {
+    const [suspendedStaff, setSuspendedStaff] = useState<Staff[]>([])
     const { backendActor } = useAuth()
     const [updating, setUpdating] = useState(false)
 
@@ -39,7 +45,7 @@ const Suspended = ({ expanded, handleChange }) => {
     const getSuspendedStaff = async () => {
         try {
             let suspended = await backendActor.getSuspendedStaff()
-            suspended = suspended.map((member) => {
+            suspended = suspended.map((member: any) => {
                 return {
                   ...member,
                   created: formatDate(member.created)
@@ -51,21 +57,21 @@ const Suspended = ({ expanded, handleChange }) => {
         }
     }
 
-    const handleShowStatusForm = (member) => {
+    const handleShowStatusForm = (member: any) => {
         setMember(member);
         setAccessModal(true)
         setShowAccessForm(!showAccessForm);
         setShowContactForm(false);
     }
 
-    const showContactForm = (member) => {
+    const showContactForm = (member: any) => {
         setMember(member);
         setShowContactForm(!showContact);
         setContactModal(true)
         setShowAccessForm(false);
     }
 
-    const handleUnsuspend = async (memberToupdate) => {
+    const handleUnsuspend = async (memberToupdate: any) => {
         try {
             setUpdating(true)
             let updatedStaff = {
@@ -96,12 +102,12 @@ const Suspended = ({ expanded, handleChange }) => {
         <Box m="1rem 0 0 0">
 
             {suspendedStaff.length > 0 ? <>
-                {suspendedStaff?.map((staff) => (
+                {suspendedStaff?.map((staff, index) => (
                     <Accordion
-                        key={staff.id}
-                        expanded={expanded === staff.id}
-                        onChange={handleChange(staff.id)}
-                        sx={{ backgroundColor: theme.palette.background.alt }}
+                        key={index}
+                        expanded={expanded === staff.email}
+                        onChange={handleChange(staff.email)}
+                        sx={{ backgroundColor: theme.palette.background.default }}
                     >
                         <AccordionSummary
                             expandIcon={<ExpandMoreIcon />}
@@ -121,14 +127,14 @@ const Suspended = ({ expanded, handleChange }) => {
 
                             <Typography sx={{ color: "text.secondary", width: "25%" }}>
                                 <span style={{ fontWeight: "bold" }}>Created at</span>:{" "}
-                                {staff.created}
+                                {Number(staff.created)}
                             </Typography>
                         </AccordionSummary>
                         <AccordionDetails>
                             <Box
                                 sx={{
                                     backgroundImage: "none",
-                                    backgroundColor: theme.palette.background.alt,
+                                    backgroundColor: theme.palette.background.default,
                                     borderRadius: "0.55rem",
                                 }}
                             >
@@ -141,7 +147,7 @@ const Suspended = ({ expanded, handleChange }) => {
                                     >
                                         <Grid
                                             style={{ display: "flex", alignItems: "center" }}
-                                            staff
+                                    
                                             xs={6}
                                         >
                                             <Typography

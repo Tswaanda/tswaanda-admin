@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { FC, useState } from 'react'
 import {
     Box,
     Select,
@@ -21,7 +21,18 @@ import IdentficationDoc from './IdentficationDoc';
 import ProofOfAddress from './ProofOfAddress';
 import UpdateCustomerStatusForm from './UpdateCustomerStatusForm';
 
-const Pending = ({
+type PendingProps = {
+    pendingCustomers: any;
+    updateCustomerStatus: any;
+    setCustomerStatus: any;
+    expanded: string | false;
+    updating: boolean;
+    handleChange: (panel: string) => (event: React.SyntheticEvent, isExpanded: boolean) => void;
+    setUpdated: (updated: boolean) => void;
+    updated: boolean;
+}
+
+const Pending : FC<PendingProps> = ({
     pendingCustomers,
     updateCustomerStatus,
     setCustomerStatus,
@@ -45,7 +56,7 @@ const Pending = ({
 
     const [customer, setCustomer] = useState({});
 
-    const showContactForm = (customer) => {
+    const showContactForm = (customer: any) => {
         setCustomer(customer);
         setShowContactForm(!showContact);
         setContactModal(true)
@@ -54,7 +65,7 @@ const Pending = ({
         setShowProofOfAddress(false);
     }
 
-    const showIdentificationDoc = (customer) => {
+    const showIdentificationDoc = (customer: any) => {
         setCustomer(customer);
         setShowIdentification(!showIdentification);
         setIDModal(!openIDModal)
@@ -63,7 +74,7 @@ const Pending = ({
         setShowProofOfAddress(false);
     }
 
-    const showProofOfAddressDoc = (customer) => {
+    const showProofOfAddressDoc = (customer: any) => {
         setCustomer(customer);
         setShowProofOfAddress(!showProofOfAddress);
         setPOAModal(!openPOAModal)
@@ -72,7 +83,7 @@ const Pending = ({
         setShowIdentification(false);
     }
 
-    const handleShowStatusForm = (customer) => {
+    const handleShowStatusForm = (customer: any) => {
         setCustomer(customer);
         setStatusModal(true)
         setShowStatusForm(!showStatusForm);
@@ -83,12 +94,12 @@ const Pending = ({
 
     return (
         <Box m="1rem 0 0 0">
-            {pendingCustomers?.map((customer) => (
+            {pendingCustomers?.map((customer : any) => (
                 <Accordion
                     key={customer.id}
                     expanded={expanded === customer.id}
                     onChange={handleChange(customer.id)}
-                    sx={{ backgroundColor: theme.palette.background.alt }}
+                    sx={{ backgroundColor: theme.palette.background.default }}
                 >
                     <AccordionSummary
                         expandIcon={<ExpandMoreIcon />}
@@ -118,7 +129,7 @@ const Pending = ({
                         <Box
                             sx={{
                                 backgroundImage: "none",
-                                backgroundColor: theme.palette.background.alt,
+                                backgroundColor: theme.palette.background.default,
                                 borderRadius: "0.55rem",
                             }}
                         >
@@ -131,7 +142,7 @@ const Pending = ({
                                 >
                                     <Grid
                                         style={{ display: "flex", alignItems: "center" }}
-                                        customer
+                                       
                                         xs={6}
                                     >
                                         <Typography
@@ -146,7 +157,7 @@ const Pending = ({
                                             {customer.body ? customer.body.lastName : "Anon"}
                                         </Typography>
                                     </Grid>
-                                    <Grid customer xs={6}>
+                                    <Grid xs={6}>
                                         <Box
                                             component="img"
                                             alt="profile"

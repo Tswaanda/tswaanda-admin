@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { FC, useState } from 'react'
 import {
     Box,
     Container,
@@ -16,7 +16,20 @@ import ContactFarmer from './ContactFarmer';
 import UpdateFarmer from '../../scenes/updateFarmer/index';
 import UpdateFarmerStatus from './UpdateFarmerStatus';
 
-const ApprovedFarmers = ({
+type ApprovedFarmersProps = {
+    approvedFarmers: any[],
+    updateFarmerStatus: any,
+    setFarmerStatus: any,
+    expanded: any,
+    showStatus: any,
+    updating: any,
+    selectedFarmerId: any,
+    handleChange: any,
+    updated: any,
+    setUpdated: any
+}
+
+const ApprovedFarmers: FC<ApprovedFarmersProps> = ({
     approvedFarmers,
     updateFarmerStatus,
     setFarmerStatus,
@@ -43,7 +56,7 @@ const ApprovedFarmers = ({
         setIsOpen(false);
     };
 
-    const showContactForm = (farmer) => {
+    const showContactForm = (farmer: any) => {
         setFarmer(farmer);
         setShowContactForm(!showContact);
         setContactModal(true);
@@ -51,7 +64,7 @@ const ApprovedFarmers = ({
         setIsOpen(false);
     }
 
-    const handleShowStatusForm = (farmer) => {
+    const handleShowStatusForm = (farmer: any) => {
         setFarmer(farmer);
         setShowStatusForm(!showStatusForm);
         setStatusModal(true);
@@ -59,7 +72,7 @@ const ApprovedFarmers = ({
         setIsOpen(false);
     }
 
-    const showUpdateForm = (farmer) => {
+    const showUpdateForm = (farmer: any) => {
         setFarmer(farmer);
         setIsOpen(!isOpen);
         setShowStatusForm(false);
@@ -74,7 +87,7 @@ const ApprovedFarmers = ({
                         key={farmer.id}
                         expanded={expanded === farmer.id}
                         onChange={handleChange(farmer.id)}
-                        sx={{ backgroundColor: theme.palette.background.alt }}
+                        sx={{ backgroundColor: theme.palette.background.default}}
                     >
                         <AccordionSummary
                             expandIcon={<ExpandMoreIcon />}
@@ -104,7 +117,7 @@ const ApprovedFarmers = ({
                             <Box
                                 sx={{
                                     backgroundImage: "none",
-                                    backgroundColor: theme.palette.background.alt,
+                                    backgroundColor: theme.palette.background.default,
                                     borderRadius: "0.55rem",
                                 }}
                             >
@@ -117,7 +130,6 @@ const ApprovedFarmers = ({
                                     >
                                         <Grid
                                             style={{ display: "flex", alignItems: "center" }}
-                                            farmer
                                             xs={6}
                                         >
                                             <Typography

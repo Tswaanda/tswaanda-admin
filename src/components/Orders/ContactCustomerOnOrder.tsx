@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import { styled } from '@mui/material/styles';
 import {
     Dialog,
@@ -24,7 +24,14 @@ const BootstrapDialog = styled(Dialog)(({ theme }) => ({
     },
 }));
 
-const ContactCustomerOnOrder = ({ openContactModal, setContactModal, theme, modalOrder }) => {
+type ContactCustomerOnOrderProps = {
+    openContactModal: any,
+    setContactModal: any,
+    theme: any,
+    modalOrder: any
+}
+
+const ContactCustomerOnOrder: FC<ContactCustomerOnOrderProps> = ({ openContactModal, setContactModal, theme, modalOrder }) => {
 
     const handleContactModalClose = () => {
         setContactModal(false);

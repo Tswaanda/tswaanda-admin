@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import { styled } from '@mui/material/styles';
 import {
     Dialog,
@@ -24,13 +24,21 @@ const BootstrapDialog = styled(Dialog)(({ theme }) => ({
     },
 }));
 
+type ContactCustomerFormProps = {
+    customer: any;
+    setShowContactForm: (show: boolean) => void;
+    theme: any;
+    openContactModal: boolean;
+    setContactModal: (show: boolean) => void;
+}
 
-const ContactCustomerForm = ({ customer, setShowContactForm, theme, openContactModal, setContactModal }) => {
+
+const ContactCustomerForm: FC<ContactCustomerFormProps> = ({ customer, setShowContactForm, theme, openContactModal, setContactModal }) => {
 
     const [sending, setSending] = useState(false)
     const [message, setMessage] = useState("")
 
-    const handleEmailSend = async (e) => {
+    const handleEmailSend = async (e: any) => {
         e.preventDefault()
         setSending(true)
         try {

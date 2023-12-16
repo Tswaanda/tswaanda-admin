@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import { styled } from '@mui/material/styles';
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
@@ -10,6 +10,7 @@ import { Viewer, Worker } from '@react-pdf-viewer/core';
 import { defaultLayoutPlugin } from '@react-pdf-viewer/default-layout';
 import '@react-pdf-viewer/core/lib/styles/index.css';
 import '@react-pdf-viewer/default-layout/lib/styles/index.css';
+// @ts-ignore
 import { getAsset } from '../../storage-config/functions';
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
@@ -21,7 +22,14 @@ const BootstrapDialog = styled(Dialog)(({ theme }) => ({
     },
 }));
 
-const ProofOfAddress = ({ setPOAModal, openPOAModal, showProofOfAddressDoc, customer }) => {
+type ProofOfAddressProps = {
+    setPOAModal: (show: boolean) => void;
+    openPOAModal: boolean;
+    showProofOfAddressDoc: () => void;
+    customer: any;
+}
+
+const ProofOfAddress: FC<ProofOfAddressProps> = ({ setPOAModal, openPOAModal, showProofOfAddressDoc, customer }) => {
     const [isPdf, setIsPdf] = useState(false)
 
     const theme = useTheme();
@@ -55,7 +63,7 @@ const ProofOfAddress = ({ setPOAModal, openPOAModal, showProofOfAddressDoc, cust
                 aria-labelledby="customized-dialog-title"
                 open={openPOAModal}
             >
-                <DialogTitle sx={{ m: 0, p: 2, backgroundColor: theme.palette.background.alt }} id="customized-dialog-title">
+                <DialogTitle sx={{ m: 0, p: 2, backgroundColor: theme.palette.background.default }} id="customized-dialog-title">
                     Proof of Address Document
                 </DialogTitle>
 
@@ -70,12 +78,12 @@ const ProofOfAddress = ({ setPOAModal, openPOAModal, showProofOfAddressDoc, cust
                         right: 8,
                         top: 8,
                         color: "white",
-                        backgroundColor: theme.palette.background.alt
+                        backgroundColor: theme.palette.background.default
                     }}
                 >
                     <CloseIcon />
                 </IconButton>
-                <DialogContent dividers sx={{ backgroundColor: theme.palette.background.alt, }}>
+                <DialogContent dividers sx={{ backgroundColor: theme.palette.background.default, }}>
                     <div className="" style={{ width: "900px", height: "900px", overflow: "auto", display: "flex", justifyContent: "center", alignItems: "center" }}>
                         {isPdf ? <Worker workerUrl="https://unpkg.com/pdfjs-dist@3.4.120/build/pdf.worker.min.js">
                             {customer

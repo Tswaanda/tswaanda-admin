@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { FC, useEffect, useState } from 'react'
 import {
   Box,
   Container,
@@ -16,9 +16,15 @@ import ContactStaff from './ContactStaff';
 import UpdateAccessLevel from './UpdateAccessLevel';
 import { useAuth } from '../../hooks/auth';
 import { formatDate } from '../../scenes/constants/index';
+import { Staff } from '../../declarations/tswaanda_backend/tswaanda_backend.did';
 
-const AccessRequest = ({ expanded, handleChange }) => {
-  const [accessRequest, setAccessRequest] = useState([])
+type AccessRequestProps = {
+  expanded: string | false;
+  handleChange: (panel: string) => (event: React.SyntheticEvent, isExpanded: boolean) => void;
+}
+
+const AccessRequest: FC<AccessRequestProps> = ({ expanded, handleChange }) => {
+  const [accessRequest, setAccessRequest] = useState<Staff[] >([])
   const { backendActor } = useAuth()
 
   const theme = useTheme();
@@ -37,7 +43,7 @@ const AccessRequest = ({ expanded, handleChange }) => {
   const getAccessRequest = async () => {
     try {
       const _accessRequest = await backendActor.getUnapprovedStaff()
-      let accessReq = _accessRequest.map((member) => {
+      let accessReq = _accessRequest.map((member: any) => {
         return {
           ...member,
           created: formatDate(member.created)
@@ -49,28 +55,29 @@ const AccessRequest = ({ expanded, handleChange }) => {
     }
   }
 
-  const handleShowStatusForm = (member) => {
+  const handleShowStatusForm = (member: any) => {
     setMember(member);
     setAccessModal(true)
     setShowAccessForm(!showAccessForm);
     setShowContactForm(false);
   }
 
-  const showContactForm = (member) => {
+  const showContactForm = (member: any) => {
     setMember(member);
     setShowContactForm(!showContact);
     setContactModal(true)
     setShowAccessForm(false);
   }
+
   return (
     <Box m="1rem 0 0 0">
       {accessRequest.length > 0 ? <>
-        {accessRequest?.map((staff) => (
+        {accessRequest?.map((staff, index) => (
           <Accordion
-            key={staff.id}
-            expanded={expanded === staff.id}
-            onChange={handleChange(staff.id)}
-            sx={{ backgroundColor: theme.palette.background.alt }}
+            key={index}
+            expanded={expanded === staff.email}
+            onChange={handleChange(staff.email)}
+            sx={{ backgroundColor: theme.palette.background.default }}
           >
             <AccordionSummary
               expandIcon={<ExpandMoreIcon />}
@@ -90,14 +97,14 @@ const AccessRequest = ({ expanded, handleChange }) => {
 
               <Typography sx={{ color: "text.secondary", width: "25%" }}>
                 <span style={{ fontWeight: "bold" }}>Created at</span>:{" "}
-                {staff.created}
+                {Number(staff.created)}
               </Typography>
             </AccordionSummary>
             <AccordionDetails>
               <Box
                 sx={{
                   backgroundImage: "none",
-                  backgroundColor: theme.palette.background.alt,
+                  backgroundColor: theme.palette.background.default,
                   borderRadius: "0.55rem",
                 }}
               >
@@ -110,7 +117,6 @@ const AccessRequest = ({ expanded, handleChange }) => {
                   >
                     <Grid
                       style={{ display: "flex", alignItems: "center" }}
-                      staff
                       xs={6}
                     >
                       <Typography

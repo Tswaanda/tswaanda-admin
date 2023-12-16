@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import { styled } from '@mui/material/styles';
 import {
   Select,
@@ -15,6 +15,7 @@ import {
 import CloseIcon from '@mui/icons-material/Close';
 import AccordionDetails from "@mui/material/AccordionDetails";
 import { useAuth } from '../../hooks/auth';
+import { type } from 'os';
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   '& .MuiDialogContent-root': {
@@ -25,7 +26,15 @@ const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   },
 }));
 
-const UpdateAccessLevel = ({
+type UpdateAccessLevelProps = {
+  member: any;
+  setShowAccessForm: (show: boolean) => void;
+  theme: any;
+  openAccessModal: boolean;
+  setAccessModal: (show: boolean) => void;
+}
+
+const UpdateAccessLevel : FC<UpdateAccessLevelProps> = ({
   openAccessModal, setAccessModal, setShowAccessForm, theme, member
 }) => {
 
@@ -75,7 +84,6 @@ const UpdateAccessLevel = ({
 
   useEffect(() => {
     if (updated) {
-      setStatusModal(false)
       setUpdated(false)
     }
   }, [updated])
@@ -112,6 +120,7 @@ const UpdateAccessLevel = ({
                   </InputLabel>
                   <Select
                     labelId="status-label"
+                    value={accessLevel}
                     onChange={(e) => setAccessLevel(e.target.value)}
                   >
                     <MenuItem value="admin">Admin</MenuItem>

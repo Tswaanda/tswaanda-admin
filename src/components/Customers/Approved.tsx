@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { FC, useState } from 'react'
 import {
     Box,
     Container,
@@ -17,7 +17,18 @@ import IdentficationDoc from './IdentficationDoc';
 import ProofOfAddress from './ProofOfAddress';
 import UpdateCustomerStatusForm from './UpdateCustomerStatusForm';
 
-const Approved = ({
+type ApprovedProps = {
+    approvedCustomers: any[];
+    updateCustomerStatus: (customer: any, status: string) => void;
+    setCustomerStatus: (status: string) => void;
+    expanded: string | false;
+    updating: boolean;
+    handleChange: (panel: string) => (event: React.SyntheticEvent, isExpanded: boolean) => void;
+    setUpdated: (updated: boolean) => void;
+    updated: boolean;
+}
+
+const Approved : FC<ApprovedProps> = ({
     approvedCustomers,
     updateCustomerStatus,
     setCustomerStatus,
@@ -41,7 +52,7 @@ const Approved = ({
 
     const [customer, setCustomer] = useState({});
 
-    const showContactForm = (customer) => {
+    const showContactForm = (customer: any) => {
         setCustomer(customer);
         setShowContactForm(!showContact);
         setContactModal(true)
@@ -50,7 +61,7 @@ const Approved = ({
         setShowProofOfAddress(false);
     }
 
-    const showIdentificationDoc = (customer) => {
+    const showIdentificationDoc = (customer: any) => {
         setCustomer(customer);
         setShowIdentification(!showIdentification);
         setIDModal(!openIDModal)
@@ -59,7 +70,7 @@ const Approved = ({
         setShowProofOfAddress(false);
     }
 
-    const showProofOfAddressDoc = (customer) => {
+    const showProofOfAddressDoc = (customer: any) => {
         setCustomer(customer);
         setShowProofOfAddress(!showProofOfAddress);
         setPOAModal(!openPOAModal)
@@ -68,7 +79,7 @@ const Approved = ({
         setShowIdentification(false);
     }
 
-    const handleShowStatusForm = (customer) => {
+    const handleShowStatusForm = (customer : any) => {
         setCustomer(customer);
         setStatusModal(true)
         setShowStatusForm(!showStatusForm);
@@ -84,7 +95,7 @@ const Approved = ({
                  key={customer.id}
                  expanded={expanded === customer.id}
                  onChange={handleChange(customer.id)}
-                 sx={{ backgroundColor: theme.palette.background.alt }}
+                 sx={{ backgroundColor: theme.palette.background.default }}
              >
                  <AccordionSummary
                      expandIcon={<ExpandMoreIcon />}
@@ -114,7 +125,7 @@ const Approved = ({
                      <Box
                          sx={{
                              backgroundImage: "none",
-                             backgroundColor: theme.palette.background.alt,
+                             backgroundColor: theme.palette.background.default,
                              borderRadius: "0.55rem",
                          }}
                      >
@@ -127,7 +138,7 @@ const Approved = ({
                              >
                                  <Grid
                                      style={{ display: "flex", alignItems: "center" }}
-                                     customer
+                                
                                      xs={6}
                                  >
                                      <Typography
@@ -142,7 +153,7 @@ const Approved = ({
                                          {customer.body ? customer.body.lastName : "Anon"}
                                      </Typography>
                                  </Grid>
-                                 <Grid customer xs={6}>
+                                 <Grid  xs={6}>
                                      <Box
                                          component="img"
                                          alt="profile"

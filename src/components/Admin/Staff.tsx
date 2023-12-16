@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { FC, useEffect, useState } from 'react'
 import {
   Box,
   Container,
@@ -17,9 +17,15 @@ import UpdateAccessLevel from './UpdateAccessLevel';
 import { useAuth } from '../../hooks/auth';
 import { toast } from 'react-toastify';
 import { formatDate } from '../../scenes/constants/index';
+import { Staff } from '../../declarations/tswaanda_backend/tswaanda_backend.did';
 
-const Staff = ({ expanded, handleChange }) => {
-  const [staff, setStaff] = useState([])
+type StaffProps = {
+  expanded: string | false;
+  handleChange: (panel: string) => (event: React.SyntheticEvent, isExpanded: boolean) => void;
+}
+
+const Staff : FC<StaffProps> = ({ expanded, handleChange }) => {
+  const [staff, setStaff] = useState<Staff[]>([])
   const [updating, setUpdating] = useState(false)
 
   const { backendActor } = useAuth()
@@ -40,8 +46,8 @@ const Staff = ({ expanded, handleChange }) => {
   const getStaff = async () => {
     try {
       const _staff = await backendActor.getApprovedStaff()
-      let unsuspended = _staff.filter((member) => member.suspended === false)
-      unsuspended = unsuspended.map((member) => {
+      let unsuspended = _staff.filter((member: any) => member.suspended === false)
+      unsuspended = unsuspended.map((member: any) => {
         return {
           ...member,
           created: formatDate(member.created)
@@ -53,14 +59,14 @@ const Staff = ({ expanded, handleChange }) => {
     }
   }
 
-  const handleShowStatusForm = (member) => {
+  const handleShowStatusForm = (member: any) => {
     setMember(member);
     setAccessModal(true)
     setShowAccessForm(!showAccessForm);
     setShowContactForm(false);
   }
 
-  const showContactForm = (member) => {
+  const showContactForm = (member: any) => {
     setMember(member);
     setShowContactForm(!showContact);
     setContactModal(true)
@@ -68,7 +74,7 @@ const Staff = ({ expanded, handleChange }) => {
   }
 
 
-  const handleSuspend = async (memberToupdate) => {
+  const handleSuspend = async (memberToupdate: any) => {
     try {
       setUpdating(true)
       let updatedStaff = {
@@ -98,12 +104,12 @@ const Staff = ({ expanded, handleChange }) => {
   return (
     <Box m="1rem 0 0 0">
       {staff.length > 0 ? <>
-        {staff?.map((staff) => (
+        {staff?.map((staff, index) => (
           <Accordion
-            key={staff.id}
-            expanded={expanded === staff.id}
-            onChange={handleChange(staff.id)}
-            sx={{ backgroundColor: theme.palette.background.alt }}
+            key={index}
+            expanded={expanded === staff.email}
+            onChange={handleChange(staff.email)}
+            sx={{ backgroundColor: theme.palette.background.default }}
           >
             <AccordionSummary
               expandIcon={<ExpandMoreIcon />}
@@ -123,14 +129,14 @@ const Staff = ({ expanded, handleChange }) => {
 
               <Typography sx={{ color: "text.secondary", width: "25%" }}>
                 <span style={{ fontWeight: "bold" }}>Created at</span>:{" "}
-                {staff.created}
+                {Number(staff.created)}
               </Typography>
             </AccordionSummary>
             <AccordionDetails>
               <Box
                 sx={{
                   backgroundImage: "none",
-                  backgroundColor: theme.palette.background.alt,
+                  backgroundColor: theme.palette.background.default,
                   borderRadius: "0.55rem",
                 }}
               >
@@ -143,7 +149,6 @@ const Staff = ({ expanded, handleChange }) => {
                   >
                     <Grid
                       style={{ display: "flex", alignItems: "center" }}
-                      staff
                       xs={6}
                     >
                       <Typography

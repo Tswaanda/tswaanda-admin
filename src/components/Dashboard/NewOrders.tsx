@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { FC, useState } from "react";
 import {
     Box,
     Typography,
@@ -11,17 +11,23 @@ import AccordionDetails from "@mui/material/AccordionDetails";
 import AccordionSummary from "@mui/material/AccordionSummary";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { Link } from "react-router-dom";
+import { type } from "os";
+import { ProductOrder } from "../../declarations/marketplace_backend/marketplace_backend.did";
 
-const NewOrders = ({
+type NewOrdersProps = {
+    orders: ProductOrder[];
+};
+
+const NewOrders: FC<NewOrdersProps> = ({
     orders,
 }) => {
 
     const theme = useTheme();
 
-    const [expanded, setExpanded] = useState(false);
+    const [expanded, setExpanded] = useState("");
 
-    const handleChange = (panel) => (event, isExpanded) => {
-        setExpanded(isExpanded ? panel : false);
+    const handleChange = (panel: any) => ( isExpanded: any) => {
+        setExpanded(isExpanded ? panel : "");
     };
 
 
@@ -32,7 +38,7 @@ const NewOrders = ({
                     key={index}
                     expanded={expanded === order.orderId}
                     onChange={handleChange(order.orderId)}
-                    sx={{ backgroundColor: theme.palette.background.alt }}
+                    sx={{ backgroundColor: theme.palette.background.default }}
                 >
                     <AccordionSummary
                         expandIcon={<ExpandMoreIcon />}
@@ -51,7 +57,7 @@ const NewOrders = ({
                         </Typography>
                         <Typography sx={{ color: "text.secondary" }}>
                             <span style={{ fontWeight: "bold" }}>Date</span>:{" "}
-                            {order.dateCreated}
+                            {Number(order.dateCreated)}
                         </Typography>
                     </AccordionSummary>
                     <AccordionDetails>

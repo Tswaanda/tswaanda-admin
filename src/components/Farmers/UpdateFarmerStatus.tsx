@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import { styled } from '@mui/material/styles';
 import {
     Select,
@@ -24,7 +24,19 @@ const BootstrapDialog = styled(Dialog)(({ theme }) => ({
     },
 }));
 
-const UpdateFarmerStatus = ({
+type UpdateFarmerStatusProps = {
+    farmer: any,
+    theme: any,
+    openStatusModal: any,
+    setStatusModal: any,
+    updateFarmerStatus: any,
+    setFarmerStatus: any,
+    updating: any,
+    updated: any,
+    setUpdated: any
+}
+
+const UpdateFarmerStatus: FC<UpdateFarmerStatusProps> = ({
     farmer,
     theme,
     openStatusModal,

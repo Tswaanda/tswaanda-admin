@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, FC } from 'react'
 import {
     Box,
     Typography,
@@ -8,13 +8,18 @@ import Accordion from "@mui/material/Accordion";
 import AccordionSummary from "@mui/material/AccordionSummary";
 import { useAuth } from '../../hooks/auth'
 import Header from "../Header";
+import { type } from 'os';
 
-const Clients = ({ clients }) => {
+type ClientsProps = {
+    clients: any
+}
+
+const Clients: FC<ClientsProps> = ({ clients }) => {
     const theme = useTheme();
 
     // Calculate the total number of clients
-    const unverified = clients?.filter(client => client.isVerified === false)
-    const verified = clients?.filter(client => client.isVerified === true)
+    const unverified = clients?.filter((client: any) => client.isVerified === false)
+    const verified = clients?.filter((client: any) => client.isVerified === true)
 
     return (
         <Box m="1rem 0 0 0">
@@ -41,10 +46,10 @@ const Clients = ({ clients }) => {
                     </Typography>
                 </Box>
             </Box>
-            {clients?.map((client) => (
+            {clients?.map((client: any) => (
                 <Accordion
                     key={client.id}
-                    sx={{ backgroundColor: theme.palette.background.alt, }}
+                    sx={{ backgroundColor: theme.palette.background.default, }}
                 >
                     <AccordionSummary
                         aria-controls="panel1bh-content"

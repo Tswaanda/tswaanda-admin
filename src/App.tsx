@@ -48,6 +48,7 @@ function App() {
   useEffect(() => {
     if (identity)
       (async () => {
+    console.log("The principal:", identity.getPrincipal().toString());
         const user = await backendActor.getStaffMember(identity.getPrincipal());
         if (user.ok) {
           setUser(user);

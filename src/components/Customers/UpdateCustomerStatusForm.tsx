@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import { styled } from '@mui/material/styles';
 import {
   Select,
@@ -24,7 +24,19 @@ const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   },
 }));
 
-const UpdateCustomerStatusForm = ({
+type UpdateCustomerStatusFormProps = {
+  customer: any;
+  openStatusModal: boolean;
+  setStatusModal: (show: boolean) => void;
+  setCustomerStatus: (status: string) => void;
+  updateCustomerStatus: (id: string) => void;
+  updating: boolean;
+  theme: any;
+  setUpdated: (updated: boolean) => void;
+  updated: boolean;
+}
+
+const UpdateCustomerStatusForm: FC<UpdateCustomerStatusFormProps> = ({
   customer,
    openStatusModal, setStatusModal, 
   setCustomerStatus,
@@ -79,6 +91,7 @@ const UpdateCustomerStatusForm = ({
                   </InputLabel>
                   <Select
                     labelId="status-label"
+                    value={customer.status}
                     onChange={(e) => setCustomerStatus(e.target.value)}
                   >
                     <MenuItem value="pending">

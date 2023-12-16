@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { FC, useState } from 'react'
 import {
   Box,
   Container,
@@ -16,8 +16,20 @@ import ContactCustomerForm from './ContactCustomerForm';
 import IdentficationDoc from './IdentficationDoc';
 import ProofOfAddress from './ProofOfAddress';
 import UpdateCustomerStatusForm from './UpdateCustomerStatusForm';
+import { type } from 'os';
 
-const Anon = ({
+type AnonProps = {
+  anonUsers: any[];
+  expanded: string | false;
+  updateCustomerStatus: any;
+  setCustomerStatus: (status: string) => void;
+  handleChange: (panel: string) => (event: React.SyntheticEvent, isExpanded: boolean) => void;
+  updating: boolean;
+  setUpdated: (updated: boolean) => void;
+  updated: boolean;
+}
+
+const Anon: FC<AnonProps> = ({
   anonUsers,
   updateCustomerStatus,
   setCustomerStatus,
@@ -41,7 +53,7 @@ const Anon = ({
 
   const [customer, setCustomer] = useState({});
 
-  const showContactForm = (customer) => {
+  const showContactForm = (customer: any) => {
     setCustomer(customer);
     setShowContactForm(!showContact);
     setContactModal(true)
@@ -50,7 +62,7 @@ const Anon = ({
     setShowProofOfAddress(false);
   }
 
-  const showIdentificationDoc = (customer) => {
+  const showIdentificationDoc = (customer: any) => {
     setCustomer(customer);
     setShowIdentification(!showIdentification);
     setIDModal(!openIDModal)
@@ -59,7 +71,7 @@ const Anon = ({
     setShowProofOfAddress(false);
   }
 
-  const showProofOfAddressDoc = (customer) => {
+  const showProofOfAddressDoc = (customer: any) => {
     setCustomer(customer);
     setShowProofOfAddress(!showProofOfAddress);
     setPOAModal(!openPOAModal)
@@ -68,7 +80,7 @@ const Anon = ({
     setShowIdentification(false);
   }
 
-  const handleShowStatusForm = (customer) => {
+  const handleShowStatusForm = (customer: any) => {
     setCustomer(customer);
     setStatusModal(true)
     setShowStatusForm(!showStatusForm);
@@ -84,7 +96,7 @@ const Anon = ({
           key={customer.id}
           expanded={expanded === customer.id}
           onChange={handleChange(customer.id)}
-          sx={{ backgroundColor: theme.palette.background.alt }}
+          sx={{ backgroundColor: theme.palette.background.default }}
         >
           <AccordionSummary
             expandIcon={<ExpandMoreIcon />}
@@ -114,7 +126,7 @@ const Anon = ({
             <Box
               sx={{
                 backgroundImage: "none",
-                backgroundColor: theme.palette.background.alt,
+                backgroundColor: theme.palette.background.default,
                 borderRadius: "0.55rem",
               }}
             >
@@ -127,7 +139,7 @@ const Anon = ({
                 >
                   <Grid
                     style={{ display: "flex", alignItems: "center" }}
-                    customer
+                  
                     xs={6}
                   >
                     <Typography
@@ -142,7 +154,7 @@ const Anon = ({
                       {customer.body ? customer.body.lastName : "Anon"}
                     </Typography>
                   </Grid>
-                  <Grid customer xs={6}>
+                  <Grid  xs={6}>
                     <Box
                       component="img"
                       alt="profile"

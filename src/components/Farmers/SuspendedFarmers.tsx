@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { FC, useState } from 'react'
 import {
     Box,
     Container,
@@ -15,8 +15,22 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ContactFarmer from './ContactFarmer';
 import UpdateFarmer from '../../scenes/updateFarmer/index';
 import UpdateFarmerStatus from './UpdateFarmerStatus';
+import { Farmer } from '../../declarations/tswaanda_backend/tswaanda_backend.did';
 
-const SuspendedFarmers = ({
+type SuspendedFarmersProps = {
+    suspendedFarmers: any,
+    updateFarmerStatus: any,
+    setFarmerStatus: any,
+    expanded: any,
+    showStatus: any,
+    updating: any,
+    selectedFarmerId: any,
+    handleChange: any,
+    updated: any,
+    setUpdated: any
+}
+
+const SuspendedFarmers: FC<SuspendedFarmersProps> = ({
     suspendedFarmers,
     updateFarmerStatus,
     setFarmerStatus,
@@ -43,7 +57,7 @@ const SuspendedFarmers = ({
         setIsOpen(false);
     };
 
-    const showContactForm = (farmer) => {
+    const showContactForm = (farmer: any) => {
         setFarmer(farmer);
         setShowContactForm(!showContact);
         setContactModal(true);
@@ -51,7 +65,7 @@ const SuspendedFarmers = ({
         setIsOpen(false);
     }
 
-    const handleShowStatusForm = (farmer) => {
+    const handleShowStatusForm = (farmer: any) => {
         setFarmer(farmer);
         setShowStatusForm(!showStatusForm);
         setStatusModal(true);
@@ -59,7 +73,7 @@ const SuspendedFarmers = ({
         setIsOpen(false);
     }
 
-    const showUpdateForm = (farmer) => {
+    const showUpdateForm = (farmer: any) => {
         setFarmer(farmer);
         setIsOpen(!isOpen);
         setShowStatusForm(false);
@@ -71,12 +85,12 @@ const SuspendedFarmers = ({
 
         <Box m="1rem 0 0 0">
             {suspendedFarmers && suspendedFarmers.length > 0 ? <>
-                {suspendedFarmers?.map((farmer) => (
+                {suspendedFarmers?.map((farmer: Farmer) => (
                     <Accordion
                         key={farmer.id}
                         expanded={expanded === farmer.id}
                         onChange={handleChange(farmer.id)}
-                        sx={{ backgroundColor: theme.palette.background.alt }}
+                        sx={{ backgroundColor: theme.palette.background.default }}
                     >
                         <AccordionSummary
                             expandIcon={<ExpandMoreIcon />}
@@ -99,14 +113,14 @@ const SuspendedFarmers = ({
                             </Typography>
                             <Typography sx={{ color: "text.secondary", width: "25%" }}>
                                 <span style={{ fontWeight: "bold" }}>Date</span>:{" "}
-                                {farmer.created}
+                                {Number(farmer.created)}
                             </Typography>
                         </AccordionSummary>
                         <AccordionDetails>
                             <Box
                                 sx={{
                                     backgroundImage: "none",
-                                    backgroundColor: theme.palette.background.alt,
+                                    backgroundColor: theme.palette.background.default,
                                     borderRadius: "0.55rem",
                                 }}
                             >
@@ -119,7 +133,6 @@ const SuspendedFarmers = ({
                                     >
                                         <Grid
                                             style={{ display: "flex", alignItems: "center" }}
-                                            farmer
                                             xs={6}
                                         >
                                             <Typography
@@ -170,7 +183,7 @@ const SuspendedFarmers = ({
                                         </Typography>
                                         <Typography sx={{ width: "50%", flexShrink: 0 }}>
                                             <span style={{ fontWeight: "bold" }}>Address</span>:{" "}
-                                            {farmer.streetAdrees}
+                                            {farmer.location}
                                         </Typography>
                                     </AccordionSummary>
                                     <hr />

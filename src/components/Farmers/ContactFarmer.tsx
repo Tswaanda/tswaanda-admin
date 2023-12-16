@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import { styled } from '@mui/material/styles';
 import {
     Dialog,
@@ -25,8 +25,16 @@ const BootstrapDialog = styled(Dialog)(({ theme }) => ({
 }));
 
 
+type ContactFarmerProps = {
+    farmer: any,
+    setShowContactForm: any,
+    theme: any,
+    openContactModal: any,
+    setContactModal: any
+}
 
-const ContactFarmer = ({ farmer, setShowContactForm, theme, openContactModal, setContactModal }) => {
+
+const ContactFarmer: FC<ContactFarmerProps> = ({ farmer, setShowContactForm, theme, openContactModal, setContactModal }) => {
 
     const [sending, setSending] = useState(false)
     const [message, setMessage] = useState("")

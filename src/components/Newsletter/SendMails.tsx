@@ -16,6 +16,7 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogTitle from '@mui/material/DialogTitle';
 import { sendNewsLetterEmail } from '../../emails/Newsletter';
 import { toast } from 'react-toastify';
+import { Farmer, Staff } from '../../declarations/tswaanda_backend/tswaanda_backend.did';
 
 export const Recipients = [
     {
@@ -29,11 +30,11 @@ export const Recipients = [
     }
 ];
 
-const SendEmails = ({ clients }) => {
+const SendEmails = ( clients: any ) => {
 
     const { backendActor } = useAuth()
-    const [farmers, setFarmers] = useState([])
-    const [employees, setEmployees] = useState([])
+    const [farmers, setFarmers] = useState<Farmer[]>([])
+    const [employees, setEmployees] = useState<Staff[]>([])
 
     const theme = useTheme();
     const [recipient, setRecipient] = useState("");
@@ -125,7 +126,7 @@ const SendEmails = ({ clients }) => {
                 <Box
                     mt="40px"
                     height="75vh"
-                    border={`1px solid ${theme.palette.secondary[200]}`}
+                    border={`1px solid ${(theme.palette.secondary as any)[200]}`}
                     borderRadius="4px"
                 >
                     <div style={{ display: "flex", justifyContent: "center", flexDirection: "column", width: "100%", gap: '20px', marginTop: "20px" }}>
@@ -189,10 +190,10 @@ const SendEmails = ({ clients }) => {
                             aria-describedby="alert-dialog-description"
 
                         >
-                            <DialogTitle sx={{ backgroundColor: theme.palette.background.alt }} id="alert-dialog-title">
+                            <DialogTitle sx={{ backgroundColor: theme.palette.background.default }} id="alert-dialog-title">
                                 You are about to send this email to all the {recipient}! Are you sure?
                             </DialogTitle>
-                            <DialogActions sx={{ backgroundColor: theme.palette.background.alt }}>
+                            <DialogActions sx={{ backgroundColor: theme.palette.background.default }}>
                                 {!sending && <Button style={{ color: "white" }} onClick={() => setConfirmSend(false)}>Cancel</Button>}
                                 <Button style={{ color: "white" }} onClick={handleSend} autoFocus>
                                     {sending && `Sending emails... ${count}`}
