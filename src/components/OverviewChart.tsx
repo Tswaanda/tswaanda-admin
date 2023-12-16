@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { FC, useMemo, useState } from "react";
 import { ResponsiveLine } from "@nivo/line";
 import { useTheme } from "@mui/material";
 
@@ -19,8 +19,13 @@ const data = {
   }
 };
 
+type Props = {
+  view: "sales" | "units";
+};
 
-const OverviewChart = ({ isDashboard = false, view }) => {
+
+const OverviewChart: FC<Props>  = ({ view }) => {
+  const isDashboard = false;
   const theme = useTheme();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -35,7 +40,7 @@ const OverviewChart = ({ isDashboard = false, view }) => {
     };
     const totalUnitsLine = {
       id: "totalUnits",
-      color: theme.palette.secondary[600],
+      color: (theme.palette.secondary as any)[600],
       data: [],
     };
 
@@ -44,14 +49,14 @@ const OverviewChart = ({ isDashboard = false, view }) => {
         const curSales = acc.sales + totalSales;
         const curUnits = acc.units + totalUnits;
 
-        totalSalesLine.data = [
-          ...totalSalesLine.data,
-          { x: month, y: curSales },
-        ];
-        totalUnitsLine.data = [
-          ...totalUnitsLine.data,
-          { x: month, y: curUnits },
-        ];
+        // totalSalesLine.data = [
+        //   ...totalSalesLine.data,
+        //   { x: month, y: curSales },
+        // ];
+        // totalUnitsLine.data = [
+        //   ...totalUnitsLine.data,
+        //   { x: month, y: curUnits },
+        // ];
 
         return { sales: curSales, units: curUnits };
       },
@@ -64,7 +69,9 @@ const OverviewChart = ({ isDashboard = false, view }) => {
   if (!data || isLoading) return "Loading...";
 
   return (
-    <ResponsiveLine
+    <div className="">
+
+      {/* <ResponsiveLine
       data={view === "sales" ? totalSalesLine : totalUnitsLine}
       theme={{
         axis: {
@@ -175,7 +182,8 @@ const OverviewChart = ({ isDashboard = false, view }) => {
           ]
           : undefined
       }
-    />
+    /> */}
+    </div>
   );
 };
 

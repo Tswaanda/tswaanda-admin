@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { FC, useEffect, useState } from "react";
 import {
     Card,
     CardActions,
@@ -20,7 +20,12 @@ import { deleteAsset } from "../../storage-config/functions";
 import UpdateProduct from "../../scenes/update/index";
 import MoreInfo from "./MoreInfo";
 
-const Product = ({
+type Props = {
+    product: any,
+    setProductsUpdated: any
+}
+
+const Product: FC<Props> = ({
     product,
     setProductsUpdated,
 }) => {
@@ -28,10 +33,10 @@ const Product = ({
     const [isOpen, setIsOpen] = useState(false);
     const [open, setOpen] = useState(false);
     const [openMoreModal, setMoreModal] = useState(false);
-    const [reviews, setReviews] = useState([]);
+    const [reviews, setReviews] = useState<any[]>([]);
 
     const [deletingAssets, setDeleting] = useState(false)
-    const [imgCount, setImgCount] = useState(null)
+    const [imgCount, setImgCount] = useState<Number | null>(null)
     const [deletingProduct, setDelProduct] = useState(false)
     const [rateValue, setRateValue] = useState(0);
 
@@ -65,12 +70,12 @@ const Product = ({
         getProductReviews();
     }, [product]);
 
-    const calculateAverageRating = (reviews) => {
+    const calculateAverageRating = (reviews: any) => {
         if (!reviews || reviews.length === 0) {
             return 0;
         }
     
-        const totalRating = reviews.reduce((accumulator, review) => {
+        const totalRating = reviews.reduce((accumulator: any, review: any) => {
             return accumulator + Number(review.rating);
         }, 0);
         const averageRating = totalRating / reviews.length;
@@ -80,12 +85,12 @@ const Product = ({
         return roundedAverage;
     };
 
-    const ratingValue = (reviews) => {
+    const ratingValue = (reviews: any) => {
         if (!reviews || reviews.length === 0) {
             return 0;
         }
     
-        const totalRating = reviews.reduce((accumulator, review) => {
+        const totalRating = reviews.reduce((accumulator: any, review: any) => {
             return accumulator + Number(review.rating);
         }, 0);
     
@@ -113,43 +118,29 @@ const Product = ({
         }
     };
 
-    const deleteAssetsUrls = async (urls) => {
+    const deleteAssetsUrls = async (urls: any) => {
         setDeleting(true)
         setImgCount(urls.length)
         for (const url of urls) {
             console.log("Deleting this url", url)
             await deleteAsset(url);
-            setImgCount(prevCount => prevCount - 1);
+            setImgCount(prevCount => Number(prevCount) - 1);
         }
         setDeleting(false)
-    };
-
-    const formatOrderDate = (timestamp) => {
-        const milliseconds = Number(timestamp) / 1000000;
-        const date = new Date(milliseconds);
-        const options = {
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-            hour: "numeric",
-            minute: "numeric",
-            hour12: true
-        };
-        return date.toLocaleDateString(undefined, options);
     };
 
     return (
         <Card
             sx={{
                 backgroundImage: "none",
-                backgroundColor: theme.palette.background.alt,
+                backgroundColor: theme.palette.background.default,
                 borderRadius: "0.55rem",
             }}
         >
             <CardContent>
                 <Typography
                     sx={{ fontSize: 14 }}
-                    color={theme.palette.secondary[400]}
+                    color={(theme.palette.secondary as any)[400]}
                     gutterBottom
                 >
                     {product.category}
@@ -157,7 +148,7 @@ const Product = ({
                 <Typography variant="h5" component="div">
                     {product.name}
                 </Typography>
-                <Typography sx={{ mb: "1.5rem" }} color={theme.palette.secondary[400]}>
+                <Typography sx={{ mb: "1.5rem" }} color={(theme.palette.secondary as any)[400]}>
                     ${Number(product.price).toFixed(2)}
                 </Typography>
                 <Rating value={rateValue} readOnly />
@@ -170,14 +161,16 @@ const Product = ({
             </CardContent>
             <CardActions>
                 <Button
-                    variant="primary"
+                    variant="contained"
+                    color="primary"
                     size="small"
                     onClick={() => setMoreModal(true)}
                 >
                     See More
                 </Button>
                 <Button
-                    variant="primary"
+                    variant="contained"
+                    color="primary"
                     size="small"
                     onClick={handleUpdateButton}
                 >
@@ -191,7 +184,7 @@ const Product = ({
                         onClose={handleUpdatePopClose}
                     />
                 )}
-                <Button variant="primary" size="small" onClick={handleClickOpen}>
+                <Button variant="contained" color="primary" size="small" onClick={handleClickOpen}>
                     <DeleteIcon />
                 </Button>
                 <Dialog

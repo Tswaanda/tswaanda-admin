@@ -11,11 +11,13 @@ import { useAuth } from "../../hooks/auth";
 import RestoreProducts from "../../scenes/products/RestoreProducts";
 import RestoreUsersModal from "../../scenes/products/RestoreUsersModal";
 import { Principal } from "@dfinity/principal";
+import { Stats as adStats } from "../../declarations/tswaanda_backend/tswaanda_backend.did";
+import { Stats as mStats} from "../../declarations/marketplace_backend/marketplace_backend.did";
 
 const Backup = () => {
   const { backendActor, marketActor } = useAuth();
-  const [adminStats, setAdminStats] = useState(null)
-  const [marketStats, setMarketStats] = useState(null)
+  const [adminStats, setAdminStats] = useState<adStats | null>(null)
+  const [marketStats, setMarketStats] = useState<mStats | null>(null)
 
   const theme = useTheme();
 
@@ -40,7 +42,7 @@ const Backup = () => {
   const handleBackupProducts = async () => {
     const products = await backendActor.getAllProducts();
 
-    const productsWithBigIntAsString = products.map(product => ({
+    const productsWithBigIntAsString = products.map((product: any) => ({
       ...product,
       created: product.created.toString(),
     }));
@@ -59,7 +61,7 @@ const Backup = () => {
   const handleMarketplaceUsersBackup = async () => {
     const users = await marketActor.getAllKYC();
 
-    const usersWithBigIntAsString = users.map(user => ({
+    const usersWithBigIntAsString = users.map((user : any) => ({
       ...user,
       userId: user.userId.toString(),
       zipCode: user.zipCode.toString(),
@@ -88,7 +90,8 @@ const Backup = () => {
       <Box
         gridColumn="span 8"
         gridRow="span 2"
-        backgroundColor={theme.palette.background.alt}
+        component="div"
+        sx={{backgroundColor: theme.palette.background.default}}
         p="0.5rem"
         borderRadius=""
       >
@@ -101,7 +104,7 @@ const Backup = () => {
               onClick={handleBackupProducts}
               sx={{
                 backgroundColor: theme.palette.secondary.light,
-                color: theme.palette.background.alt,
+                color: theme.palette.background.default,
                 fontSize: "14px",
                 fontWeight: "bold",
                 marginRight: "10px",
@@ -116,7 +119,7 @@ const Backup = () => {
               onClick={() => setRestoreProductsModal(true)}
               sx={{
                 backgroundColor: theme.palette.secondary.light,
-                color: theme.palette.background.alt,
+                color: theme.palette.background.default,
                 fontSize: "14px",
                 fontWeight: "bold",
                 padding: "10px 20px",
@@ -143,7 +146,7 @@ const Backup = () => {
               onClick={handleMarketplaceUsersBackup}
               sx={{
                 backgroundColor: theme.palette.secondary.light,
-                color: theme.palette.background.alt,
+                color: theme.palette.background.default,
                 fontSize: "14px",
                 fontWeight: "bold",
                 marginRight: "10px",
@@ -158,7 +161,7 @@ const Backup = () => {
               onClick={() => setRestoreUsersModal(true)}
               sx={{
                 backgroundColor: theme.palette.secondary.light,
-                color: theme.palette.background.alt,
+                color: theme.palette.background.default,
                 fontSize: "14px",
                 fontWeight: "bold",
                 padding: "10px 20px",
@@ -184,7 +187,7 @@ const Backup = () => {
               // onClick={handleMarketplaceUsersBackup}
               sx={{
                 backgroundColor: theme.palette.secondary.light,
-                color: theme.palette.background.alt,
+                color: theme.palette.background.default,
                 fontSize: "14px",
                 fontWeight: "bold",
                 marginRight: "10px",
@@ -199,7 +202,7 @@ const Backup = () => {
               onClick={() => setRestoreUsersModal(true)}
               sx={{
                 backgroundColor: theme.palette.secondary.light,
-                color: theme.palette.background.alt,
+                color: theme.palette.background.default,
                 fontSize: "14px",
                 fontWeight: "bold",
                 padding: "10px 20px",

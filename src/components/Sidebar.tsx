@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { FC, useEffect, useState } from "react";
 import {
   Box,
   Drawer,
@@ -38,7 +38,15 @@ import { marketActor } from "../config";
 import StorageIcon from '@mui/icons-material/Storage';
 import ContentPasteIcon from '@mui/icons-material/ContentPaste';
 
-const Sidebar = ({
+type Props = {
+  user: any;
+  drawerWidth: number;
+  isSidebarOpen: boolean;
+  setIsSidebarOpen: any;
+  isNonMobile: boolean;
+};
+
+const Sidebar: FC<Props> = ({
   user,
   drawerWidth,
   isSidebarOpen,
@@ -152,8 +160,8 @@ const Sidebar = ({
   const getSize = async () => {
     const orderSize = await marketActor.getPendingOrdersSize();
     const kycSize = await marketActor.getPendingKYCReaquestSize();
-    setNewOrders(Number(orderSize));
-    setNewKYC(Number(kycSize));
+    setNewOrders(orderSize);
+    setNewKYC(kycSize);
   };
 
   useEffect(() => {
@@ -183,8 +191,8 @@ const Sidebar = ({
           sx={{
             width: drawerWidth,
             "& .MuiDrawer-paper": {
-              color: theme.palette.secondary[200],
-              backgroundColor: theme.palette.background.alt,
+              color: ((theme.palette.secondary as any) as any)[200],
+              backgroundColor: theme.palette.background.default,
               boxSizing: "border-box",
               borderWidth: isNonMobile ? 0 : "2px",
               width: drawerWidth,
@@ -193,7 +201,7 @@ const Sidebar = ({
         >
           <Box width="100%">
             <Box m="1.5rem 2rem 2rem 3rem">
-              <FlexBetween color={theme.palette.secondary.main}>
+              <FlexBetween color={(theme.palette.secondary as any).main}>
                 <Box display="flex" alignItems="center" gap="0.5rem">
                   <Typography variant="h4" fontWeight="bold">
                     TSWAANDA
@@ -227,12 +235,12 @@ const Sidebar = ({
                       sx={{
                         backgroundColor:
                           active === lcText
-                            ? theme.palette.secondary[300]
+                            ? (theme.palette.secondary as any)[300]
                             : "transparent",
                         color:
                           active === lcText
-                            ? theme.palette.primary[600]
-                            : theme.palette.secondary[100],
+                            ? (theme.palette.primary as any)[600]
+                            : (theme.palette.secondary as any)[100],
                       }}
                     >
                       <ListItemIcon
@@ -240,8 +248,8 @@ const Sidebar = ({
                           ml: "2rem",
                           color:
                             active === lcText
-                              ? theme.palette.primary[600]
-                              : theme.palette.secondary[200],
+                              ? (theme.palette.primary as any)[600]
+                              : (theme.palette.secondary as any)[200],
                         }}
                       >
                         {icon}

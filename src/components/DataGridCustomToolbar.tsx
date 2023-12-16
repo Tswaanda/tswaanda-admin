@@ -1,4 +1,4 @@
-import React from "react";
+import React, { FC } from "react";
 import { Search } from "@mui/icons-material";
 import { IconButton, TextField, InputAdornment } from "@mui/material";
 import {
@@ -9,13 +9,19 @@ import {
 } from "@mui/x-data-grid";
 import FlexBetween from "./FlexBetween";
 
-const DataGridCustomToolbar = ({ searchInput, setSearchInput, setSearch}) => {
+type Props = {
+    searchInput: string,
+    setSearchInput: any,
+    setSearch: any
+}
+
+const DataGridCustomToolbar: FC<Props> = ({ searchInput, setSearchInput, setSearch}) => {
     return (
         <GridToolbarContainer>
             <FlexBetween width="100%">
                 <FlexBetween>
-                    <GridToolbarColumnsButton />
-                    <GridToolbarDensitySelector />
+                    {/* <GridToolbarColumnsButton />
+                    <GridToolbarDensitySelector /> */}
                     <GridToolbarExport />
                 </FlexBetween>
                 <TextField

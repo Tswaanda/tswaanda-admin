@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { FC, useEffect, useState } from 'react'
 import {
     Box,
     Container,
@@ -14,11 +14,19 @@ import AccordionSummary from "@mui/material/AccordionSummary";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { Principal } from "@dfinity/principal";
 import { useAuth } from '../../hooks/auth';
+import { type } from 'os';
+import { Status } from '../../declarations/tswaanda_backend/tswaanda_backend.did';
 
-const Canister = ({ canister, unauthorized, setUnauthorized }) => {
+type Props = {
+    canister: any,
+    unauthorized: boolean,
+    setUnauthorized: any
+}
+
+const Canister : FC<Props> = ({ canister, unauthorized, setUnauthorized }) => {
     const theme = useTheme();
     const { identity, backendActor } = useAuth()
-    const [status, setStatus] = useState(null)
+    const [status, setStatus] = useState<Status| null>(null)
     const [loading, setLoading] = useState(false)
 
     useEffect(() => {
@@ -30,7 +38,7 @@ const Canister = ({ canister, unauthorized, setUnauthorized }) => {
     const getCanisterInfo = async () => {
         try {
             setLoading(true)
-            const modifyStatus = (status) => {
+            const modifyStatus = (status: any) => {
                 if ("running" in status) {
                     return "Running"
                 } else if ("stopping" in status) {
@@ -42,14 +50,14 @@ const Canister = ({ canister, unauthorized, setUnauthorized }) => {
 
             const status = await backendActor.getCanisterStatus(Principal.fromText(canister.id));
            if (status.ok) {
-            let modifiedSatatus = {
+            let modifiedStatus = {
                 ...status.ok,
                 memory_size: Number(status.ok.memory_size) / 1073741824,
                 cycles: Number(status.ok.cycles) / 1000000000000,
                 status: modifyStatus(status.ok.status),
                 memory_allocation: Number(status.ok.settings.memory_allocation) / 1073741824,
             }
-            setStatus(modifiedSatatus)
+            setStatus(modifiedStatus)
             setLoading(false)
            } else {
                 console.log("Error fetching canister information", status)
@@ -64,7 +72,7 @@ const Canister = ({ canister, unauthorized, setUnauthorized }) => {
 
     return (
         <div className="">
-            <Accordion sx={{ backgroundColor: theme.palette.background.alt }}>
+            <Accordion sx={{ backgroundColor: theme.palette.background.default }}>
                 <AccordionSummary
                     expandIcon={<ExpandMoreIcon />}
                     aria-controls="panel1bh-content"
@@ -80,14 +88,14 @@ const Canister = ({ canister, unauthorized, setUnauthorized }) => {
                     </Typography>
                     {status && <Typography sx={{ width: "30%", flexShrink: 0 }}>
                         <span style={{ fontWeight: "bold" }}>Cycles Balance:{" "}</span>
-                        {status.cycles} TC
+                        {Number(status.cycles)} TC
                     </Typography>}
                 </AccordionSummary>
                 {loading ? <h3>Loading</h3> : <AccordionDetails>
                     {status && <Box
                         sx={{
                             backgroundImage: "none",
-                            backgroundColor: theme.palette.background.alt,
+                            backgroundColor: theme.palette.background.default,
                             borderRadius: "0.55rem",
                         }}
                     >
@@ -99,7 +107,7 @@ const Canister = ({ canister, unauthorized, setUnauthorized }) => {
                             >
                                 <Typography sx={{ width: "50%", flexShrink: 0 }}>
                                     <span style={{ fontWeight: "bold" }}>Memory size:</span> {""}
-                                    {status.memory_size} GB
+                                    {Number(status.memory_size)} GB
                                 </Typography>
                                 <Typography
                                     sx={{
@@ -108,7 +116,9 @@ const Canister = ({ canister, unauthorized, setUnauthorized }) => {
                                     }}
                                 >
                                     <span style={{ fontWeight: "bold" }}>Status</span>{" "}
-                                    {status.status}
+                                    {("Stopped" in status.status && "Stopped") ||""}
+                                    {("Running" in status.status && "Running") ||""}
+                                    {("Stopping" in status.status && "Stopping") ||""}
                                 </Typography>
                             </AccordionSummary>
                             <AccordionSummary>
@@ -119,7 +129,7 @@ const Canister = ({ canister, unauthorized, setUnauthorized }) => {
                                     }}
                                 >
                                     <span style={{ fontWeight: "bold" }}>Memory allocation:</span>{" "}
-                                    {status.memory_allocation} GB
+                                    {Number(status.settings.memory_allocation)} GB
                                 </Typography>
                                 <Typography sx={{ width: "50%", flexShrink: 0 }}>
                                     <span style={{ fontWeight: "bold" }}>Freezing threshold:</span> {" "}

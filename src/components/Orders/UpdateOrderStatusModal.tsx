@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import { styled } from '@mui/material/styles';
 import {
     Select,
@@ -26,7 +26,20 @@ const BootstrapDialog = styled(Dialog)(({ theme }) => ({
     },
 }));
 
-const UpdateOrderStatusModal = ({ openStatusModal, updateOrderStatus, orderStatus, setStatusModal, setOrderStatus, updating, theme, modalOrder, updated,
+type Props = {
+    openStatusModal: boolean,
+    updateOrderStatus: any,
+    orderStatus: any,
+    setStatusModal: any,
+    setOrderStatus: any,
+    updating: boolean,
+    theme: any,
+    modalOrder: any,
+    updated: boolean,
+    setUpdated: any
+}
+
+const UpdateOrderStatusModal : FC<Props> = ({ openStatusModal, updateOrderStatus, orderStatus, setStatusModal, setOrderStatus, updating, theme, modalOrder, updated,
     setUpdated }) => {
 
     const { backendActor } = useAuth()

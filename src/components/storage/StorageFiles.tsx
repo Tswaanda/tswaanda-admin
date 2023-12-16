@@ -20,20 +20,23 @@ import Accordion from "@mui/material/Accordion";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import AccordionSummary from "@mui/material/AccordionSummary";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+
+// ts-ignore
 import { deleteAsset, getAllAssets } from "../../storage-config/functions";
+import { Asset } from "../../declarations/file_storage/file_storage.did";
 
 const StorageFiles = () => {
     const theme = useTheme();
-    const [expanded, setExpanded] = useState(false);
-    const handleChange = (panel) => (event, isExpanded) => {
+    const [expanded, setExpanded] = useState("");
+    const handleChange = (panel: any) => (isExpanded: any) => {
         setExpanded(isExpanded ? panel : false);
     };
-    const [files, setFiles] = useState(null)
+    const [files, setFiles] = useState<Asset[]>([])
 
-    const formatOrderDate = (timestamp) => {
-        const milliseconds = Number(timestamp) / 1000000;
+    const formatOrderDate = (timestamp: number): string => {
+        const milliseconds = timestamp / 1000000;
         const date = new Date(milliseconds);
-        const options = {
+        const options: Intl.DateTimeFormatOptions = {
             year: "numeric",
             month: "long",
             day: "numeric",
@@ -43,14 +46,15 @@ const StorageFiles = () => {
         };
         return date.toLocaleDateString(undefined, options);
     };
+    
 
     useEffect(() => {
         const getFiles = async () => {
             const files = await getAllAssets()
             if (files.ok) {
                 const sortedFiles = files.ok
-                    .filter(file => file.created !== undefined)
-                    .sort((a, b) => Number(b.created) - Number(a.created));
+                    .filter((file: any) => file.created !== undefined)
+                    .sort((a: any, b: any) => Number(b.created) - Number(a.created));
                 setFiles(sortedFiles);
                 console.log(sortedFiles);
             } else {
@@ -60,10 +64,13 @@ const StorageFiles = () => {
         getFiles()
     }, [])
 
-    const handleDeleteFile = async (url) => {
+    
+
+    const handleDeleteFile = async (url: string): Promise<void> => {
         setFiles(prevFiles => prevFiles.filter(file => file.url !== url));
-        const res = await deleteAsset(url)
+         await deleteAsset(url);
     }
+    
 
     return (
         <Box m="1rem 0 0 0">
@@ -74,7 +81,7 @@ const StorageFiles = () => {
                             key={file.id}
                             expanded={expanded === file.id}
                             onChange={handleChange(file.id)}
-                            sx={{ backgroundColor: theme.palette.background.alt }}
+                            sx={{ backgroundColor: theme.palette.background.default }}
                         >
                             <AccordionSummary
                                 expandIcon={<ExpandMoreIcon />}
@@ -83,7 +90,7 @@ const StorageFiles = () => {
                             >
                                 <Typography sx={{ color: "text.secondary" }}>
                                     <span> <span style={{ fontWeight: "bold" }}>Date</span>:
-                                        {formatOrderDate(file.created)}</span>
+                                        {formatOrderDate(Number(file.created))}</span>
                                     <br />
                                     <span><span style={{ fontWeight: "bold" }}>Filename</span>:{" "}
                                         {file.filename}</span>
@@ -94,7 +101,7 @@ const StorageFiles = () => {
                                 <Box
                                     sx={{
                                         backgroundImage: "none",
-                                        backgroundColor: theme.palette.background.alt,
+                                        backgroundColor: theme.palette.background.default,
                                         borderRadius: "0.55rem",
                                     }}
                                 >
@@ -112,9 +119,9 @@ const StorageFiles = () => {
                                             <Box m="0 0.1rem 0 0.1rem" textAlign="left">
                                                 <Typography
                                                     fontSize="0.9rem"
-                                                    sx={{ color: theme.palette.secondary[100] }}
+                                                    sx={{ color: (theme.palette.secondary as any)[100] }}
                                                 >
-                                                    Name: {file.name}
+                                                    Name: {file.filename}
                                                 </Typography>
                                             </Box>
                                         </Grid>

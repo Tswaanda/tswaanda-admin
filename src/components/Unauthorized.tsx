@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import {
   DialogTitle,
   DialogContent,
@@ -14,8 +14,18 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "react-toastify";
 import { useAuth } from '../hooks/auth';
+import { type } from 'os';
 
-const Unauthorized = ({ user }) => {
+type Props = {
+  user: any
+}
+
+type FormData = {
+  fullName: string,
+  phone: string,
+}
+
+const Unauthorized: FC<Props> = ({ user }) => {
   const { backendActor, identity, logout } = useAuth()
 
   const theme = useTheme()
@@ -38,9 +48,9 @@ const Unauthorized = ({ user }) => {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm({ resolver: zodResolver(schema) });
+  } = useForm<FormData>({ resolver: zodResolver(schema) });
 
-  const handleSave = async (data) => {
+  const handleSave = async (data: FormData) => {
     if (email === "") {
       setEmailError("Please enter your email address")
     } else if (!email.includes("@") || !email.includes(".")) {
@@ -78,7 +88,7 @@ const Unauthorized = ({ user }) => {
   }
 
   return (
-    <DialogContent dividers sx={{ backgroundColor: theme.palette.background.alt, minWidth: '600px' }}>
+    <DialogContent dividers sx={{ backgroundColor: theme.palette.background.default, minWidth: '600px' }}>
       <div className="" style={{ minWidth: '500px' }}>
         {user ? <div style={{ height: '100vh' }}>
           <h2 style={{ marginTop: '150px' }}>
@@ -145,7 +155,7 @@ const Unauthorized = ({ user }) => {
                     color="primary"
                     sx={{
                       backgroundColor: theme.palette.secondary.light,
-                      color: theme.palette.background.alt,
+                      color: theme.palette.background.default,
                       fontSize: "14px",
                       fontWeight: "bold",
                       padding: "10px 20px",

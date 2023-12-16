@@ -3,6 +3,7 @@ import {
   canisterId,
   idlFactory,
 } from "./declarations/tswaanda_backend";
+// ts-ignore
 import icblast from "@infu/icblast";
 import { idlFactory as marketIdlFactory } from "./declarations/marketplace_backend";
 import { AuthClient } from "@dfinity/auth-client";

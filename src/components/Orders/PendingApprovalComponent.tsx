@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { FC, useEffect, useState } from "react";
 import {
   Box,
   Typography,
@@ -12,8 +12,22 @@ import AccordionSummary from "@mui/material/AccordionSummary";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import UpdateOrderStatusModal from "./UpdateOrderStatusModal";
 import ContactCustomerOnOrder from "./ContactCustomerOnOrder";
+import { ProductOrder } from "../../declarations/marketplace_backend/marketplace_backend.did";
 
-const PendingApprovalComponent = ({
+type Props = {
+  updated: boolean,
+  setUpdated: any,
+  pendingOrders: any,
+  handleChange: any,
+  updatePendingOrderStatus: any,
+  expanded: any,
+  theme: any,
+  updating: boolean,
+  setOrderStatus: any,
+  orderStatus: any
+}
+
+const PendingApprovalComponent: FC<Props> = ({
   updated,
   setUpdated,
   pendingOrders,
@@ -26,7 +40,7 @@ const PendingApprovalComponent = ({
   orderStatus
 }) => {
 
-  const [orders, setOrders] = useState([])
+  const [orders, setOrders] = useState<ProductOrder[] | null>(null)
   const [updateSatus, setUpdateStatus] = useState(false)
   const [contactCustomer, setContactCustomer] = useState(false)
 
@@ -35,21 +49,21 @@ const PendingApprovalComponent = ({
 
   const [modalOrder, setOrder] = useState({})
 
-  const handleContactCustomer = (order) => {
+  const handleContactCustomer = (order: any) => {
     setOrder(order)
     setContactCustomer(!contactCustomer)
     setContactModal(true)
     setUpdateStatus(false)
   }
 
-  const handleUpdateStatus = (order) => {
+  const handleUpdateStatus = (order: any) => {
     setOrder(order)
     setUpdateStatus(!updateSatus)
     setStatusModal(true)
     setContactCustomer(false)
   }
 
-  const updateOrderStatus = (id) => {
+  const updateOrderStatus = (id: any) => {
     updatePendingOrderStatus(id)
   }
 
@@ -84,7 +98,7 @@ const PendingApprovalComponent = ({
             </Typography>
             <Typography sx={{ color: "text.secondary" }}>
               <span style={{ fontWeight: "bold" }}>Date</span>:{" "}
-              {order.dateCreated}
+              {Number(order.dateCreated)}
             </Typography>
           </AccordionSummary>
           <AccordionDetails>
@@ -100,7 +114,7 @@ const PendingApprovalComponent = ({
                   <Typography>Status: {order.status}</Typography>
                 </Grid>
                 <Grid item xs={6}>
-                  <Typography>Step: {order.step}</Typography>
+                  <Typography>Step: {Number(order.step)}</Typography>
                 </Grid>
               </Grid>
               <hr />

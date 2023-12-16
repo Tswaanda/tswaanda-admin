@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import {
     Dialog,
     DialogTitle,
@@ -22,7 +22,14 @@ const BootstrapDialog = styled(Dialog)(({ theme }) => ({
     },
 }));
 
-const MoreInfo = ({ product, openMoreModal, setMoreModal, reviews }) => {
+type Props = {
+    product: any,
+    openMoreModal: boolean,
+    setMoreModal: any,
+    reviews: any
+}
+
+const MoreInfo: FC<Props> = ({ product, openMoreModal, setMoreModal, reviews }) => {
 
     const theme = useTheme();
 
@@ -37,7 +44,7 @@ const MoreInfo = ({ product, openMoreModal, setMoreModal, reviews }) => {
                 aria-labelledby="customized-dialog-title"
                 open={openMoreModal}
             >
-                <DialogTitle sx={{ m: 0, p: 2, backgroundColor: theme.palette.background.alt, font: "bold" }} id="customized-dialog-title">
+                <DialogTitle sx={{ m: 0, p: 2, backgroundColor: theme.palette.background.default, font: "bold" }} id="customized-dialog-title">
                     <h3> More information about {product.name}</h3>
                 </DialogTitle>
                 <IconButton
@@ -48,13 +55,13 @@ const MoreInfo = ({ product, openMoreModal, setMoreModal, reviews }) => {
                         right: 8,
                         top: 8,
                         color: "white",
-                        backgroundColor: theme.palette.background.alt
+                        backgroundColor: theme.palette.background.default
                     }}
                 >
                     <CloseIcon />
                 </IconButton>
-                <DialogContent dividers sx={{ backgroundColor: theme.palette.background.alt, minWidth: '600px', minHeight: "300px" }}>
-                    {reviews.length > 0 ? reviews.map((review, index) => {
+                <DialogContent dividers sx={{ backgroundColor: theme.palette.background.default, minWidth: '600px', minHeight: "300px" }}>
+                    {reviews.length > 0 ? reviews.map((review: any) => {
                         return (
                             <Card sx={{ minWidth: 275, backgroundColor: "#108b42" }}>
                                 <CardContent>
