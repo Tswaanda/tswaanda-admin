@@ -17,14 +17,14 @@ import Product from "../../components/Products/Product";
 const Products = () => {
   const theme = useTheme();
 
-  const [products, setProducts] = useState(null);
+  const [products, setProducts] = useState<any[]| null>(null);
   const [loading, setLoading] = useState(false);
   const [productsUpdated, setProductsUpdated] = useState(false);
 
   const getProducts = async () => {
     try {
       setLoading(true);
-      const products = await backendActor.getAllProducts();
+      const products = await backendActor.getAllProducts() as any[];
       setProducts(products);
       setLoading(false);
       setProductsUpdated(false);
@@ -65,7 +65,7 @@ const Products = () => {
           onClick={handleUpLoadButton}
           sx={{
             backgroundColor: theme.palette.secondary.light,
-            color: theme.palette.background.alt,
+            color: theme.palette.background.default,
             fontSize: "14px",
             fontWeight: "bold",
             padding: "10px 20px",

@@ -1,11 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  Box,
-  Tabs,
-  Tab,
-  Button,
-  useTheme
-} from "@mui/material";
+import { Box, Tabs, Tab, Button, useTheme } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import Header from "../../components/Header";
 import { toast } from "react-toastify";
@@ -14,16 +8,18 @@ import ApprovedFarmers from "../../components/Farmers/ApprovedFarmers";
 import FarmerListing from "../../scenes/farmerlisting";
 import SuspendedFarmers from "../../components/Farmers/SuspendedFarmers";
 import { useAuth } from "../../hooks/auth";
+import { formatDate, formatTime } from "../constants";
+import { Farmer } from "../../declarations/tswaanda_backend/tswaanda_backend.did";
 // import { backendActor } from "../../config";
 
 const Farmers = () => {
-  const {backendActor} = useAuth()
+  const { backendActor } = useAuth();
   const [expanded, setExpanded] = useState(false);
   const [showStatus, setShowStatus] = useState(false);
   const [updating, setUpdating] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [farmers, setFarmers] = useState(null);
-  const [data, setData] = useState(null);
+  const [farmers, setFarmers] = useState<any[] | null>(null);
+  const [data, setData] = useState<Farmer[] | null>(null);
   const [pendingFarmers, setPendingFarmers] = useState(null);
   const [approvedFarmers, setApprovedFarmers] = useState(null);
   const [suspendedFarmers, setSuspendedFarmers] = useState(null);
@@ -46,83 +42,60 @@ const Farmers = () => {
 
   const theme = useTheme();
 
-  const handleTabChange = (event, newValue) => {
+  const handleTabChange = (newValue: any) => {
     setValue(newValue);
   };
 
-  const handleChange = (panel) => (event, isExpanded) => {
+  const handleChange = (panel: any) => (isExpanded: any) => {
     setExpanded(isExpanded ? panel : false);
   };
 
   const getPendingFarmers = async () => {
     try {
-      const res = await backendActor.getUnverifiedFarmers()
+      const res = await backendActor.getUnverifiedFarmers();
       const sortedData = res.sort(
-        (a, b) => Number(b.created) - Number(a.created)
+        (a: any, b: any) => Number(b.created) - Number(a.created)
       );
       const convertedFarmers = convertData(sortedData);
       setPendingFarmers(convertedFarmers);
     } catch (error) {
-      console.log("Error getting pending farmers", error)
+      console.log("Error getting pending farmers", error);
     }
-  }
+  };
   const getSuspended = async () => {
     try {
-      const res = await backendActor.getSuspendedFarmers()
+      const res = await backendActor.getSuspendedFarmers();
       const sortedData = res.sort(
-        (a, b) => Number(b.created) - Number(a.created)
+        (a: any, b: any) => Number(b.created) - Number(a.created)
       );
       const convertedFarmers = convertData(sortedData);
       setSuspendedFarmers(convertedFarmers);
     } catch (error) {
-      console.log("Error getting suspended farmers", error)
+      console.log("Error getting suspended farmers", error);
     }
-  }
+  };
 
   const getApprovedFarmers = async () => {
     try {
-      const res = await backendActor.getVerifiedFarmers()
+      const res = await backendActor.getVerifiedFarmers();
       const sortedData = res.sort(
-        (a, b) => Number(b.created) - Number(a.created)
+        (a: any, b: any) => Number(b.created) - Number(a.created)
       );
       const convertedFarmers = convertData(sortedData);
       setApprovedFarmers(convertedFarmers);
     } catch (error) {
-      console.log("Error getting approved farmers", error)
+      console.log("Error getting approved farmers", error);
     }
-  }
+  };
 
-  const convertData = (data) => {
+  const convertData = (data: any) => {
     if (!data) {
       return [];
     }
 
-    const formatCustomerDate = (timestamp) => {
-      const date = new Date(Number(timestamp));
-      const options = {
-        weekday: "short",
-        day: "numeric",
-        month: "long",
-        year: "numeric",
-      };
-      return date.toLocaleDateString("en-US", options);
-    };
-
-    const formatCustomerTime = (timestamp) => {
-      const date = new Date(Number(timestamp));
-      const options = {
-        hour: "numeric",
-        minute: "numeric",
-        hour12: true,
-      };
-      return date.toLocaleTimeString("en-US", options);
-    };
-
-    const modifiedOrder = data.map((farmer) => {
-
-
-      const formattedDate = formatCustomerDate(farmer.created);
-      const formattedTime = formatCustomerTime(farmer.created);
+    const modifiedOrder = data.map((farmer: any) => {
+      const formattedDate = formatDate(farmer.created);
+      const formattedTime = formatTime(farmer.created);
 
       return {
         ...farmer,
@@ -132,7 +105,7 @@ const Farmers = () => {
     });
 
     return modifiedOrder;
-  }
+  };
 
   const getFarmers = async () => {
     setIsLoading(true);
@@ -140,23 +113,17 @@ const Farmers = () => {
       const res = await backendActor.getAllFarmers();
       setData(res);
     } catch (error) {
-      console.log("Error getting farmers", error)
+      console.log("Error getting farmers", error);
       setIsLoading(false);
     }
   };
 
   useEffect(() => {
     if (data) {
-
-      const formatCustomerDate = (timestamp) => {
-        const date = new Date(Number(timestamp));
-        return date.toLocaleDateString();
-      };
-
-      const modfifiedCustomers = data.map((farmer) => ({
+      const modfifiedCustomers = data.map((farmer: any) => ({
         ...farmer,
         phone: Number(farmer.phone),
-        created: formatCustomerDate(farmer.created),
+        created: formatDate(farmer.created),
       }));
       setFarmers(modfifiedCustomers);
       setIsLoading(false);
@@ -178,12 +145,12 @@ const Farmers = () => {
     }
   }, [value]);
 
-  const handleShowStatusForm = (id) => {
+  const handleShowStatusForm = (id: any) => {
     setSelectedFarmerId(id);
     setShowStatus(true);
   };
 
-  const updateFarmerStatus = async (id) => {
+  const updateFarmerStatus = async (id: any) => {
     if (data && farmerStatus != "") {
       setUpdating(true);
       const farmerIndex = data.findIndex((farmer) => farmer.id === id);
@@ -194,28 +161,24 @@ const Farmers = () => {
         }
         if (farmerStatus === "suspended") {
           data[farmerIndex].isSuspended = true;
-
         }
         if (farmerStatus === "pending") {
           data[farmerIndex].isVerified = false;
           data[farmerIndex].isSuspended = false;
         }
-        const res = await backendActor.updateFarmer(
-          data[farmerIndex]
-        );
+        const res = await backendActor.updateFarmer(data[farmerIndex]);
         setUpdated(true);
-        toast.success(
-          `Farmer status have been updated`,
-          {
-            autoClose: 5000,
-            position: "top-center",
-            hideProgressBar: true,
-          }
-        );
-        const customerPosition = farmers.findIndex(
+        toast.success(`Farmer status have been updated`, {
+          autoClose: 5000,
+          position: "top-center",
+          hideProgressBar: true,
+        });
+        const customerPosition = farmers?.findIndex(
           (farmer) => farmer.id === id
         );
-        farmers[customerPosition].status = farmerStatus;
+        if (customerPosition !== undefined && farmers) {
+          farmers[customerPosition].status = farmerStatus;
+        }
         setUpdating(false);
         setSelectedFarmerId(null);
       } else {
@@ -247,7 +210,6 @@ const Farmers = () => {
               selectedFarmerId,
               farmerStatus,
               handleChange,
-
             }}
           />
         );
@@ -268,7 +230,6 @@ const Farmers = () => {
               selectedFarmerId,
               farmerStatus,
               handleChange,
-
             }}
           />
         );
@@ -289,7 +250,6 @@ const Farmers = () => {
               selectedFarmerId,
               farmerStatus,
               handleChange,
-
             }}
           />
         );
@@ -308,7 +268,7 @@ const Farmers = () => {
             onClick={handleListButton}
             sx={{
               backgroundColor: theme.palette.secondary.light,
-              color: theme.palette.background.alt,
+              color: theme.palette.background.default,
               fontSize: "14px",
               fontWeight: "bold",
               padding: "10px 20px",

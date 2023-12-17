@@ -21,7 +21,7 @@ const gas = Big(3)
   .toFixed();
 
 const Wallet = () => {
-  const [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = useState("");
   const theme = useTheme();
 
   const [user, setUser] = useState(null);
@@ -40,14 +40,14 @@ const Wallet = () => {
   const handleSendTokens = async () => {
     if (account != "" && tokenAmount) {
       try {
-        const amount = Big(tokenAmount)
-          .times(10 ** 24)
-          .toFixed();
-        const res = await contract.ft_transfer(
-          { receiver_id: account, amount: amount },
-          gas,
-          1
-        );
+        // const amount = Big(tokenAmount)
+        //   .times(10 ** 24)
+        //   .toFixed();
+        // const res = await contract.ft_transfer(
+        //   { receiver_id: account, amount: amount },
+        //   gas,
+        //   1
+        // );
       } catch (error) {
         console.log(error);
       }
@@ -58,12 +58,12 @@ const Wallet = () => {
   const handleAddAccount = async () => {
     if (account != "") {
       try {
-        const result = await contract.storage_deposit(
-          { account_id: account },
-          gas,
-          "1250000000000000000000"
-        );
-        console.log(result);
+        // const result = await contract.storage_deposit(
+        //   { account_id: account },
+        //   gas,
+        //   "1250000000000000000000"
+        // );
+        // console.log(result);
       } catch (error) {
         console.log(error);
       }
@@ -77,14 +77,14 @@ const Wallet = () => {
   const handleContract = (e) => {
     if (user && e.target.textContent === "Remove Wallet") {
       (function signOut() {
-        wallet.signOut();
+        // wallet.signOut();
         window.location.replace(
           window.location.origin + window.location.pathname
         );
       })();
     } else if (!user && e.target.textContent === "Connect Wallet") {
       (function signIn() {
-        wallet.requestSignIn(configData.contractName, "Wallet Block Dice");
+        // wallet.requestSignIn(configData.contractName, "Wallet Block Dice");
       })();
     }
   };
@@ -101,18 +101,18 @@ const Wallet = () => {
   // }, []);
 
   const loadContractInfo = async () => {
-    let bal = await contract.ft_balance_of({ account_id: user.accountId });
-    let totalSup = await contract.ft_total_supply();
-    if (bal > 0) {
-      const formattedBal = bal / 1000000000000000000000000;
-      const roundedBal = formattedBal.toFixed(2);
-      setUSDVal(roundedBal);
-      setBalance(formattedBal);
-    }
-    if (totalSup > 0) {
-      const formattedBal = totalSup / 1000000000000000000000000;
-      setTotalSupply(formattedBal);
-    }
+    // let bal = await contract.ft_balance_of({ account_id: user.accountId });
+    // let totalSup = await contract.ft_total_supply();
+    // if (bal > 0) {
+    //   const formattedBal = bal / 1000000000000000000000000;
+    //   const roundedBal = formattedBal.toFixed(2);
+    //   setUSDVal(roundedBal);
+    //   setBalance(formattedBal);
+    // }
+    // if (totalSup > 0) {
+    //   const formattedBal = totalSup / 1000000000000000000000000;
+    //   setTotalSupply(formattedBal);
+    // }
   };
 
   useEffect(() => {
@@ -131,7 +131,7 @@ const Wallet = () => {
             // onClick={handleContract}
             sx={{
               backgroundColor: theme.palette.secondary.light,
-              color: theme.palette.background.alt,
+              color: theme.palette.background.default,
               fontSize: "14px",
               fontWeight: "bold",
               padding: "10px 20px",
@@ -144,7 +144,7 @@ const Wallet = () => {
       <Accordion
         expanded={expanded === "panel1"}
         onChange={handleChange("panel1")}
-        sx={{ backgroundColor: theme.palette.background.alt }}
+        sx={{ backgroundColor: theme.palette.background.default }}
       >
         <AccordionSummary
           expandIcon={<ExpandMoreIcon />}
@@ -172,7 +172,7 @@ const Wallet = () => {
       <Accordion
         expanded={expanded === "panel2"}
         onChange={handleChange("panel2")}
-        sx={{ backgroundColor: theme.palette.background.alt }}
+        sx={{ backgroundColor: theme.palette.background.default }}
       >
         <AccordionSummary
           expandIcon={<ExpandMoreIcon />}
@@ -208,7 +208,7 @@ const Wallet = () => {
               onClick={handleSendTokens}
               sx={{
                 backgroundColor: theme.palette.secondary.light,
-                color: theme.palette.background.alt,
+                color: theme.palette.background.default,
                 fontSize: "14px",
                 fontWeight: "bold",
                 padding: "10px 20px",
@@ -222,7 +222,7 @@ const Wallet = () => {
       <Accordion
         expanded={expanded === "panel3"}
         onChange={handleChange("panel3")}
-        sx={{ backgroundColor: theme.palette.background.alt }}
+        sx={{ backgroundColor: theme.palette.background.default }}
       >
         <AccordionSummary
           expandIcon={<ExpandMoreIcon />}
@@ -252,7 +252,7 @@ const Wallet = () => {
               onClick={handleAddAccount}
               sx={{
                 backgroundColor: theme.palette.secondary.light,
-                color: theme.palette.background.alt,
+                color: theme.palette.background.default,
                 fontSize: "14px",
                 fontWeight: "bold",
                 padding: "10px 20px",
@@ -266,7 +266,7 @@ const Wallet = () => {
       <Accordion
         expanded={expanded === "panel4"}
         onChange={handleChange("panel4")}
-        sx={{ backgroundColor: theme.palette.background.alt }}
+        sx={{ backgroundColor: theme.palette.background.default }}
       >
         <AccordionSummary
           expandIcon={<ExpandMoreIcon />}

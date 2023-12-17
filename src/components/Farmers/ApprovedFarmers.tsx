@@ -17,7 +17,7 @@ import UpdateFarmer from '../../scenes/updateFarmer/index';
 import UpdateFarmerStatus from './UpdateFarmerStatus';
 
 type ApprovedFarmersProps = {
-    approvedFarmers: any[],
+    approvedFarmers: any,
     updateFarmerStatus: any,
     setFarmerStatus: any,
     expanded: any,

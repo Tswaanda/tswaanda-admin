@@ -391,15 +391,15 @@ const Dashboard = () => {
         {/* ROW 1 */}
         <StatBox
           title="Total Customers"
-          value={Number(marketStats?.totalCustomers)}
-          increase={currentMonthRate}
+          value={String(marketStats?.totalCustomers)}
+          increase={currentMonthRate ? String(currentMonthRate) : "N/A"}
           description="Since last month"
           icon={null}
         />
         <StatBox
           title="Total Orders"
-          value={Number(marketStats?.totalOrders)}
-          increase={currentMonthOrderRate}
+          value={String(marketStats?.totalOrders)}
+          increase={String(currentMonthOrderRate)}
           description="Since last month"
           icon={
             <PointOfSale
@@ -465,8 +465,8 @@ const Dashboard = () => {
         </Box>
         <StatBox
           title="New KYC request"
-          value={Number(newKYCNum)}
-          increase={NCCurrentMonthNewRate}
+          value={String(newKYCNum)}
+          increase={String(NCCurrentMonthNewRate)}
           description="Since last month"
           icon={
             <PersonAdd
@@ -476,8 +476,8 @@ const Dashboard = () => {
         />
         <StatBox
           title="New Orders"
-          value={Number(newOrdersNum)}
-          increase={newOrderscurrentMonthOrderRate}
+          value={String(newOrdersNum)}
+          increase={String(newOrderscurrentMonthOrderRate)}
           description="Since last month"
           icon={
             <Traffic

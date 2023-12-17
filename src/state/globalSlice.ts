@@ -1,9 +1,15 @@
 import { createSlice } from "@reduxjs/toolkit";
 
-const initialState = {
+export interface GlobalState {
+    storageInitiated: boolean,
+    mode: "light" | "dark",
+  }
+  
+  const initialState: GlobalState = {
+    storageInitiated: false,
     mode: "dark",
-    storageInitiated: false
-};
+  }
+
 
 export const globalSlice = createSlice({
     name: "global",

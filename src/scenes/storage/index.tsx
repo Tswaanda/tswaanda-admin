@@ -8,7 +8,7 @@ import Backup from "../../components/storage/Backup";
 const Storage = () => {
 
   const [value, setValue] = useState(0);
-  const handleTabChange = (event, newValue) => {
+  const handleTabChange = (newValue:any) => {
     setValue(newValue);
   };
 

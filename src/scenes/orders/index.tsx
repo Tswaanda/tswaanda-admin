@@ -8,23 +8,21 @@ import ShippedComponent from "../../components/Orders/ShippedComponent";
 import DeliveredComponent from "../../components/Orders/DeliveredComponent";
 import { marketActor } from "../../config";
 import { sendAutomaticOrderUpdateEmail } from "../../emails/orders";
+import { formatDate, formatTime } from "../constants";
 
 const Orders = () => {
   const theme = useTheme();
   const [expanded, setExpanded] = useState(false);
-  const [pendingData, setPendingData] = useState(null);
-  const [shippedData, setShippedData] = useState(null);
-  const [deliveredData, setDeliverdData] = useState(null);
-  const [approvedData, setApprovedData] = useState(null);
-  const [pendingOrders, setPendingOrders] = useState(null);
-  const [shippedOrders, setShippedOrders] = useState(null);
-  const [deliveredOrders, setDeliverdOrders] = useState(null);
-  const [approvedOrders, setApprovedOrders] = useState(null);
-
-
+  const [pendingData, setPendingData] = useState<any[] | null>(null);
+  const [shippedData, setShippedData] = useState<any[] | null>(null);
+  const [deliveredData, setDeliverdData] = useState<any[] | null>(null);
+  const [approvedData, setApprovedData] = useState<any[] | null>(null);
+  const [pendingOrders, setPendingOrders] = useState<any[] | null>(null);
+  const [shippedOrders, setShippedOrders] = useState<any[] | null>(null);
+  const [deliveredOrders, setDeliverdOrders] = useState<any[] | null>(null);
+  const [approvedOrders, setApprovedOrders] = useState<any[] | null>(null);
 
   const [showStep, setShowStep] = useState(false);
-
 
   const [orderStatus, setOrderStatus] = useState("");
   const [orderStep, setOrderStep] = useState(null);
@@ -33,7 +31,7 @@ const Orders = () => {
 
   //Setting of the value of the currect tab
   const [value, setValue] = useState(0);
-  const handleTabChange = (event, newValue) => {
+  const handleTabChange = (newValue: any) => {
     setValue(newValue);
   };
 
@@ -50,73 +48,50 @@ const Orders = () => {
   }, [value]);
 
   const getPendingOrders = async () => {
-    const res = await marketActor.getPendingOrders();
+    const res = (await marketActor.getPendingOrders()) as any[];
     const sortedData = res.sort(
-      (a, b) => Number(b.dateCreated) - Number(a.dateCreated)
+      (a: any, b: any) => Number(b.dateCreated) - Number(a.dateCreated)
     );
     setPendingData(sortedData);
     const convertedOrders = convertData(sortedData);
     setPendingOrders(convertedOrders);
   };
   const getApprovedOrders = async () => {
-    const res = await marketActor.getApprovedOrders();
+    const res = (await marketActor.getApprovedOrders()) as any[];
     const sortedData = res.sort(
-      (a, b) => Number(b.dateCreated) - Number(a.dateCreated)
+      (a: any, b: any) => Number(b.dateCreated) - Number(a.dateCreated)
     );
     setApprovedData(sortedData);
     const convertedOrders = convertData(sortedData);
     setApprovedOrders(convertedOrders);
   };
   const getShippedOrders = async () => {
-    const res = await marketActor.getShippedOrders();
+    const res = (await marketActor.getShippedOrders()) as any[];
     const sortedData = res.sort(
-      (a, b) => Number(b.dateCreated) - Number(a.dateCreated)
+      (a: any, b: any) => Number(b.dateCreated) - Number(a.dateCreated)
     );
     setShippedData(sortedData);
     const convertedOrders = convertData(sortedData);
     setShippedOrders(convertedOrders);
   };
   const getDeliveredOrders = async () => {
-    const res = await marketActor.getDeliveredOrders();
+    const res = (await marketActor.getDeliveredOrders()) as any[];
     const sortedData = res.sort(
-      (a, b) => Number(b.dateCreated) - Number(a.dateCreated)
+      (a: any, b: any) => Number(b.dateCreated) - Number(a.dateCreated)
     );
     setDeliverdData(sortedData);
     const convertedOrders = convertData(sortedData);
     setDeliverdOrders(convertedOrders);
   };
 
-  const convertData = (data) => {
+  const convertData = (data: any) => {
     if (!data) {
       return [];
     }
 
-    const formatOrderDate = (timestamp) => {
-      const date = new Date(Number(timestamp));
-      const options = {
-        weekday: "short",
-        day: "numeric",
-        month: "long",
-        year: "numeric",
-      };
-      return date.toLocaleDateString("en-US", options);
-    };
-
-    const formatOrderTime = (timestamp) => {
-      const date = new Date(Number(timestamp));
-      const options = {
-        hour: "numeric",
-        minute: "numeric",
-        hour12: true,
-      };
-      return date.toLocaleTimeString("en-US", options);
-    };
-
-    const modifiedOrder = data.map((order) => {
-
-
-      const formattedDate = formatOrderDate(order.dateCreated);
-      const formattedTime = formatOrderTime(order.dateCreated);
+    const modifiedOrder = data.map((order: any) => {
+      const formattedDate = formatDate(order.dateCreated);
+      const formattedTime = formatTime(order.dateCreated);
 
       return {
         ...order,
@@ -126,25 +101,25 @@ const Orders = () => {
     });
 
     return modifiedOrder;
-  }
+  };
 
-  const updatePendingOrderStatus = async (id) => {
+  const updatePendingOrderStatus = async (id: any) => {
     updateOrderStatus(id, pendingData, pendingOrders);
   };
-  const updateProcessingOrderStatus = async (id) => {
+  const updateProcessingOrderStatus = async (id: any) => {
     updateOrderStatus(id, approvedData, approvedOrders);
   };
-  const updateShippedOrderStatus = async (id) => {
+  const updateShippedOrderStatus = async (id: any) => {
     updateOrderStatus(id, shippedData, shippedOrders);
   };
-  const updateDeliverdOrderStatus = async (id) => {
+  const updateDeliverdOrderStatus = async (id: any) => {
     updateOrderStatus(id, deliveredData, deliveredOrders);
   };
 
-  const updateOrderStatus = async (id, data, orders) => {
+  const updateOrderStatus = async (id: any, data: any, orders: any) => {
     if (data && orderStatus != "") {
       setUpdating(true);
-      const orderIndex = data.findIndex((order) => order.orderId === id);
+      const orderIndex = data.findIndex((order: any) => order.orderId === id);
 
       if (orderIndex !== -1) {
         data[orderIndex].status = orderStatus;
@@ -159,41 +134,61 @@ const Orders = () => {
         }
         await marketActor.updatePOrder(id, data[orderIndex]);
         if (orderStatus !== "pending") {
-          await sendAutomaticOrderUpdateEmail(data[orderIndex].fistName, data[orderIndex].userEmail, orderStatus);
+          await sendAutomaticOrderUpdateEmail(
+            data[orderIndex].fistName,
+            data[orderIndex].userEmail,
+            orderStatus
+          );
         }
         setUpdated(true);
-        toast.success(`Order status have been updated${orderStatus !== "pending" ? `. Order update email sent to the customer ${data[orderIndex].userEmail}` : ``}`, {
-          autoClose: 5000,
-          position: "top-center",
-          hideProgressBar: true,
-        });
-        const orderPosition = orders.findIndex((order) => order.orderId === id);
+        toast.success(
+          `Order status have been updated${
+            orderStatus !== "pending"
+              ? `. Order update email sent to the customer ${data[orderIndex].userEmail}`
+              : ``
+          }`,
+          {
+            autoClose: 5000,
+            position: "top-center",
+            hideProgressBar: true,
+          }
+        );
+        const orderPosition = orders.findIndex(
+          (order: any) => order.orderId === id
+        );
         orders[orderPosition].status = orderStatus;
         setUpdating(false);
 
         if (value === 0) {
-          const filteredOrders = pendingOrders.filter(
+          const filteredOrders = pendingOrders?.filter(
             (order) => order.orderId !== id
           );
-          setPendingOrders(filteredOrders);
+          if (filteredOrders) {
+            setPendingOrders(filteredOrders);
+          }
         } else if (value === 1) {
-          const filteredOrders = approvedOrders.filter(
+          const filteredOrders = approvedOrders?.filter(
             (order) => order.orderId !== id
           );
-          setApprovedOrders(filteredOrders);
+          if (filteredOrders) {
+            setApprovedOrders(filteredOrders);
+          }
         } else if (value === 2) {
-          const filteredOrders = shippedOrders.filter(
+          const filteredOrders = shippedOrders?.filter(
             (order) => order.orderId !== id
           );
-          setShippedOrders(filteredOrders);
+          if (filteredOrders) {
+            setShippedOrders(filteredOrders);
+          }
         } else if (value === 3) {
-          const filteredOrders = deliveredOrders.filter(
+          const filteredOrders = deliveredOrders?.filter(
             (order) => order.orderId !== id
           );
-          setDeliverdOrders(filteredOrders);
+          if (filteredOrders) {
+            setDeliverdOrders(filteredOrders);
+          }
         }
         setOrderStatus("");
-
       } else {
         toast.warning("Order not found", {
           autoClose: 5000,
@@ -204,11 +199,11 @@ const Orders = () => {
     }
   };
 
-  const handleShowStepForm = (id) => {
+  const handleShowStepForm = (id:any) => {
     setShowStep(true);
   };
 
-  const handleChange = (panel) => (event, isExpanded) => {
+  const handleChange = (panel:any) => (isExpanded:any) => {
     setExpanded(isExpanded ? panel : false);
   };
 
@@ -230,7 +225,7 @@ const Orders = () => {
               updating,
               setOrderStep,
               setOrderStatus,
-              orderStatus
+              orderStatus,
             }}
           />
         );
@@ -250,7 +245,7 @@ const Orders = () => {
               updating,
               setOrderStep,
               setOrderStatus,
-              orderStatus
+              orderStatus,
             }}
           />
         );
@@ -270,7 +265,7 @@ const Orders = () => {
               updating,
               setOrderStep,
               setOrderStatus,
-              orderStatus
+              orderStatus,
             }}
           />
         );
@@ -290,7 +285,7 @@ const Orders = () => {
               updating,
               setOrderStep,
               setOrderStatus,
-              orderStatus
+              orderStatus,
             }}
           />
         );

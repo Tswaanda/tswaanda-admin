@@ -20,15 +20,16 @@ import { HSCodes } from "../../hscodes/hscodes";
 import { sendOrderListedEmail } from "../../emails/orderListedMail";
 import { toast } from "react-toastify";
 import Autocomplete from '@mui/lab/Autocomplete';
+import { RootState } from "../../state/Store";
 
 function UpLoadProduct({ isOpen, onClose, setProductsUpdated }) {
 
-  const { storageInitiated } = useSelector((state) => state.global)
+  const { storageInitiated } = useSelector((state: RootState) => state.global)
   const { backendActor } = useAuth()
 
   const [farmer, setFarmer] = useState("");
-  const [minOrder, setMinOrder] = useState(null);
-  const [product, setProduct] = useState({});
+  const [minOrder, setMinOrder] = useState<any|null>(null);
+  const [product, setProduct] = useState<any|null>(null);
   const [shortDescription, setShortDescription] = useState("");
   const [fullDesc, setFullDesc] = useState("");
   const [price, setPrice] = useState("");
@@ -38,8 +39,8 @@ function UpLoadProduct({ isOpen, onClose, setProductsUpdated }) {
   const [loadingImages, setloadingImages] = useState(false);
   const [saving, setSaving] = useState(false);
 
-  const [uploads, setUploads] = useState([]);
-  const [imgCount, setImgCount] = useState(null)
+  const [uploads, setUploads] = useState<any[]>([]);
+  const [imgCount, setImgCount] = useState<any|null>(null)
   const [uploading, setUpLoading] = useState(false);
 
   const handleImageInputChange = (e) => {
@@ -51,7 +52,7 @@ function UpLoadProduct({ isOpen, onClose, setProductsUpdated }) {
   };
 
   useEffect(() => {
-    if (uploads.length >= 4) {
+    if (uploads?.length >= 4) {
       setloadingImages(false);
     }
   }, [uploads]);
@@ -130,7 +131,7 @@ function UpLoadProduct({ isOpen, onClose, setProductsUpdated }) {
     if (storageInitiated && uploads) {
       setUpLoading(true);
       const file_path = location.pathname;
-      const assetsUrls = [];
+      const assetsUrls: string[] = [];
 
       for (const image of uploads) {
         try {

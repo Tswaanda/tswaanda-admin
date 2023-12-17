@@ -4,7 +4,9 @@ import { Box, Typography, useTheme } from "@mui/material";
 // import { useGetSalesQuery } from "../state/api";
 
 const BreakdownChart = ({ isDashboard = false }) => {
-  const { data, isLoading } = useGetSalesQuery();
+  // const { data, isLoading } = useGetSalesQuery();
+  let data = null;
+  let isLoading = false;
   const theme = useTheme();
 
   if (!data || isLoading) return "Loading...";
@@ -15,14 +17,14 @@ const BreakdownChart = ({ isDashboard = false }) => {
     (theme.palette.secondary as any)[300],
     (theme.palette.secondary as any)[500],
   ];
-  const formattedData = Object.entries(data.salesByCategory || {}).map(
-    ([category, sales], i) => ({
-      id: category,
-      label: category,
-      value: sales,
-      color: colors[i],
-    })
-  );
+  // const formattedData = Object.entries(data.salesByCategory || {}).map(
+  //   ([category, sales], i) => ({
+  //     id: category,
+  //     label: category,
+  //     value: sales,
+  //     color: colors[i],
+  //   })
+  // );
 
   return (
     <Box
@@ -32,8 +34,8 @@ const BreakdownChart = ({ isDashboard = false }) => {
       minWidth={isDashboard ? "325px" : undefined}
       position="relative"
     >
-      <ResponsivePie
-        data={formattedData}
+      {/* <ResponsivePie
+        // data={formattedData}
         theme={{
           axis: {
             domain: {
@@ -115,7 +117,7 @@ const BreakdownChart = ({ isDashboard = false }) => {
             ],
           },
         ]}
-      />
+      /> */}
       <Box
         position="absolute"
         top="50%"
@@ -130,7 +132,7 @@ const BreakdownChart = ({ isDashboard = false }) => {
         }}
       >
         <Typography variant="h6">
-          {!isDashboard && "Total:"} ${data.yearlySalesTotal}
+          {!isDashboard && "Total:"} $
         </Typography>
       </Box>
     </Box>

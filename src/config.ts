@@ -3,7 +3,7 @@ import {
   canisterId,
   idlFactory,
 } from "./declarations/tswaanda_backend";
-// ts-ignore
+// @ts-ignore
 import icblast from "@infu/icblast";
 import { idlFactory as marketIdlFactory } from "./declarations/marketplace_backend";
 import { AuthClient } from "@dfinity/auth-client";
@@ -17,7 +17,7 @@ const marketCanisterId = "55ger-liaaa-aaaal-qb33q-cai";
 
 const identity = authClient.getIdentity()
 let ic = icblast({
-  local: network === "local" ? true : false
+  local: false
   , identity: identity
 });
 
@@ -25,7 +25,7 @@ export const canister = await ic("55ger-liaaa-aaaal-qb33q-cai");
 
 const localhost = "http://localhost:4943";
 const localagent = new HttpAgent({ host: localhost });
-localagent.fetchRootKey();
+// localagent.fetchRootKey();
 
 
 const host = "https://icp0.io";

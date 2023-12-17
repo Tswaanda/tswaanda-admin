@@ -37,6 +37,7 @@ import { useAuth } from "./hooks/auth";
 import Unauthorized from "./components/Unauthorized";
 import Newsletter from "./scenes/newsletters";
 import NotificationsPage from "./scenes/notifications";
+import { RootState } from "./state/Store";
 
 function App() {
   const dispatch = useDispatch();
@@ -102,7 +103,7 @@ function App() {
     }
   };
 
-  const mode = useSelector((state) => state.global.mode);
+  const mode = useSelector((state: RootState) => state.global.mode);
   const theme = useMemo(() => createTheme(themeSettings(mode)), [mode]);
 
   return (

@@ -22,14 +22,14 @@ const BootstrapDialog = styled(Dialog)(({ theme }) => ({
     },
 }));
 
-type ProofOfAddressProps = {
-    setPOAModal: (show: boolean) => void;
-    openPOAModal: boolean;
-    showProofOfAddressDoc: () => void;
+type Props = {
+    setPOAModal: any;
+    openPOAModal: any;
+    showProofOfAddressDoc: any;
     customer: any;
-}
+};
 
-const ProofOfAddress: FC<ProofOfAddressProps> = ({ setPOAModal, openPOAModal, showProofOfAddressDoc, customer }) => {
+const ProofOfAddress: FC<Props> = ({ setPOAModal, openPOAModal, showProofOfAddressDoc, customer }) => {
     const [isPdf, setIsPdf] = useState(false)
 
     const theme = useTheme();

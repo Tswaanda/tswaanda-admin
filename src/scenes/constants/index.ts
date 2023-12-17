@@ -14,9 +14,9 @@ export const categories = [
   "Organic and Specialty",
 ];
 
-export const formatDate = (timestamp) => {
+export const formatDate = (timestamp: string | number): string => {
   const date = new Date(Number(timestamp));
-  const options = {
+  const options: Intl.DateTimeFormatOptions = {
     weekday: "short",
     day: "numeric",
     month: "long",
@@ -24,3 +24,15 @@ export const formatDate = (timestamp) => {
   };
   return date.toLocaleDateString("en-US", options);
 };
+
+export const formatTime = (timestamp: string | number): string => {
+  const date = new Date(Number(timestamp));
+  const options: Intl.DateTimeFormatOptions = {
+    hour: "numeric",
+    minute: "numeric",
+    hour12: true,
+  };
+  return date.toLocaleTimeString("en-US", options);
+};
+
+

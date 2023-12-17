@@ -5,27 +5,35 @@ import React, {
   createContext,
   FC,
 } from "react";
-import { Actor, ActorSubclass, HttpAgent, Identity, SignIdentity } from "@dfinity/agent";
-import { createActor as createMarketActor , idlFactory as marketIdlFactory } from "../declarations/marketplace_backend";
+import {
+  Actor,
+  ActorSubclass,
+  HttpAgent,
+  Identity,
+  SignIdentity,
+} from "@dfinity/agent";
+import { idlFactory as marketIdlFactory } from "../declarations/marketplace_backend";
 import { AuthClient } from "@dfinity/auth-client";
 import { canisterId as identityCanId } from "../declarations/internet_identity/index";
 import {
   canisterId,
-  createActor as createActorBackend,
   tswaanda_backend,
+  idlFactory as tswaanda_backend_idl,
 } from "../declarations/tswaanda_backend/index";
 import {
   AppMessage,
   _SERVICE as BACKENDSERVICE,
 } from "../declarations/tswaanda_backend/tswaanda_backend.did";
 import IcWebSocket from "ic-websocket-js";
-import { _SERVICE as MARKETSERVICE } from "../declarations/marketplace_backend/marketplace_backend.did";
 
 const marketCanisterId = "55ger-liaaa-aaaal-qb33q-cai";
 const localMarketCanId = "by6od-j4aaa-aaaaa-qaadq-cai";
 
 const gatewayUrl = "wss://gateway.icws.io";
 const icUrl = "https://icp0.io";
+
+const localhost = "http://localhost:8080";
+const host = "https://icp0.io";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -93,10 +101,10 @@ export const useAuth = () => {
 
 export const ContextProvider: FC<LayoutProps> = ({ children }) => {
   const [principleId, setPrincipleId] = useState("");
-  const [identity, setIdentity] = useState<Identity | null>(null);
+  const [identity, setIdentity] = useState<any>(null);
   const [backendActor, setBackendActor] =
-    useState<ActorSubclass<BACKENDSERVICE> | null>(null);
-  const [marketActor, setMarketActor] = useState<MARKETSERVICE | null >(null);
+    useState<ActorSubclass | null>(null);
+  const [marketActor, setMarketActor] = useState<ActorSubclass | null>(null);
   const [ws, setWs] = useState<IcWebSocket<BACKENDSERVICE, AppMessage> | null>(
     null
   );
@@ -140,21 +148,23 @@ export const ContextProvider: FC<LayoutProps> = ({ children }) => {
       const _identity = authClient.getIdentity();
       setIdentity(_identity);
 
-      // let agent = new HttpAgent({
-      //   host: network === "local" ? localhost : host,
-      //   identity: _identity,
-      // });
-      // agent.fetchRootKey()
+      let agent = new HttpAgent({
+        host: network === "local" ? localhost : host,
+        identity: _identity,
+      });
+      // agent.fetchRootKey();
 
       // set backend actor
-      const _backendActor = createActorBackend(canisterId, {
-        agentOptions: { identity: _identity },
+      const _backendActor = Actor.createActor(tswaanda_backend_idl, {
+        agent,
+        canisterId: canisterId,
       });
       setBackendActor(_backendActor);
 
       // set market actor
-      const _marketActor = createMarketActor(marketCanisterId, {
-        agentOptions: { identity: _identity },
+      const _marketActor = Actor.createActor(marketIdlFactory, {
+        agent,
+        canisterId: marketCanisterId,
       });
       setMarketActor(_marketActor);
 
@@ -181,9 +191,6 @@ export const ContextProvider: FC<LayoutProps> = ({ children }) => {
     setContextPrincipleID("");
     setContextIdentity(null);
   };
-
-  // const localhost = "http://localhost:8080";
-  // const host = "https://icp0.io";
 
   return (
     <ContextWrapper.Provider

@@ -21,18 +21,18 @@ import IdentficationDoc from './IdentficationDoc';
 import ProofOfAddress from './ProofOfAddress';
 import UpdateCustomerStatusForm from './UpdateCustomerStatusForm';
 
-type AllProps = {
-    customers: any[];
-    updateCustomerStatus: (customer: any, status: string) => void;
-    setCustomerStatus: (status: string) => void;
-    expanded: string | false;
-    updating: boolean;
-    handleChange: (panel: string) => (event: React.SyntheticEvent, isExpanded: boolean) => void;
-    setUpdated: (updated: boolean) => void;
-    updated: boolean;
+type Props = {
+    customers: any,
+    updateCustomerStatus: any,
+    setCustomerStatus: any,
+    expanded: any,
+    updating: any,
+    handleChange: any,
+    setUpdated: any,
+    updated: any,
 }
 
-const All: FC<AllProps> = ({
+const All: FC<Props> = ({
     customers,
     updateCustomerStatus,
     setCustomerStatus,

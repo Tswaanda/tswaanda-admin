@@ -1,15 +1,18 @@
 import React from "react";
 import { Box, useTheme } from "@mui/material";
-import { useGetUserPerformanceQuery } from "../../state/api";
+// import { useGetUserPerformanceQuery } from "../../state/api";
 import { useSelector } from "react-redux";
 import { DataGrid } from "@mui/x-data-grid";
 import Header from "../../components/Header";
 import CustomColumnMenu from "../../components/DataGridCustomColumnMenu";
+import { RootState } from "../../state/Store";
 
 const Performance = () => {
     const theme = useTheme();
-    const userId = useSelector((state) => state.global.userId);
-    const { data, isLoading } = useGetUserPerformanceQuery(userId);
+   let userId = null
+   let data = null
+    let isLoading = false
+    // const { data, isLoading } = useGetUserPerformanceQuery(userId);
 
     const columns = [
         {
@@ -32,13 +35,13 @@ const Performance = () => {
         headerName: "# of Products",
         flex: 0.5,
         sortable: false,
-        renderCell: (params) => params.value.length,
+        renderCell: (params:any) => params.value.length,
         },
         {
         field: "cost",
         headerName: "Cost",
         flex: 1,
-        renderCell: (params) => `$${Number(params.value).toFixed(2)}`,
+        renderCell: (params:any) => `$${Number(params.value).toFixed(2)}`,
         },
     ];
 
@@ -59,24 +62,24 @@ const Performance = () => {
                     borderBottom: "none",
                 },
                 "& .MuiDataGrid-columnHeaders": {
-                    backgroundColor: theme.palette.background.alt,
-                    color: theme.palette.secondary[100],
+                    backgroundColor: theme.palette.background.default,
+                    color: (theme.palette.secondary as any)[100],
                     borderBottom: "none",
                 },
                 "& .MuiDataGrid-virtualScroller": {
                     backgroundColor: theme.palette.primary.light,
                 },
                 "& .MuiDataGrid-footerContainer": {
-                    backgroundColor: theme.palette.background.alt,
-                    color: theme.palette.secondary[100],
+                    backgroundColor: theme.palette.background.default,
+                    color: (theme.palette.secondary as any)[100],
                     borderTop: "none",
                 },
                 "& .MuiDataGrid-toolbarContainer .MuiButton-text": {
-                    color: `${theme.palette.secondary[200]} !important`,
+                    color: `${(theme.palette.secondary as any)[200]} !important`,
                 },
                 }}
             >
-                <DataGrid
+                {/* <DataGrid
                     loading={isLoading || !data}
                     getRowId={(row) => row._id}
                     rows={(data && data.sales) || []}
@@ -84,7 +87,7 @@ const Performance = () => {
                     components={{
                         ColumnMenu: CustomColumnMenu,
                     }}
-                />
+                /> */}
             </Box>
         </Box>
     );

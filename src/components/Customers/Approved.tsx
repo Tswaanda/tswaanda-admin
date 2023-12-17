@@ -18,14 +18,14 @@ import ProofOfAddress from './ProofOfAddress';
 import UpdateCustomerStatusForm from './UpdateCustomerStatusForm';
 
 type ApprovedProps = {
-    approvedCustomers: any[];
-    updateCustomerStatus: (customer: any, status: string) => void;
-    setCustomerStatus: (status: string) => void;
-    expanded: string | false;
-    updating: boolean;
-    handleChange: (panel: string) => (event: React.SyntheticEvent, isExpanded: boolean) => void;
-    setUpdated: (updated: boolean) => void;
-    updated: boolean;
+    approvedCustomers: any,
+    updateCustomerStatus: any,
+    setCustomerStatus: any,
+    expanded: any,
+    updating: any,
+    handleChange: any,
+    setUpdated: any,
+    updated: any,
 }
 
 const Approved : FC<ApprovedProps> = ({
@@ -90,7 +90,7 @@ const Approved : FC<ApprovedProps> = ({
 
     return (
         <Box m="1rem 0 0 0">
-            {approvedCustomers?.map((customer) => (
+            {approvedCustomers?.map((customer: any) => (
                  <Accordion
                  key={customer.id}
                  expanded={expanded === customer.id}

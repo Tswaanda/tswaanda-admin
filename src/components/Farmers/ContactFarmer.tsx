@@ -44,7 +44,7 @@ const ContactFarmer: FC<ContactFarmerProps> = ({ farmer, setShowContactForm, the
         setContactModal(false);
     }
 
-    const handleEmailSend = async (e) => {
+    const handleEmailSend = async (e: any) => {
         e.preventDefault()
         setSending(true)
         console.log("sending")

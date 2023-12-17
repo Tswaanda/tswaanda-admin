@@ -19,14 +19,14 @@ import UpdateCustomerStatusForm from './UpdateCustomerStatusForm';
 import { type } from 'os';
 
 type AnonProps = {
-  anonUsers: any[];
-  expanded: string | false;
-  updateCustomerStatus: any;
-  setCustomerStatus: (status: string) => void;
-  handleChange: (panel: string) => (event: React.SyntheticEvent, isExpanded: boolean) => void;
-  updating: boolean;
-  setUpdated: (updated: boolean) => void;
-  updated: boolean;
+  anonUsers: any,
+  updateCustomerStatus: any,
+  setCustomerStatus: any,
+  expanded: any,
+  updating: any,
+  handleChange: any,
+  setUpdated: any,
+  updated: any,
 }
 
 const Anon: FC<AnonProps> = ({

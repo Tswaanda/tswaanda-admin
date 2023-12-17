@@ -1,10 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  Box,
-  Tabs,
-  Tab,
-  Button,
-} from "@mui/material";
+import { Box, Tabs, Tab, Button } from "@mui/material";
 import Header from "../../components/Header";
 import { toast } from "react-toastify";
 import { canister } from "../../config";
@@ -13,14 +8,16 @@ import Approved from "../../components/Customers/Approved";
 import { sendAutomaticEmailMessage } from "../../emails/kycApprovals";
 import Anon from "../../components/Customers/Anon";
 import All from "../../components/Customers/All";
+import { formatDate, formatTime } from "../constants";
+import { Customer } from "../../declarations/marketplace_backend/marketplace_backend.did";
 
 const Customers = () => {
-  const [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = useState<string | false>(false);
   const [showStatus, setShowStatus] = useState(false);
   const [updating, setUpdating] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [customers, setCustomers] = useState(null);
-  const [data, setData] = useState(null);
+  const [customers, setCustomers] = useState<any[] | null>(null);
+  const [data, setData] = useState<Customer[] | null>(null);
   const [pendingCustomers, setPendingCustomers] = useState(null);
   const [approvedCustomers, setApprovedCustomers] = useState(null);
   const [updated, setUpdated] = useState(false);
@@ -30,72 +27,49 @@ const Customers = () => {
   const [customerStatus, setCustomerStatus] = useState("");
   const [value, setValue] = useState(0);
 
-  const handleTabChange = (event, newValue) => {
+  const handleTabChange = (newValue: any) => {
     setValue(newValue);
   };
 
-  const handleChange = (panel) => (event, isExpanded) => {
+  const handleChange = (panel: any) => (isExpanded: any) => {
     setExpanded(isExpanded ? panel : false);
   };
 
   const getPendingCustomers = async () => {
-    const res = await canister.getPendingKYCReaquest()
+    const res = await canister.getPendingKYCReaquest();
     const sortedData = res.sort(
-      (a, b) => Number(b.created) - Number(a.created)
+      (a: any, b: any) => Number(b.created) - Number(a.created)
     );
     const convertedCustomers = convertData(sortedData);
     setPendingCustomers(convertedCustomers);
-  }
+  };
 
   const getApprovedCustomers = async () => {
-    const res = await canister.getApprovedKYC()
+    const res = await canister.getApprovedKYC();
     const sortedData = res.sort(
-      (a, b) => Number(b.created) - Number(a.created)
+      (a: any, b: any) => Number(b.created) - Number(a.created)
     );
     const convertedCustomers = convertData(sortedData);
     setApprovedCustomers(convertedCustomers);
-  }
+  };
 
   const getAnonUsers = async () => {
-    const res = await canister.getAnonUsers()
+    const res = await canister.getAnonUsers();
     const sortedData = res.sort(
-      (a, b) => Number(b.created) - Number(a.created)
+      (a: any, b: any) => Number(b.created) - Number(a.created)
     );
     const convertedCustomers = convertData(sortedData);
     setAnonUsers(convertedCustomers);
-  }
+  };
 
-  const convertData = (data) => {
+  const convertData = (data: any) => {
     if (!data) {
       return [];
     }
 
-    const formatCustomerDate = (timestamp) => {
-      const date = new Date(Number(timestamp));
-      const options = {
-        weekday: "short",
-        day: "numeric",
-        month: "long",
-        year: "numeric",
-      };
-      return date.toLocaleDateString("en-US", options);
-    };
-
-    const formatCustomerTime = (timestamp) => {
-      const date = new Date(Number(timestamp));
-      const options = {
-        hour: "numeric",
-        minute: "numeric",
-        hour12: true,
-      };
-      return date.toLocaleTimeString("en-US", options);
-    };
-
-    const modfifiedCustomers = data.map((customer) => {
-
-
-      const formattedDate = formatCustomerDate(customer.created);
-      const formattedTime = formatCustomerTime(customer.created);
+    const modfifiedCustomers = data.map((customer: any) => {
+      const formattedDate = formatDate(customer.created);
+      const formattedTime = formatTime(customer.created);
 
       return {
         ...customer,
@@ -105,7 +79,7 @@ const Customers = () => {
     });
 
     return modfifiedCustomers;
-  }
+  };
 
   const getCustomers = async () => {
     setIsLoading(true);
@@ -115,23 +89,17 @@ const Customers = () => {
 
   useEffect(() => {
     if (data) {
-
-      const formatCustomerDate = (timestamp) => {
-        const date = new Date(Number(timestamp));
-        return date.toLocaleDateString();
-      };
-
-      const modfifiedCustomers = data.map((customer) => ({
+      const modfifiedCustomers = data?.map((customer) => ({
         ...customer,
         principal: customer.principal.toString(),
-        created: formatCustomerDate(customer.created),
-        body: customer.body ?
-          {
-            ...customer.body,
-            zipCode: Number(customer.zipCode),
-            phoneNumber: Number(customer.phoneNumber),
-          }
-          : undefined
+        created: formatDate(Number(customer.created)),
+        body: customer.body
+          ? {
+              ...customer.body,
+              zipCode: Number(customer.body[0]?.zipCode),
+              phoneNumber: Number(customer.body[0]?.phoneNumber),
+            }
+          : undefined,
       }));
       setCustomers(modfifiedCustomers);
       setIsLoading(false);
@@ -153,38 +121,53 @@ const Customers = () => {
     }
   }, [value]);
 
-  const handleShowStatusForm = (id) => {
+  const handleShowStatusForm = (id: any) => {
     setSelectedCustomerId(id);
     setShowStatus(true);
   };
 
-  const updateCustomerStatus = async (id) => {
+  const updateCustomerStatus = async (id: any) => {
     if (data && customerStatus != "") {
       try {
         setUpdating(true);
         const customerIndex = data.findIndex((customer) => customer.id === id);
 
         if (customerIndex !== -1) {
-          data[customerIndex].body.status = customerStatus;
-          await canister.updateKYCRequest(
-            data[customerIndex]
-          );
+          const customer = data[customerIndex];
+          if (customer.body && customer.body.length > 0) {
+            const firstBodyElement = customer.body[0];
+            if (firstBodyElement) {
+              firstBodyElement.status = customerStatus;
+            }
+          }
+          await canister.updateKYCRequest(data[customerIndex]);
           if (customerStatus === "approved") {
-            await sendAutomaticEmailMessage(data[customerIndex].body.firstName, data[customerIndex].body.email)
+            await sendAutomaticEmailMessage(
+              data[customerIndex].body[0]?.firstName,
+              data[customerIndex].body[0]?.email
+            );
           }
           setUpdated(true);
           toast.success(
-            `Customer status have been updated to ${customerStatus} ${customerStatus === "approved" ? ", Approval email have been sent" : ""} `,
+            `Customer status have been updated to ${customerStatus} ${
+              customerStatus === "approved"
+                ? ", Approval email have been sent"
+                : ""
+            } `,
             {
               autoClose: 5000,
               position: "top-center",
               hideProgressBar: true,
             }
           );
-          const customerPosition = customers.findIndex(
+          const customerPosition = customers?.findIndex(
             (customer) => customer.id === id
           );
-          customers[customerPosition].body.status = customerStatus;
+          if (customerPosition !== undefined) {
+            if (customers) {
+              customers[customerPosition].body.status = customerStatus;
+            }
+          }
           setUpdating(false);
           setSelectedCustomerId(null);
         } else {
@@ -195,7 +178,7 @@ const Customers = () => {
           });
         }
       } catch (error) {
-        console.log("Error updating the customer status", error)
+        console.log("Error updating the customer status", error);
       }
     }
   };
@@ -259,7 +242,6 @@ const Customers = () => {
               selectedCustomerId,
               customerStatus,
               handleChange,
-
             }}
           />
         );
@@ -280,7 +262,6 @@ const Customers = () => {
               selectedCustomerId,
               customerStatus,
               handleChange,
-
             }}
           />
         );

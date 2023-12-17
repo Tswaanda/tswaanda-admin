@@ -9,6 +9,7 @@ import Header from "../../components/Header";
 import SendEmails from '../../components/Newsletter/SendMails';
 import Clients from '../../components/Newsletter/Clients';
 import { useAuth } from '../../hooks/auth';
+import { formatDate, formatTime } from '../constants';
 
 
 const Newsletter = () => {
@@ -23,47 +24,26 @@ const Newsletter = () => {
     const getClients = async () => {
         const res = await marketActor.getAllNewsLetterSubcribersEntries()
         const sortedData = res.sort(
-            (a, b) => Number(b.created) - Number(a.created)
+            (a:any, b:any) => Number(b.created) - Number(a.created)
         );
         const convertedClients = convertData(sortedData);
         setClients(convertedClients)
     }
 
-    const handleTabChange = (event, newValue) => {
+    const handleTabChange = (newValue: any) => {
         setValue(newValue);
     };
 
-    const convertData = (data) => {
+    const convertData = (data:any) => {
         if (!data) {
             return [];
         }
 
-        const formatCustomerDate = (timestamp) => {
-            const date = new Date(Number(timestamp));
-            const options = {
-                weekday: "short",
-                day: "numeric",
-                month: "long",
-                year: "numeric",
-            };
-            return date.toLocaleDateString("en-US", options);
-        };
-
-        const formatCustomerTime = (timestamp) => {
-            const date = new Date(Number(timestamp));
-            const options = {
-                hour: "numeric",
-                minute: "numeric",
-                hour12: true,
-            };
-            return date.toLocaleTimeString("en-US", options);
-        };
-
-        const modifiedClients = data.map((client) => {
+        const modifiedClients = data.map((client:any) => {
 
 
-            const formattedDate = formatCustomerDate(client.created);
-            const formattedTime = formatCustomerTime(client.created);
+            const formattedDate = formatDate(client.created);
+            const formattedTime = formatTime(client.created);
 
             return {
                 ...client,

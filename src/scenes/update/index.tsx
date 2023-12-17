@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { FC, useEffect, useState } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -17,8 +17,16 @@ import { useSelector, useDispatch } from 'react-redux'
 import { useAuth } from "../../hooks/auth";
 import { HSCodes } from "../../hscodes/hscodes";
 import { toast } from "react-toastify";
+import { RootState } from "../../state/Store";
 
-const UpdateProduct = ({
+type UpdateProductProps = {
+  productInfo: any;
+  setProductsUpdated: any;
+  isOpen: boolean;
+  onClose: any;
+};
+
+const UpdateProduct: FC<UpdateProductProps> = ({
   productInfo,
   setProductsUpdated,
   isOpen,
@@ -27,14 +35,19 @@ const UpdateProduct = ({
 
   const { backendActor } = useAuth()
 
-  const { storageInitiated } = useSelector((state) => state.global)
+  const { storageInitiated } = useSelector((state: RootState) => state.global)
 
-  const [id, setId] = useState(productInfo.id);
-  const [minOrder, setMinOrder] = useState(productInfo.minOrder);
-  const [productItem, setProductItem] = useState({
+  type Pitem = {
+    name: string;
+    code: string;
+  };
+  const [productItem, setProductItem] = useState<Pitem| String>({
     name: productInfo.name,
     code: productInfo.hscode,
   });
+
+  const [id, setId] = useState(productInfo.id);
+  const [minOrder, setMinOrder] = useState(productInfo.minOrder);
   const [shortDescription, setShortDescription] = useState(
     productInfo.shortDescription
   );
@@ -48,17 +61,17 @@ const UpdateProduct = ({
     productInfo.availability
   );
   const [farmer, setFarmer] = useState(productInfo.farmer);
-  const [newImages, setNewImages] = useState(null);
+  const [newImages, setNewImages] = useState<any[]|null>(null);
   const [deletingAssets, setDeleting] = useState(false)
 
 
   const [images, setImages] = useState(productInfo.images);
   const [updating, setUpdating] = useState(false);
   const [loadingImages, setloading] = useState(false);
-  const [imgCount, setImgCount] = useState(null)
+  const [imgCount, setImgCount] = useState<any|null>(null)
   const [uploading, setUpLoading] = useState(false);
 
-  const handleImageChange = async (e) => {
+  const handleImageChange = async (e: any) => {
     setloading(true);
     const files = Array.from(e.target.files);
     const selected = files.slice(0, 4);
@@ -66,7 +79,7 @@ const UpdateProduct = ({
     setloading(false)
   };
 
-  const handleFormSubmit = async (event) => {
+  const handleFormSubmit = async (event:any) => {
     event.preventDefault();
     if (deletingAssets || uploading || updating) {
       console.log("Currently busy")
@@ -88,7 +101,7 @@ const UpdateProduct = ({
     }
   };
 
-  const saveUpdatedProduct = async (filesUrls) => {
+  const saveUpdatedProduct = async (filesUrls:any) => {
     const farmerRes = await backendActor.getFarmerByEmail(farmer)
     if (!farmerRes.ok) {
       console.log("Farmer not found, please check email address or register farmer first")
@@ -105,9 +118,9 @@ const UpdateProduct = ({
     }
     const updatedProduct = {
       id: id,
-      name: productItem.name,
+      name: (productItem as Pitem).name,
       farmer: farmer,
-      hscode: productItem.code,
+      hscode: (productItem as Pitem).code,
       price: parseInt(price),
       minOrder: parseInt(minOrder),
       shortDescription: shortDescription,
@@ -131,14 +144,14 @@ const UpdateProduct = ({
       setImgCount(newImages.length)
       setUpLoading(true);
       const file_path = location.pathname;
-      const assetsUrls = [];
+      const assetsUrls: string[] = [];
 
       for (const image of newImages) {
         try {
           const assetUrl = await uploadFile(image, file_path);
           assetsUrls.push(assetUrl);
           console.log("This file was successfully uploaded:", image.name);
-          setImgCount(prevCount => prevCount - 1);
+          setImgCount((prevCount: any) => prevCount - 1);
         } catch (error) {
           console.error("Error uploading file:", image.name, error);
         }
@@ -149,13 +162,13 @@ const UpdateProduct = ({
     }
   };
 
-  const deleteAssetsUrls = async (urls) => {
+  const deleteAssetsUrls = async (urls:any) => {
     setDeleting(true)
     setImgCount(urls.length)
     for (const url of urls) {
       console.log("Deleting this url", url)
       await deleteAsset(url);
-      setImgCount(prevCount => prevCount - 1);
+      setImgCount((prevCount:any) => prevCount - 1);
     }
     setDeleting(false)
   };
@@ -181,7 +194,7 @@ const UpdateProduct = ({
               onChange={(e) => setProductItem(e.target.value)}
             >
               {HSCodes.map((codeItem, index) => (
-                <MenuItem key={index} value={codeItem}>
+                <MenuItem key={index} >
                   {codeItem.name} - {codeItem.code}
                 </MenuItem>
               ))}

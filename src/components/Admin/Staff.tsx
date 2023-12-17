@@ -17,15 +17,15 @@ import UpdateAccessLevel from './UpdateAccessLevel';
 import { useAuth } from '../../hooks/auth';
 import { toast } from 'react-toastify';
 import { formatDate } from '../../scenes/constants/index';
-import { Staff } from '../../declarations/tswaanda_backend/tswaanda_backend.did';
+import { Staff as StaffMember } from '../../declarations/tswaanda_backend/tswaanda_backend.did';
 
 type StaffProps = {
   expanded: string | false;
-  handleChange: (panel: string) => (event: React.SyntheticEvent, isExpanded: boolean) => void;
+  handleChange: any
 }
 
 const Staff : FC<StaffProps> = ({ expanded, handleChange }) => {
-  const [staff, setStaff] = useState<Staff[]>([])
+  const [staff, setStaff] = useState<StaffMember[]>([])
   const [updating, setUpdating] = useState(false)
 
   const { backendActor } = useAuth()

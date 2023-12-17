@@ -35,7 +35,7 @@ const IdentficationDoc: FC<IdentficationDocProps> = ({ setIDModal, openIDModal, 
 
   const handlePOAModalClose = () => {
     setIDModal(false);
-    showIdentificationDoc()
+    // showIdentificationDoc()
   };
 
       useEffect(() => {

@@ -1,3 +1,13 @@
+type ColorToken = {
+  [key: number]: string;
+};
+
+type Tokens = {
+  grey: ColorToken;
+  primary: ColorToken;
+  secondary: ColorToken;
+};
+
 // color design tokens export
 export const tokensDark = {
     grey: {
@@ -43,17 +53,17 @@ export const tokensDark = {
   };
   
   // function that reverses the color palette
-  function reverseTokens(tokensDark) {
-    const reversedTokens = {};
-    Object.entries(tokensDark).forEach(([key, val]) => {
-      const keys = Object.keys(val);
+  function reverseTokens(tokens: Tokens): Tokens {
+    const reversedTokens: Tokens = {} as Tokens;
+    Object.entries(tokens).forEach(([key, val]) => {
+      const keys = Object.keys(val).map(k => parseInt(k, 10));
       const values = Object.values(val);
       const length = keys.length;
-      const reversedObj = {};
+      const reversedObj: ColorToken = {} as ColorToken;
       for (let i = 0; i < length; i++) {
         reversedObj[keys[i]] = values[length - i - 1];
       }
-      reversedTokens[key] = reversedObj;
+      reversedTokens[key as keyof Tokens] = reversedObj;
     });
     return reversedTokens;
   }

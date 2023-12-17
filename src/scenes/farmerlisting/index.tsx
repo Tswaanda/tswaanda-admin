@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { FC, useEffect, useState } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -17,13 +17,22 @@ import { v4 as uuidv4 } from "uuid";
 import { toast } from "react-toastify";
 import { uploadFile } from "../../storage-config/functions";
 import { useAuth } from "../../hooks/auth";
-import { useSelector, useDispatch } from 'react-redux'
+import { useSelector, useDispatch } from "react-redux";
+import { RootState } from "../../state/Store";
 
-function FarmerListing({ isOpen, onClose, getPendingFarmers }) {
+type FarmerListingProps = {
+  isOpen: boolean;
+  onClose: any;
+  getPendingFarmers: any;
+};
 
-  const { storageInitiated } = useSelector((state) => state.global)
-  const { backendActor } = useAuth()
-
+const FarmerListing: FC<FarmerListingProps> = ({
+  isOpen,
+  onClose,
+  getPendingFarmers,
+}) => {
+  const { storageInitiated } = useSelector((state: RootState) => state.global);
+  const { backendActor } = useAuth();
 
   const [farmerName, setFarmerName] = useState("");
   const [farmerEmail, setFarmerEmail] = useState("");
@@ -32,13 +41,12 @@ function FarmerListing({ isOpen, onClose, getPendingFarmers }) {
   const [farmLocation, setFarmLocation] = useState("");
   const [farmDescription, setFarmDescription] = useState("");
   const [produceCategory, setProduceCategory] = useState("");
-  const [proofOfAddress, setProofOfAddress] = useState(null);
-  const [idCopy, setIdCopy] = useState(null);
+  const [proofOfAddress, setProofOfAddress] = useState<File | null>(null);
+  const [idCopy, setIdCopy] = useState<File | null>(null);
 
   const [saving, setSaving] = useState(false);
 
-
-  const handleFormSubmit = async (event) => {
+  const handleFormSubmit = async (event: any) => {
     event.preventDefault();
     try {
       setSaving(true);
@@ -75,23 +83,18 @@ function FarmerListing({ isOpen, onClose, getPendingFarmers }) {
       });
       getPendingFarmers();
       setSaving(false);
-
     } catch (error) {
       console.log(error);
-      toast.error(
-        `Error adding farmer, please try again`,
-        {
-          autoClose: 5000,
-          position: "top-center",
-          hideProgressBar: true,
-        }
-      );
+      toast.error(`Error adding farmer, please try again`, {
+        autoClose: 5000,
+        position: "top-center",
+        hideProgressBar: true,
+      });
       setSaving(false);
     }
-
   };
 
-  const uploadAssets = async (image) => {
+  const uploadAssets = async (image: any) => {
     if (storageInitiated) {
       try {
         const file_path = location.pathname;
@@ -103,7 +106,6 @@ function FarmerListing({ isOpen, onClose, getPendingFarmers }) {
       }
     }
   };
-
 
   return (
     <Dialog open={isOpen} onClose={onClose}>
@@ -173,14 +175,28 @@ function FarmerListing({ isOpen, onClose, getPendingFarmers }) {
             label="Proof of address (Optional)"
             type="file"
             fullWidth
-            onChange={(e) => setProofOfAddress(e.target.files[0])}
+            onChange={(e) => {
+              const input = e.target as HTMLInputElement;
+              if (input.files && input.files.length > 0) {
+                setProofOfAddress(input.files[0]);
+              } else {
+                setProofOfAddress(null);
+              }
+            }}
           />
           <TextField
             margin="dense"
             label="Id Copy (Optional)"
             type="file"
             fullWidth
-            onChange={(e) => setIdCopy(e.target.files[0])}
+            onChange={(e) => {
+              const input = e.target as HTMLInputElement;
+              if (input.files && input.files.length > 0) {
+                setIdCopy(input.files[0]);
+              } else {
+                setIdCopy(null);
+              }
+            }}
           />
 
           <FormControl fullWidth margin="dense">
@@ -197,7 +213,6 @@ function FarmerListing({ isOpen, onClose, getPendingFarmers }) {
               ))}
             </Select>
           </FormControl>
-
         </DialogContent>
         <DialogActions>
           <Button onClick={onClose} variant="outlined" color="error">
@@ -220,6 +235,6 @@ function FarmerListing({ isOpen, onClose, getPendingFarmers }) {
       </form>
     </Dialog>
   );
-}
+};
 
 export default FarmerListing;

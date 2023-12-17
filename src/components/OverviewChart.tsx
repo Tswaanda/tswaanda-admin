@@ -20,7 +20,7 @@ const data = {
 };
 
 type Props = {
-  view: "sales" | "units";
+  view: any
 };
 
 

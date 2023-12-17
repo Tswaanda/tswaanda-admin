@@ -39,7 +39,6 @@ import StorageIcon from '@mui/icons-material/Storage';
 import ContentPasteIcon from '@mui/icons-material/ContentPaste';
 
 type Props = {
-  user: any;
   drawerWidth: number;
   isSidebarOpen: boolean;
   setIsSidebarOpen: any;
@@ -47,14 +46,13 @@ type Props = {
 };
 
 const Sidebar: FC<Props> = ({
-  user,
   drawerWidth,
   isSidebarOpen,
   setIsSidebarOpen,
   isNonMobile,
 }) => {
-  const [newOrders, setNewOrders] = useState(null);
-  const [newKYC, setNewKYC] = useState(null);
+  const [newOrders, setNewOrders] = useState<any|null>(null);
+  const [newKYC, setNewKYC] = useState<any|null>(null);
 
   const navItems = [
     {

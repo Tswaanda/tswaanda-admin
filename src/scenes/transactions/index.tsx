@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 
 const Transactions = () => {
-    const iframeRef = useRef();
+    const iframeRef = useRef<HTMLIFrameElement>(null);;
     const sendOfferDetailsToWallet = () => {
         const offerDetails = { 
             type: 'offer', 
@@ -43,53 +43,69 @@ const Transactions = () => {
                 notesLabel: 'Payment Method',
                 notes: 'Direct Payment',
                 termLabel: 'Terms & Conditions',
-                term: contractMarkdown,
+                // term: contractMarkdown,
             }
         }
-        iframeRef.current.style.display = "block";
-        iframeRef.current.contentWindow.postMessage(JSON.stringify(offerDetails), '*');
+        if (iframeRef.current && iframeRef.current.contentWindow) {
+            iframeRef.current.style.display = "block";
+            iframeRef.current.contentWindow.postMessage(JSON.stringify(offerDetails), '*');
+        }
     };
 
     const sendSupportMessageToWallet = () => {
         let message = { type: 'message', value: 'Hello, how can I help you?' };
-        iframeRef.current.style.display = "block";
-        iframeRef.current.contentWindow.postMessage(JSON.stringify(message), '*');
+        if (iframeRef.current && iframeRef.current.contentWindow) {
+            iframeRef.current.style.display = "block";
+            iframeRef.current.contentWindow.postMessage(JSON.stringify(message), '*');
+        }
     };
 
     const sendCheckoutDetailsToWallet = () => {
         let purchaseDetails = { type: 'name', value: 'Tswaanda' };
-        iframeRef.current.style.display = "block";
-        iframeRef.current.contentWindow.postMessage(JSON.stringify(purchaseDetails), '*');
+        if (iframeRef.current && iframeRef.current.contentWindow) {
+            iframeRef.current.style.display = "block";
+            iframeRef.current.contentWindow.postMessage(JSON.stringify(purchaseDetails), '*');
+        }
     };
 
     const sendPurchaseDetailsToWallet = () => {
         let purchaseDetails = { type: 'purchase', value: { walletOwner: "", accountNumber: "", paymentDate: "", orderNumber: "" }};
-        iframeRef.current.style.display = "block";
-        iframeRef.current.contentWindow.postMessage(JSON.stringify(purchaseDetails), '*');
+        if (iframeRef.current && iframeRef.current.contentWindow) {
+            iframeRef.current.style.display = "block";
+            iframeRef.current.contentWindow.postMessage(JSON.stringify(purchaseDetails), '*');
+        }
     };
 
     const sendExportDetailsToWallet = () => {
         let purchaseDetails = { type: 'export', value: '' };
-        iframeRef.current.style.display = "block";
-        iframeRef.current.contentWindow.postMessage(JSON.stringify(purchaseDetails), '*');
+        if (iframeRef.current && iframeRef.current.contentWindow) {
+            iframeRef.current.style.display = "block";
+            iframeRef.current.contentWindow.postMessage(JSON.stringify(purchaseDetails), '*');
+        }
     };
 
     const sendShipmentDetailsToWallet = () => {
         let purchaseDetails = { type: 'shipment', value: '' };
-        iframeRef.current.style.display = "block";
-        iframeRef.current.contentWindow.postMessage(JSON.stringify(purchaseDetails), '*');
+        if (iframeRef.current && iframeRef.current.contentWindow) {
+            iframeRef.current.style.display = "block";
+            iframeRef.current.contentWindow.postMessage(JSON.stringify(purchaseDetails), '*');
+        }
     };
 
     const sendFulfillmentDetailsToWallet = () => {
         let purchaseDetails = { type: 'fulfillment', value: '' };
-        iframeRef.current.style.display = "block";
-        iframeRef.current.contentWindow.postMessage(JSON.stringify(purchaseDetails), '*');
+        if (iframeRef.current && iframeRef.current.contentWindow) {
+            iframeRef.current.style.display = "block";
+            iframeRef.current.contentWindow.postMessage(JSON.stringify(purchaseDetails), '*');
+        }
     };
 
     const sendDisputeDetailsToWallet = () => {
         let purchaseDetails = { type: 'dispute', value: '' };
-        iframeRef.current.style.display = "block";
-        iframeRef.current.contentWindow.postMessage(JSON.stringify(purchaseDetails), '*');
+        if (iframeRef.current && iframeRef.current.contentWindow) {
+            iframeRef.current.style.display = "block";
+            iframeRef.current.contentWindow.postMessage(JSON.stringify(purchaseDetails), '*');
+        }
     };
 
     return (

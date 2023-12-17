@@ -13,13 +13,13 @@ import Suspended from "../../components/Admin/Suspended";
 const Support = () => {
     const { backendActor } = useAuth()
     const [value, setValue] = useState(0);
-    const [expanded, setExpanded] = useState(false);
+    const [expanded, setExpanded] = useState<string | false>(false);
 
-    const handleTabChange = (event, newValue) => {
+    const handleTabChange = (newValue: any) => {
         setValue(newValue);
     };
 
-    const handleChange = (panel) => (event, isExpanded) => {
+    const handleChange = (panel: any) => (event: any, isExpanded: any) => {
         setExpanded(isExpanded ? panel : false);
     };
 
