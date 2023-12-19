@@ -28,15 +28,15 @@ import {
   PaidOutlined,
   NewspaperOutlined,
 } from "@mui/icons-material";
-import AgricultureIcon from '@mui/icons-material/Agriculture';
-import SupportAgentIcon from '@mui/icons-material/SupportAgent';
+import AgricultureIcon from "@mui/icons-material/Agriculture";
+import SupportAgentIcon from "@mui/icons-material/SupportAgent";
 import ShoppingCartCheckoutIcon from "@mui/icons-material/ShoppingCartCheckout";
 import Badge from "@mui/material/Badge";
 import { useLocation, useNavigate } from "react-router-dom";
 import FlexBetween from "./FlexBetween";
 import { marketActor } from "../config";
-import StorageIcon from '@mui/icons-material/Storage';
-import ContentPasteIcon from '@mui/icons-material/ContentPaste';
+import StorageIcon from "@mui/icons-material/Storage";
+import ContentPasteIcon from "@mui/icons-material/ContentPaste";
 
 type Props = {
   drawerWidth: number;
@@ -51,8 +51,8 @@ const Sidebar: FC<Props> = ({
   setIsSidebarOpen,
   isNonMobile,
 }) => {
-  const [newOrders, setNewOrders] = useState<any|null>(null);
-  const [newKYC, setNewKYC] = useState<any|null>(null);
+  const [newOrders, setNewOrders] = useState<any | null>(null);
+  const [newKYC, setNewKYC] = useState<any | null>(null);
 
   const navItems = [
     {
@@ -70,7 +70,7 @@ const Sidebar: FC<Props> = ({
     {
       text: "Customers",
       icon: (
-        <Badge badgeContent={newKYC} color="secondary">
+        <Badge badgeContent={String(newKYC)} color="secondary">
           <Groups2Outlined />
         </Badge>
       ),
@@ -79,8 +79,9 @@ const Sidebar: FC<Props> = ({
       text: "Farmers",
       icon: (
         <Badge
-          // badgeContent={newKYC} 
-          color="secondary">
+          // badgeContent={newKYC}
+          color="secondary"
+        >
           <AgricultureIcon />
         </Badge>
       ),
@@ -92,7 +93,7 @@ const Sidebar: FC<Props> = ({
     {
       text: "Orders",
       icon: (
-        <Badge badgeContent={newOrders} color="secondary">
+        <Badge badgeContent={String(newOrders)} color="secondary">
           <ShoppingCartCheckoutIcon />
         </Badge>
       ),
@@ -171,7 +172,6 @@ const Sidebar: FC<Props> = ({
   const navigate = useNavigate();
   const theme = useTheme();
 
-
   useEffect(() => {
     setActive(pathname.substring(1));
   }, [pathname]);
@@ -189,7 +189,7 @@ const Sidebar: FC<Props> = ({
           sx={{
             width: drawerWidth,
             "& .MuiDrawer-paper": {
-              color: ((theme.palette.secondary as any) as any)[200],
+              color: (theme.palette.secondary as any as any)[200],
               backgroundColor: theme.palette.background.default,
               boxSizing: "border-box",
               borderWidth: isNonMobile ? 0 : "2px",
@@ -262,7 +262,6 @@ const Sidebar: FC<Props> = ({
               })}
             </List>
           </Box>
-
         </Drawer>
       )}
     </Box>

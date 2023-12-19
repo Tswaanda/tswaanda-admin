@@ -7,7 +7,7 @@ const network = process.env.DFX_NETWORK
 const getActor = async (canisterId, idlFactory, identity) => {
   console.log("getActor called with:", { canisterId, idlFactory, identity });
 
-  const HOST = network === "ic" ? `https://${canisterId}.icp0.io/` : "http://127.0.0.1:8080/";
+  const HOST = network === "ic" ? `https://${canisterId}.icp0.io/` : "http://127.0.0.1:3000/";
 
   console.log("Host here", HOST)
 
