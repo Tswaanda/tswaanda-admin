@@ -28,7 +28,7 @@ import Iter "mo:base/Iter";
 import Result "mo:base/Result";
 import Buffer "mo:base/Buffer";
 import Principal "mo:base/Principal";
-import Map "mo:hashmap/Map/Map";
+import Map "mo:hashmap/Map";
 import Utils "./utils";
 
 shared ({ caller = initializer }) actor class TswaandaAdmin() = this {

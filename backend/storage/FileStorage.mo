@@ -42,8 +42,8 @@ actor class FileStorage(is_prod : Bool) = this {
 	// change me when in production
 	let IS_PROD : Bool = is_prod;
 
-	private var assets = Map.new<Asset_ID, Asset>(thash);
-	private var chunks = Map.new<Chunk_ID, AssetChunk>(nhash);
+	private var assets = Map.new<Asset_ID, Asset>();
+	private var chunks = Map.new<Chunk_ID, AssetChunk>();
 
 	stable var assets_stable_storage : [(Asset_ID, Asset)] = [];
 	stable var chunks_stable_storage : [(Chunk_ID, AssetChunk)] = [];

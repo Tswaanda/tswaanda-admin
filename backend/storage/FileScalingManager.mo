@@ -26,7 +26,7 @@ actor class FileScalingManager(is_prod : Bool) = this {
 
 	let { thash } = Map;
 
-	private var canister_records = Map.new<Text, CanisterInfo>(thash);
+	private var canister_records = Map.new<Text, CanisterInfo>();
 	stable var canister_records_stable_storage : [(Text, CanisterInfo)] = [];
 
 	stable var file_storage_canister_id : Text = "";
