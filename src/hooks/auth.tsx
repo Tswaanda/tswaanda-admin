@@ -1,10 +1,4 @@
-
-import React, {
-  useContext,
-  useState,
-  createContext,
-  FC,
-} from "react";
+import React, { useContext, useState, createContext, FC } from "react";
 import {
   Actor,
   ActorSubclass,
@@ -21,13 +15,18 @@ import {
   idlFactory as tswaandaIdl,
 } from "../declarations/tswaanda_backend/index";
 import IcWebSocket from "ic-websocket-js";
-import { AppMessage, _SERVICE } from "../declarations/tswaanda_backend/tswaanda_backend.did";
+import {
+  AppMessage,
+  _SERVICE,
+} from "../declarations/tswaanda_backend/tswaanda_backend.did";
 
 const marketCanisterId = "55ger-liaaa-aaaal-qb33q-cai";
 const localMarketCanId = "asrmz-lmaaa-aaaaa-qaaeq-cai";
 
 const gatewayUrl = "wss://gateway.icws.io";
 const icUrl = "https://icp0.io";
+const localGatewayUrl = "ws://127.0.0.1:8080";
+const localICUrl = "http://127.0.0.1:4943";
 
 const localhost = "http://localhost:3000";
 const host = "https://icp0.io";
@@ -144,12 +143,16 @@ export const ContextProvider: FC<LayoutProps> = ({ children }) => {
       });
       setMarketActor(_marketActor);
 
-      const _ws = new IcWebSocket(gatewayUrl, undefined, {
-        canisterId: canisterId,
-        canisterActor: tswaanda_backend,
-        identity: _identity as SignIdentity,
-        networkUrl: icUrl,
-      });
+      const _ws = new IcWebSocket(
+        network === "local" ? localGatewayUrl : gatewayUrl,
+        undefined,
+        {
+          canisterId: canisterId,
+          canisterActor: tswaanda_backend,
+          identity: _identity as SignIdentity,
+          networkUrl: network === "local" ? localICUrl : icUrl,
+        }
+      );
       setWs(_ws);
     }
   };
@@ -158,7 +161,6 @@ export const ContextProvider: FC<LayoutProps> = ({ children }) => {
     await authClient.logout();
     setIsAuthenticated(false);
   };
-
 
   return (
     <ContextWrapper.Provider

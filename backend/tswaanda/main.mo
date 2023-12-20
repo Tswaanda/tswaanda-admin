@@ -101,7 +101,7 @@ shared ({ caller = initializer }) actor class TswaandaAdmin() = this {
         Debug.print("Client " # debug_show (args.client_principal) # " disconnected");
     };
 
-    let params = IcWebSocketCdkTypes.WsInitParams(null, null, null);
+    let params = IcWebSocketCdkTypes.WsInitParams(null, null);
     let ws_state = IcWebSocketCdkState.IcWebSocketState(params);
 
     let handlers = IcWebSocketCdkTypes.WsHandlers(
