@@ -86,8 +86,6 @@ function App() {
     }
   };
 
-  console.log("isAuthenticated", isAuthenticated)
-
   useEffect(() => {
     init();
     checkAuth();

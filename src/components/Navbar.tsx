@@ -103,7 +103,7 @@ const Navbar = ({ user, isSidebarOpen, setIsSidebarOpen }) => {
               <Box
                 component="img"
                 alt="profile"
-                src="./confidence.png"
+                src="../assets/confidence.png"
                 height="32px"
                 width="32px"
                 borderRadius="50%"

@@ -10,6 +10,7 @@ import {
   ActorSubclass,
   HttpAgent,
   Identity,
+  SignIdentity,
 } from "@dfinity/agent";
 import { AuthClient } from "@dfinity/auth-client";
 import { canisterId as identityCanId } from "../declarations/internet_identity/index";
@@ -20,9 +21,10 @@ import {
   idlFactory as tswaandaIdl,
 } from "../declarations/tswaanda_backend/index";
 import IcWebSocket from "ic-websocket-js";
+import { AppMessage, _SERVICE } from "../declarations/tswaanda_backend/tswaanda_backend.did";
 
 const marketCanisterId = "55ger-liaaa-aaaal-qb33q-cai";
-const localMarketCanId = "by6od-j4aaa-aaaaa-qaadq-cai";
+const localMarketCanId = "asrmz-lmaaa-aaaaa-qaaeq-cai";
 
 const gatewayUrl = "wss://gateway.icws.io";
 const icUrl = "https://icp0.io";
@@ -49,6 +51,7 @@ type Context = {
   identity: any;
   backendActor: any;
   isAuthenticated: boolean;
+  ws: any;
   setStorageInitiated(args: boolean): void;
   setAccessLevel(args: string): void;
   login(): void;
@@ -63,6 +66,7 @@ const initialContext: Context = {
   storageInitiated: false,
   accessLevel: "",
   marketActor: null,
+  ws: null,
   setStorageInitiated: (): void => {
     throw new Error("setStorageInitiated function must be overridden");
   },
@@ -90,6 +94,7 @@ export const ContextProvider: FC<LayoutProps> = ({ children }) => {
   const [identity, setIdentity] = useState<Identity | null>(null);
   const [backendActor, setBackendActor] = useState<ActorSubclass | null>(null);
   const [marketActor, setMarketActor] = useState<ActorSubclass | null>(null);
+  const [ws, setWs] = useState<IcWebSocket<_SERVICE, AppMessage> | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [storageInitiated, setStorageInitiated] = useState(false);
   const [accessLevel, setAccessLevel] = useState("");
@@ -116,7 +121,6 @@ export const ContextProvider: FC<LayoutProps> = ({ children }) => {
     if (await authClient.isAuthenticated()) {
       setIsAuthenticated(true);
       const _identity = authClient.getIdentity();
-      console.log("identity", _identity);
       setIdentity(_identity);
 
       let agent = new HttpAgent({
@@ -139,6 +143,14 @@ export const ContextProvider: FC<LayoutProps> = ({ children }) => {
         canisterId: network === "local" ? localMarketCanId : marketCanisterId,
       });
       setMarketActor(_marketActor);
+
+      const _ws = new IcWebSocket(gatewayUrl, undefined, {
+        canisterId: canisterId,
+        canisterActor: tswaanda_backend,
+        identity: _identity as SignIdentity,
+        networkUrl: icUrl,
+      });
+      setWs(_ws);
     }
   };
 
@@ -157,6 +169,7 @@ export const ContextProvider: FC<LayoutProps> = ({ children }) => {
         marketActor,
         storageInitiated,
         accessLevel,
+        ws,
         setStorageInitiated,
         setAccessLevel,
         login,
