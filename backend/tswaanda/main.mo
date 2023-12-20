@@ -83,10 +83,14 @@ shared ({ caller = initializer }) actor class TswaandaAdmin() = this {
         staff := HashMap.fromIter<Principal, Staff>(staffEntries.vals(), 0, Principal.equal, Principal.hash);
     };
 
-    // * -----------------------------------------WEBSOCKETS----------------------------------------------------
+    /*---------------------------------
+    *  WEBSOCKETS IMPLEMENTATION
+    *---------------------------------*/
+
+    let connected_clients = Buffer.Buffer<IcWebSocketCdk.ClientPrincipal>(0);
 
     func on_open(args : IcWebSocketCdk.OnOpenCallbackArgs) : async () {
-        Debug.print("on_open");
+        connected_clients.add(args.client_principal);
     };
 
     func on_message(args : IcWebSocketCdk.OnMessageCallbackArgs) : async () {
@@ -128,7 +132,14 @@ shared ({ caller = initializer }) actor class TswaandaAdmin() = this {
         ws.ws_get_messages(caller, args);
     };
 
-    //-----------------------------------------Access control implimentation---------------------------------------------
+    // Returns an array of the the clients connect to the canister
+    public shared query func getAllConnectedClients() : async [IcWebSocketCdk.ClientPrincipal] {
+        return Buffer.toArray<IcWebSocketCdk.ClientPrincipal>(connected_clients);
+    };
+
+    /********************************
+    *  ACCESS CONTROL IMPLEMENTATION
+    *********************************/
 
     // Determine if a principal has a role with permissions
     func has_permission(pal : Principal, perm : Permission) : Bool {
@@ -286,7 +297,9 @@ shared ({ caller = initializer }) actor class TswaandaAdmin() = this {
         return Buffer.toArray<Staff>(suspendedStaff);
     };
 
-    //-----------------------------------------Products implimentation------------------------------------------------
+    /*****************************
+    *  PRODUCTS MANAGEMENT METHODS
+    *****************************/
 
     public func createProduct(newProduct : Product) : async Text {
         switch (products.put(newProduct.id, newProduct)) {
@@ -359,7 +372,9 @@ shared ({ caller = initializer }) actor class TswaandaAdmin() = this {
         };
     };
 
-    //----------------------------------------------Farmers implimentation------------------------------------------------
+    /**************************************
+    *  FARMERS MANAGEMENT IMPLEMENTATION
+    ***************************************/
 
     public shared func createFarmer(newFarmer : Farmer) : () {
         farmers.put(newFarmer.email, newFarmer);
@@ -421,7 +436,9 @@ shared ({ caller = initializer }) actor class TswaandaAdmin() = this {
         return Buffer.toArray<Farmer>(suspendedFarmers);
     };
 
-    // --------------------------------------------STATS MANAGEMENT--------------------------------------------------------
+    /************************************
+    *  CANISTER STATS IMPLEMENTATION
+    *************************************/
 
     public shared query func getAdminStats() : async Stats {
         let totalProducts = products.size();
@@ -436,7 +453,9 @@ shared ({ caller = initializer }) actor class TswaandaAdmin() = this {
         return stats;
     };
 
-    // --------------------------------------------CANISTERS MANAGEMENT----------------------------------------------------
+    /**********************************
+    *  CANISTER MANAGEMENT IMPLEMENTATION
+    ***********************************/
 
     public query func get_health() : async Health {
         let health : Health = {

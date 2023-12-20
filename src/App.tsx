@@ -42,7 +42,7 @@ import { RootState } from "./state/Store";
 function App() {
   const dispatch = useDispatch();
 
-  const { isAuthenticated, identity, checkAuth, backendActor } = useAuth();
+  const { isAuthenticated, identity, checkAuth, backendActor, ws } = useAuth();
   const [authorized, setAuthorized] = useState<boolean | null>(null);
   const [user, setUser] = useState(null);
 
@@ -90,6 +90,23 @@ function App() {
     init();
     checkAuth();
   }, []);
+
+  // Websocket connection
+  useEffect(() => {
+    if (!ws) {
+      return;
+    }
+    ws.onopen = () => {
+      console.log("Connected to the canister");
+    };
+    ws.onclose = () => {
+      console.log("Disconnected from the canister");
+    };
+    ws.onerror = (error: any) => {
+      console.log("Error:", error);
+    };
+  }, [ws]);
+
   const ProtectedRoutes = () => {
     if (isAuthenticated && authorized) {
       return <Outlet />;
