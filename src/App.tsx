@@ -42,19 +42,27 @@ import { RootState } from "./state/Store";
 function App() {
   const dispatch = useDispatch();
 
-  const { isAuthenticated, identity, checkAuth, backendActor, ws } = useAuth();
+  const { isAuthenticated, identity, backendActor, ws } = useAuth();
   const [authorized, setAuthorized] = useState<boolean | null>(null);
   const [user, setUser] = useState(null);
 
   useEffect(() => {
-    if (identity)
-      (async () => {
-        const user = await backendActor.getStaffMember(identity.getPrincipal());
-        if (user.ok) {
-          setUser(user);
-        }
-      })();
+    if (identity) {
+      getMembers();
+    }
   }, [identity]);
+
+  const getMembers = async () => {
+    try {
+      console.log(identity.getPrincipal().toString());
+      const user = await backendActor.getStaffMember(identity.getPrincipal());
+      if (user.ok) {
+        setUser(user);
+      }
+    } catch (error) {
+      console.log("Error on getting members", error);
+    }
+  };
 
   const getRole = async () => {
     console.log("Your principal id:", identity.getPrincipal().toString());
@@ -88,7 +96,6 @@ function App() {
 
   useEffect(() => {
     init();
-    checkAuth();
   }, []);
 
   // Websocket connection

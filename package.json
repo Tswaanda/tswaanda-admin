@@ -12,7 +12,7 @@
     "start": "run-p frontend",
     "frontend": "vite --port 3000",
     "deploy": "dfx deploy file_scaling_manager --argument='(false)' && dfx deploy file_storage --argument='(false)' && dfx deploy",
-    "dfx-start": "dfx start --clean --background",
+    "dfx": "dfx start --clean --background",
     "dfx-kill": "sudo kill -9 $(sudo lsof -t -i:4943)",
     "build": "tsc && vite build",
     "deploy:local": "dfx deploy --network=local",

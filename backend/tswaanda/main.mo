@@ -98,7 +98,17 @@ shared ({ caller = initializer }) actor class TswaandaAdmin() = this {
     };
 
     func on_close(args : IcWebSocketCdk.OnCloseCallbackArgs) : async () {
-        Debug.print("Client " # debug_show (args.client_principal) # " disconnected");
+        /// On close event we remove the client from the list of client
+        let index = Buffer.indexOf<IcWebSocketCdk.ClientPrincipal>(args.client_principal, connected_clients, Principal.equal);
+        switch (index) {
+            case (null) {
+                // Do nothing
+            };
+            case (?index) {
+                // remove the client at the given even
+                ignore connected_clients.remove(index);
+            };
+        };
     };
 
     let params = IcWebSocketCdkTypes.WsInitParams(null, null);

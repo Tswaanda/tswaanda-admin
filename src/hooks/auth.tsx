@@ -1,4 +1,3 @@
-import React, { useContext, useState, createContext, FC } from "react";
 import {
   Actor,
   ActorSubclass,
@@ -6,8 +5,6 @@ import {
   Identity,
   SignIdentity,
 } from "@dfinity/agent";
-import { AuthClient } from "@dfinity/auth-client";
-import { canisterId as identityCanId } from "../declarations/internet_identity/index";
 import { idlFactory as marketIdlFactory } from "../declarations/marketplace_backend";
 import {
   canisterId,
@@ -19,6 +16,19 @@ import {
   AppMessage,
   _SERVICE,
 } from "../declarations/tswaanda_backend/tswaanda_backend.did";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  FC,
+} from "react";
+import {
+  AuthClient,
+  AuthClientCreateOptions,
+  AuthClientLoginOptions,
+} from "@dfinity/auth-client";
+import { canisterId as iiCanId } from "../declarations/internet_identity";
 
 const marketCanisterId = "55ger-liaaa-aaaal-qb33q-cai";
 const localMarketCanId = "asrmz-lmaaa-aaaaa-qaaeq-cai";
@@ -32,18 +42,7 @@ const localhost = "http://localhost:3000";
 const host = "https://icp0.io";
 const network = process.env.DFX_NETWORK || "local";
 
-interface LayoutProps {
-  children: React.ReactNode;
-}
-
-const authClient = await AuthClient.create({
-  idleOptions: {
-    idleTimeout: 1000 * 60 * 30, // set to 30 minutes
-    disableDefaultIdleCallback: true, // disable the default reload behavior
-  },
-});
-
-type Context = {
+interface ContextType {
   accessLevel: string;
   marketActor: any;
   storageInitiated: boolean;
@@ -55,10 +54,9 @@ type Context = {
   setAccessLevel(args: string): void;
   login(): void;
   logout(): void;
-  checkAuth(): void;
-};
+}
 
-const initialContext: Context = {
+const initialContext: ContextType = {
   identity: null,
   backendActor: null,
   isAuthenticated: false,
@@ -78,108 +76,126 @@ const initialContext: Context = {
   logout: (): void => {
     throw new Error("logout function must be overridden");
   },
-  checkAuth: (): void => {
-    throw new Error("checkAuth function must be overridden");
+};
+
+const AuthContext = createContext<ContextType>(initialContext);
+
+interface DefaultOptions {
+  createOptions: AuthClientCreateOptions;
+  loginOptions: AuthClientLoginOptions;
+}
+
+const defaultOptions: DefaultOptions = {
+  createOptions: {
+    idleOptions: {
+      disableIdle: true,
+    },
+  },
+  loginOptions: {
+    identityProvider:
+      process.env.DFX_NETWORK === "ic"
+        ? "https://identity.ic0.app/#authorize"
+        : `http://localhost:4943?canisterId=${iiCanId}`,
   },
 };
 
-const ContextWrapper = createContext<Context>(initialContext);
-
-export const useAuth = () => {
-  return useContext(ContextWrapper);
-};
-
-export const ContextProvider: FC<LayoutProps> = ({ children }) => {
+export const useAuthClient = (options = defaultOptions) => {
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [authClient, setAuthClient] = useState<AuthClient | null>(null);
   const [identity, setIdentity] = useState<Identity | null>(null);
   const [backendActor, setBackendActor] = useState<ActorSubclass | null>(null);
   const [marketActor, setMarketActor] = useState<ActorSubclass | null>(null);
   const [ws, setWs] = useState<IcWebSocket<_SERVICE, AppMessage> | null>(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [storageInitiated, setStorageInitiated] = useState(false);
   const [accessLevel, setAccessLevel] = useState("");
 
-  const login = async () => {
-    const days = BigInt(1);
-    const hours = BigInt(24);
-    const nanoseconds = BigInt(3600000000000);
-    await authClient.login({
-      identityProvider:
-        network === "ic"
-          ? "https://identity.ic0.app/#authorize"
-          : `http://localhost:4943?canisterId=${identityCanId}`,
-      maxTimeToLive: days * hours * nanoseconds,
+  useEffect(() => {
+    AuthClient.create(options.createOptions).then(async (client) => {
+      updateClient(client);
+    });
+  }, []);
+
+  const login = () => {
+    authClient?.login({
+      ...options.loginOptions,
       onSuccess: () => {
-        setIsAuthenticated(true);
-        checkAuth();
+        updateClient(authClient);
       },
-      onError: (err) => alert(err),
     });
   };
 
-  const checkAuth = async () => {
-    if (await authClient.isAuthenticated()) {
-      setIsAuthenticated(true);
-      const _identity = authClient.getIdentity();
-      setIdentity(_identity);
+  async function updateClient(client: AuthClient) {
+    setAuthClient(client);
+    const isAuthenticated = await client.isAuthenticated();
+    setIsAuthenticated(isAuthenticated);
 
-      let agent = new HttpAgent({
-        host: network === "local" ? localhost : host,
-        identity: _identity,
-      });
+    const identity = client.getIdentity();
+    setIdentity(identity);
 
-      if (network === "local") {
-        agent.fetchRootKey();
-      }
+    let agent = new HttpAgent({
+      host: network === "local" ? localhost : host,
+      identity: identity,
+    });
 
-      const _backendActor = Actor.createActor(tswaandaIdl, {
-        agent,
-        canisterId: canisterId,
-      });
-      setBackendActor(_backendActor);
-
-      const _marketActor = Actor.createActor(marketIdlFactory, {
-        agent,
-        canisterId: network === "local" ? localMarketCanId : marketCanisterId,
-      });
-      setMarketActor(_marketActor);
-
-      const _ws = new IcWebSocket(
-        network === "local" ? localGatewayUrl : gatewayUrl,
-        undefined,
-        {
-          canisterId: canisterId,
-          canisterActor: tswaanda_backend,
-          identity: _identity as SignIdentity,
-          networkUrl: network === "local" ? localICUrl : icUrl,
-        }
-      );
-      setWs(_ws);
+    if (network === "local") {
+      agent.fetchRootKey();
     }
-  };
 
-  const logout = async () => {
-    await authClient.logout();
-    setIsAuthenticated(false);
-  };
+    const _backendActor = Actor.createActor(tswaandaIdl, {
+      agent,
+      canisterId: canisterId,
+    });
+    setBackendActor(_backendActor);
 
-  return (
-    <ContextWrapper.Provider
-      value={{
-        identity,
-        backendActor,
-        isAuthenticated,
-        marketActor,
-        storageInitiated,
-        accessLevel,
-        ws,
-        setStorageInitiated,
-        setAccessLevel,
-        login,
-        logout,
-        checkAuth,
-      }}
-    >
-      {children}
-    </ContextWrapper.Provider>
-  );
+    const _marketActor = Actor.createActor(marketIdlFactory, {
+      agent,
+      canisterId: network === "local" ? localMarketCanId : marketCanisterId,
+    });
+    setMarketActor(_marketActor);
+
+    const _ws = new IcWebSocket(
+      network === "local" ? localGatewayUrl : gatewayUrl,
+      undefined,
+      {
+        canisterId: canisterId,
+        canisterActor: tswaanda_backend,
+        identity: identity as SignIdentity,
+        networkUrl: network === "local" ? localICUrl : icUrl,
+      }
+    );
+    setWs(_ws);
+  }
+
+  async function logout() {
+    await authClient?.logout();
+    if (authClient) {
+      updateClient(authClient);
+    }
+  }
+
+  return {
+    identity,
+    backendActor,
+    isAuthenticated,
+    marketActor,
+    storageInitiated,
+    accessLevel,
+    ws,
+    setStorageInitiated,
+    setAccessLevel,
+    login,
+    logout,
+  };
 };
+
+interface LayoutProps {
+  children: React.ReactNode;
+}
+
+export const AuthProvider: FC<LayoutProps> = ({ children }) => {
+  const auth = useAuthClient();
+
+  return <AuthContext.Provider value={auth}>{children}</AuthContext.Provider>;
+};
+
+export const useAuth = () => useContext(AuthContext);

@@ -7,14 +7,14 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 // ts-ignore
 import { store } from "./state/Store";
-import { ContextProvider } from "./hooks/auth";
+import { AuthProvider } from "./hooks/auth";
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
     <Provider store={store}>
-      <ContextProvider>
+      <AuthProvider>
         <App />
-      </ContextProvider>
+      </AuthProvider>
       <ToastContainer />
     </Provider>
   </React.StrictMode>
