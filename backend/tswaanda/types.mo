@@ -5,6 +5,75 @@ import Principal "mo:base/Principal";
 
 module {
 
+    /***********************************************
+    *  WEBSOCKET MESSAGE TYPES AND NOTIFICATIONS
+    ***********************************************/
+    public type AppMessage = {
+        #FromAdmin : AdminMessage;
+        #FromMarket : MarketMessage;
+    };
+
+    public type Notification = {
+        id : Text;
+        notification : {
+            #OrderUpdate : OrderUpdateNotification;
+            #KYCUpdate : KYCUpdateNotification;
+        };
+        read : Bool;
+        created : Int;
+    };
+
+    public type OrderUpdateNotification = {
+        orderId : Text;
+        status : Text;
+    };
+
+    public type KYCUpdateNotification = {
+        status : Text;
+        message : Text;
+    };
+
+    type AdminMessage = {
+        #OrderUpdate : AdminOrderUpdate;
+        #KYCUpdate : AdminKYCUpdate;
+
+    };
+
+    type MarketMessage = {
+        #OrderUpdate : MarketOrderUpdate;
+        #KYCUpdate : MarketKYCUpdate;
+    };
+
+    type AdminOrderUpdate = {
+        clientId : Text;
+        orderId : Text;
+        status : Text;
+        timestamp : Int;
+    };
+
+    type AdminKYCUpdate = {
+        clientId : Text;
+        status : Text;
+        message : Text;
+        timestamp : Int;
+    };
+
+    type MarketOrderUpdate = {
+        orderId : Text;
+        status : Text;
+        timestamp : Int;
+    };
+
+    type MarketKYCUpdate = {
+        status : Text;
+        message : Text;
+        timestamp : Int;
+    };
+
+    /********************************
+    *  ACCESS CONTROL
+    ********************************/
+
     public type Role = {
         #owner;
         #admin;
@@ -18,11 +87,26 @@ module {
         #lowest;
     };
 
+    public type Staff = {
+        fullName : Text;
+        email : Text;
+        phone : Text;
+        role : ?Role;
+        approved : Bool;
+        principal : Principal;
+        suspended : Bool;
+        created : Int;
+    };
+
+    /********************************
+    *  PRODUCT
+    ********************************/
+
     public type Product = {
         id : Text;
         name : Text;
-        hscode: Text;
-        farmer: Text;
+        hscode : Text;
+        farmer : Text;
         price : Int32;
         minOrder : Int32;
         shortDescription : Text;
@@ -32,7 +116,17 @@ module {
         weight : Int32;
         ordersPlaced : Int32;
         availability : Text;
-        created: Int;
+        created : Int;
+    };
+
+    public type ProductReview = {
+        id : Text;
+        productId : Text;
+        userName : Text;
+        userLastName : Text;
+        rating : Int;
+        review : Text;
+        created : Int;
     };
 
     public type Farmer = {
@@ -47,30 +141,9 @@ module {
         soldProducts : [Text];
         produceCategories : Text;
         proofOfAddress : ?Text;
-        idCopy: ?Text;
+        idCopy : ?Text;
         isVerified : Bool;
         isSuspended : Bool;
-        created : Int;
-    };
-
-    public type ProductReview = {
-        id : Text;
-        productId : Text;
-        userName : Text;
-        userLastName : Text;
-        rating : Int;
-        review : Text;
-        created : Int;
-    };
-
-    public type Staff = {
-        fullName : Text;
-        email : Text;
-        phone : Text;
-        role : ?Role;
-        approved : Bool;
-        principal : Principal;
-        suspended : Bool;
         created : Int;
     };
 

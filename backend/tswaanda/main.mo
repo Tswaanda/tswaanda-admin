@@ -28,6 +28,7 @@ import Iter "mo:base/Iter";
 import Result "mo:base/Result";
 import Buffer "mo:base/Buffer";
 import Principal "mo:base/Principal";
+import Time "mo:base/Time";
 import Map "mo:hashmap/Map";
 import Utils "./utils";
 
@@ -43,29 +44,41 @@ shared ({ caller = initializer }) actor class TswaandaAdmin() = this {
     type Staff = Type.Staff;
     type Health = Type.Health;
     type Stats = Type.Stats;
+    type AppMessage = Type.AppMessage;
+    type Notification = Type.Notification;
+    type NotificationId = Text;
+    type ProductId = Text;
+    type OrderUpdateNotification = Type.OrderUpdateNotification;
+    type KYCUpdateNotification = Type.KYCUpdateNotification;
 
-    type AppMessage = {
-        #Notification;
-        #Product;
-    };
-
-    //Access control variables
+    /***********************************
+    *  STATE VARIABLES IMPLEMENTATION
+    ************************************/
     private stable var roles : AssocList.AssocList<Principal, Role> = List.nil();
     private stable var role_requests : AssocList.AssocList<Principal, Role> = List.nil();
 
-    //Products map
-    var products = HashMap.HashMap<Text, Product>(0, Text.equal, Text.hash);
-    var productReviews = HashMap.HashMap<Text, List.List<ProductReview>>(0, Text.equal, Text.hash);
+    var products = HashMap.HashMap<ProductId, Product>(0, Text.equal, Text.hash);
+    private stable var productsEntries : [(Text, Product)] = [];
 
-    //Farmers map
+    var productReviews = HashMap.HashMap<ProductId, List.List<ProductReview>>(0, Text.equal, Text.hash);
+    private stable var productReviewsEntries : [(Text, List.List<ProductReview>)] = [];
+
     var farmers = HashMap.HashMap<farmerEmail, Farmer>(0, Text.equal, Text.hash);
+    private stable var farmersEntries : [(Text, Farmer)] = [];
 
     var staff = HashMap.HashMap<Principal, Staff>(0, Principal.equal, Principal.hash);
-
-    private stable var productsEntries : [(Text, Product)] = [];
-    private stable var farmersEntries : [(Text, Farmer)] = [];
-    private stable var productReviewsEntries : [(Text, List.List<ProductReview>)] = [];
     private stable var staffEntries : [(Principal, Staff)] = [];
+
+    var adminNotifications = HashMap.HashMap<NotificationId, Notification>(0, Text.equal, Text.hash);
+    private stable var adminNotificationsEntries : [(Text, Notification)] = [];
+
+    var userNotifications = HashMap.HashMap<Principal, List.List<Notification>>(0, Principal.equal, Principal.hash);
+    private stable var userNotificationsEntries : [(Principal, List.List<Notification>)] = [];
+
+    let all_connected_clients = Buffer.Buffer<IcWebSocketCdk.ClientPrincipal>(0);
+    let market_clients = Buffer.Buffer<IcWebSocketCdk.ClientPrincipal>(0);
+    var admin_clients = Buffer.Buffer<IcWebSocketCdk.ClientPrincipal>(0);
+    private stable var admin_clients_entries : [IcWebSocketCdk.ClientPrincipal] = [];
 
     //----------------------------------------------Upgrade methods--------------------------------------------------------
 
@@ -74,6 +87,9 @@ shared ({ caller = initializer }) actor class TswaandaAdmin() = this {
         farmersEntries := Iter.toArray(farmers.entries());
         productReviewsEntries := Iter.toArray(productReviews.entries());
         staffEntries := Iter.toArray(staff.entries());
+        adminNotificationsEntries := Iter.toArray(adminNotifications.entries());
+        userNotificationsEntries := Iter.toArray(userNotifications.entries());
+        admin_clients_entries := Buffer.toArray<IcWebSocketCdk.ClientPrincipal>(admin_clients);
     };
 
     system func postupgrade() {
@@ -81,33 +97,102 @@ shared ({ caller = initializer }) actor class TswaandaAdmin() = this {
         farmers := HashMap.fromIter<Text, Farmer>(farmersEntries.vals(), 0, Text.equal, Text.hash);
         productReviews := HashMap.fromIter<Text, List.List<ProductReview>>(productReviewsEntries.vals(), 0, Text.equal, Text.hash);
         staff := HashMap.fromIter<Principal, Staff>(staffEntries.vals(), 0, Principal.equal, Principal.hash);
+        adminNotifications := HashMap.fromIter<Text, Notification>(adminNotificationsEntries.vals(), 0, Text.equal, Text.hash);
+        userNotifications := HashMap.fromIter<Principal, List.List<Notification>>(userNotificationsEntries.vals(), 0, Principal.equal, Principal.hash);
+        admin_clients := Buffer.fromIter<IcWebSocketCdk.ClientPrincipal>(admin_clients_entries.vals());
     };
 
     /*---------------------------------
     *  WEBSOCKETS IMPLEMENTATION
     *---------------------------------*/
 
-    let connected_clients = Buffer.Buffer<IcWebSocketCdk.ClientPrincipal>(0);
-
     func on_open(args : IcWebSocketCdk.OnOpenCallbackArgs) : async () {
-        connected_clients.add(args.client_principal);
+        all_connected_clients.add(args.client_principal);
     };
 
     func on_message(args : IcWebSocketCdk.OnMessageCallbackArgs) : async () {
-        Debug.print("on_message");
+        let app_msg : ?AppMessage = from_candid (args.message);
+        switch (app_msg) {
+            case (?msg) {
+                switch (msg) {
+                    case (#FromAdmin(msg)) {
+                        // Check if the client already exist in the list of admin clients, if not we add it
+                        let index = Buffer.indexOf<Principal>(args.client_principal, admin_clients, Principal.equal);
+                        switch (index) {
+                            case (null) {
+                                // Do nothing
+                            };
+                            case (?index) {
+                                admin_clients.add(args.client_principal);
+                            };
+                        };
+                        switch (msg) {
+                            case (#KYCUpdate(msg)) {
+
+                                let client = Principal.fromText(msg.clientId);
+                                let currentTime = Time.now();
+                                let kycNotf : KYCUpdateNotification = {
+                                    status = msg.clientId;
+                                    message = msg.message;
+                                    timestamp = currentTime;
+                                };
+                                let notification : Notification = {
+                                    id = msg.clientId;
+                                    notification = #KYCUpdate(kycNotf);
+                                    read = false;
+                                    created = currentTime;
+                                };
+                                var notifications : List.List<Notification> = switch (userNotifications.get(client)) {
+                                    case (null) {
+                                        List.nil();
+                                    };
+                                    case (?result) {
+                                        result;
+                                    };
+                                };
+                                notifications := List.push(notification, notifications);
+                                userNotifications.put(client, notifications);
+
+                                // Send the notification to the client
+                                await send_app_message(client, #KYCUpdate(kycNotf))
+                                
+                            };
+                            case (#OrderUpdate(msg)) {
+
+                            };
+                        };
+                    };
+                    case (#FromMarket(msg)) {
+                        market_clients.add(args.client_principal);
+                    };
+                };
+            };
+            case (null) {
+                // TODO: Handle null message
+            };
+        };
     };
 
     func on_close(args : IcWebSocketCdk.OnCloseCallbackArgs) : async () {
         /// On close event we remove the client from the list of client
-        let index = Buffer.indexOf<IcWebSocketCdk.ClientPrincipal>(args.client_principal, connected_clients, Principal.equal);
+        let index = Buffer.indexOf<IcWebSocketCdk.ClientPrincipal>(args.client_principal, all_connected_clients, Principal.equal);
         switch (index) {
             case (null) {
                 // Do nothing
             };
             case (?index) {
                 // remove the client at the given even
-                ignore connected_clients.remove(index);
+                ignore all_connected_clients.remove(index);
             };
+        };
+    };
+
+    func send_app_message(client_principal : Principal, msg : AppMessage) : async () {
+        switch (await IcWebSocketCdk.send(ws_state, client_principal, to_candid (msg))) {
+            case (#Err(err)) {
+                Debug.print("Could not send message:" # debug_show (#Err(err)));
+            };
+            case (_) {};
         };
     };
 
@@ -144,7 +229,7 @@ shared ({ caller = initializer }) actor class TswaandaAdmin() = this {
 
     // Returns an array of the the clients connect to the canister
     public shared query func getAllConnectedClients() : async [IcWebSocketCdk.ClientPrincipal] {
-        return Buffer.toArray<IcWebSocketCdk.ClientPrincipal>(connected_clients);
+        return Buffer.toArray<IcWebSocketCdk.ClientPrincipal>(all_connected_clients);
     };
 
     /********************************
