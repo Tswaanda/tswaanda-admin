@@ -8,66 +8,95 @@ module {
     /***********************************************
     *  WEBSOCKET MESSAGE TYPES AND NOTIFICATIONS
     ***********************************************/
+    // Websocket message types
     public type AppMessage = {
         #FromAdmin : AdminMessage;
         #FromMarket : MarketMessage;
     };
 
-    public type Notification = {
-        id : Text;
-        notification : {
-            #OrderUpdate : OrderUpdateNotification;
-            #KYCUpdate : KYCUpdateNotification;
-        };
-        read : Bool;
-        created : Int;
-    };
-
-    public type OrderUpdateNotification = {
-        orderId : Text;
-        status : Text;
-    };
-
-    public type KYCUpdateNotification = {
-        status : Text;
-        message : Text;
-    };
-
-    type AdminMessage = {
+    // From Admin
+    public type AdminMessage = {
         #OrderUpdate : AdminOrderUpdate;
         #KYCUpdate : AdminKYCUpdate;
 
     };
 
-    type MarketMessage = {
-        #OrderUpdate : MarketOrderUpdate;
-        #KYCUpdate : MarketKYCUpdate;
-    };
-
     type AdminOrderUpdate = {
-        clientId : Text;
+        marketPlUserclientId : Text;
         orderId : Text;
         status : Text;
         timestamp : Int;
     };
 
     type AdminKYCUpdate = {
-        clientId : Text;
+        marketPlUserclientId : Text;
         status : Text;
         message : Text;
         timestamp : Int;
     };
 
+    // From Market
+    public type MarketMessage = {
+        #OrderUpdate : MarketOrderUpdate;
+        #KYCUpdate : MarketKYCUpdate;
+    };
+
     type MarketOrderUpdate = {
+        marketPlUserclientId : Text;
         orderId : Text;
-        status : Text;
+        message : Text;
         timestamp : Int;
     };
 
     type MarketKYCUpdate = {
-        status : Text;
+        marketPlUserclientId : Text;
         message : Text;
         timestamp : Int;
+    };
+
+    //**********Notifications***********
+
+    // User Notifications
+    public type UserNotification = {
+        id : Text;
+        notification : {
+            #OrderUpdate : UserOrderUpdateNotification;
+            #KYCUpdate : UserKYCUpdateNotification;
+        };
+        read : Bool;
+        created : Int;
+    };
+
+    public type UserOrderUpdateNotification = {
+        orderId : Text;
+        status : Text;
+    };
+
+    public type UserKYCUpdateNotification = {
+        status : Text;
+        message : Text;
+    };
+
+    // Admin Notifications
+    public type AdminNotification = {
+        id : Text;
+        notification : {
+            #OrderUpdate : AdminOrderUpdateNotification;
+            #KYCUpdate : AdminKYCUpdateNotification;
+        };
+        read : Bool;
+        created : Int;
+    };
+
+    public type AdminOrderUpdateNotification = {
+        marketPlUserclientId : Text;
+        orderId : Text;
+        message : Text;
+    };
+
+    public type AdminKYCUpdateNotification = {
+        marketPlUserclientId : Text;
+        message : Text;
     };
 
     /********************************
