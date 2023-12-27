@@ -43,33 +43,31 @@ const ContactCustomerOnOrder: FC<ContactCustomerOnOrderProps> = ({ openContactMo
     const handleEmailSend = async (e) => {
         e.preventDefault()
         setSending(true)
-        console.log("sending")
-        console.log(modalOrder)
-        // try {
-        //     if (message !== "") {
-        //         await sendCustomerEmailMessageOnOrder(message, modalOrder.email)
-        //         toast.success(
-        //             `Message sent to ${modalOrder.email} `,
-        //             {
-        //                 autoClose: 5000,
-        //                 position: "top-center",
-        //                 hideProgressBar: true,
-        //             }
-        //         );
-        //         setSending(false)
-        //     }
-        // } catch (error) {
-        //     console.log("Error sending email", error)
-        //     toast.error(
-        //         `Error sending message to ${modalOrder.email} `,
-        //         {
-        //             autoClose: 5000,
-        //             position: "top-center",
-        //             hideProgressBar: true,
-        //         }
-        //     );
-        //     setSending(false)
-        // }
+        try {
+            if (message !== "") {
+                await sendCustomerEmailMessageOnOrder(message, modalOrder.email)
+                toast.success(
+                    `Message sent to ${modalOrder.email} `,
+                    {
+                        autoClose: 5000,
+                        position: "top-center",
+                        hideProgressBar: true,
+                    }
+                );
+                setSending(false)
+            }
+        } catch (error) {
+            console.log("Error sending email", error)
+            toast.error(
+                `Error sending message to ${modalOrder.email} `,
+                {
+                    autoClose: 5000,
+                    position: "top-center",
+                    hideProgressBar: true,
+                }
+            );
+            setSending(false)
+        }
     }
 
     return (

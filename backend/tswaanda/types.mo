@@ -2,6 +2,7 @@ import Nat32 "mo:base/Nat32";
 import Text "mo:base/Text";
 import Blob "mo:base/Blob";
 import Principal "mo:base/Principal";
+import Order "mo:base/Order";
 
 module {
 
@@ -24,7 +25,7 @@ module {
     type AdminOrderUpdate = {
         marketPlUserclientId : Text;
         orderId : Text;
-        status : Text;
+        status : OrderStatus;
         timestamp : Int;
     };
 
@@ -69,12 +70,22 @@ module {
 
     public type UserOrderUpdateNotification = {
         orderId : Text;
-        status : Text;
+        status : OrderStatus;
     };
 
     public type UserKYCUpdateNotification = {
         status : Text;
         message : Text;
+    };
+
+    type OrderStatus = {
+        #Pending;
+        #Approved;
+        #Rejected;
+        #Cancelled;
+        #Shipped;
+        #Delivered;
+        #Completed;
     };
 
     // Admin Notifications

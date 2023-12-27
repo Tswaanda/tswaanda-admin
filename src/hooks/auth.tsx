@@ -166,6 +166,22 @@ export const useAuthClient = (options = defaultOptions) => {
     setWs(_ws);
   }
 
+  // Websocket connection
+  useEffect(() => {
+    if (!ws) {
+      return;
+    }
+    ws.onopen = () => {
+      console.log("Connected to the canister");
+    };
+    ws.onclose = () => {
+      console.log("Disconnected from the canister");
+    };
+    ws.onerror = (error: any) => {
+      console.log("Error:", error);
+    };
+  }, [ws]);
+
   async function logout() {
     await authClient?.logout();
     if (authClient) {

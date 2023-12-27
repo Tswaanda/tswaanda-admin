@@ -98,22 +98,6 @@ function App() {
     init();
   }, []);
 
-  // Websocket connection
-  useEffect(() => {
-    if (!ws) {
-      return;
-    }
-    ws.onopen = () => {
-      console.log("Connected to the canister");
-    };
-    ws.onclose = () => {
-      console.log("Disconnected from the canister");
-    };
-    ws.onerror = (error: any) => {
-      console.log("Error:", error);
-    };
-  }, [ws]);
-
   const ProtectedRoutes = () => {
     if (isAuthenticated && authorized) {
       return <Outlet />;
