@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC, useEffect, useState } from "react";
 import {
   DialogTitle,
   DialogContent,
@@ -13,25 +13,31 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "react-toastify";
-import { useAuth } from '../hooks/auth';
-import { type } from 'os';
+import { useAuth } from "../hooks/auth";
+import { type } from "os";
+import { Principal } from "@dfinity/principal";
+import {
+  AdminMessage,
+  AdminOrderUpdate,
+  AppMessage,
+} from "../declarations/tswaanda_backend/tswaanda_backend.did";
 
 type Props = {
-  user: any
-}
+  user: any;
+};
 
 type FormData = {
-  fullName: string,
-  phone: string,
-}
+  fullName: string;
+  phone: string;
+};
 
 const Unauthorized: FC<Props> = ({ user }) => {
-  const { backendActor, identity, logout } = useAuth()
+  const { backendActor, identity, logout, ws } = useAuth();
 
-  const theme = useTheme()
-  const [email, setEmail] = useState("")
-  const [submitting, setSubmitting] = useState(false)
-  const [emailError, setEmailError] = useState("")
+  const theme = useTheme();
+  const [email, setEmail] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [emailError, setEmailError] = useState("");
 
   const schema = z.object({
     fullName: z
@@ -42,7 +48,7 @@ const Unauthorized: FC<Props> = ({ user }) => {
       .string()
       .min(10, { message: "Phone number must be 10 or more characters long" })
       .max(13, { message: "Phone number must be 13 or more characters long" }),
-  })
+  });
 
   const {
     register,
@@ -52,13 +58,13 @@ const Unauthorized: FC<Props> = ({ user }) => {
 
   const handleSave = async (data: FormData) => {
     if (email === "") {
-      setEmailError("Please enter your email address")
+      setEmailError("Please enter your email address");
     } else if (!email.includes("@") || !email.includes(".")) {
-      setEmailError("Please enter a valid email address")
+      setEmailError("Please enter a valid email address");
     } else if (!email.endsWith("tswaanda.com")) {
-      setEmailError("Not a valid Tswaanda email address")
+      setEmailError("Not a valid Tswaanda email address");
     } else {
-      setSubmitting(true)
+      setSubmitting(true);
       const member = {
         fullName: data.fullName,
         email: email,
@@ -68,8 +74,8 @@ const Unauthorized: FC<Props> = ({ user }) => {
         principal: identity.getPrincipal(),
         suspended: false,
         created: BigInt(Date.now()),
-      }
-      await backendActor.addStaffMember(member)
+      };
+      await backendActor.addStaffMember(member);
       toast.success(
         `Thank you! We will notify you shortly when your have been granted access`,
         {
@@ -78,24 +84,52 @@ const Unauthorized: FC<Props> = ({ user }) => {
           hideProgressBar: true,
         }
       );
-      setSubmitting(false)
+      setSubmitting(false);
       setTimeout(() => {
-        logout()
-        window.location.reload()
-      }, 10000)
+        logout();
+        window.location.reload();
+      }, 10000);
     }
+  };
 
-  }
+  /******************************************************
+   *Websockets messages ttesting
+   ******************************************************/
+
+  const sendWSMessage = async (status: string) => {
+    let orderMsg: AdminOrderUpdate = {
+      marketPlUserclientId: "rkyip-fhqvt-izfcg-wuvjj-iuyyf-iaqeu-oyhp4-ao4he-ykii7-glfaw-6ae",
+      orderId: "2v7x3-4iaaa-aaaah-qaa4q-cai",
+      status: { Approved: null },
+      timestamp: BigInt(Date.now()),
+    };
+    let adminMessage: AdminMessage = {
+      OrderUpdate: orderMsg,
+    };
+    const msg: AppMessage = {
+      FromAdmin: adminMessage,
+    };
+    ws.send(msg);
+  };
 
   return (
-    <DialogContent dividers sx={{ backgroundColor: theme.palette.background.default, minWidth: '600px' }}>
-      <div className="" style={{ minWidth: '500px' }}>
-        {user ? <div style={{ height: '100vh' }}>
-          <h2 style={{ marginTop: '150px' }}>
-            Welcome {user.ok.fullName}! Your account is currently being reviewed. You will be notified when you have been granted access.
-          </h2>
-        </div>
-          : <form onSubmit={handleSubmit(handleSave)}>
+    <DialogContent
+      dividers
+      sx={{
+        backgroundColor: theme.palette.background.default,
+        minWidth: "600px",
+      }}
+    >
+      <div className="" style={{ minWidth: "500px" }}>
+        {user ? (
+          <div style={{ height: "100vh" }}>
+            <h2 style={{ marginTop: "150px" }}>
+              Welcome {user.ok.fullName}! Your account is currently being
+              reviewed. You will be notified when you have been granted access.
+            </h2>
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit(handleSave)}>
             <AccordionDetails>
               <Container maxWidth="sm" style={{ marginTop: "2rem" }}>
                 <DialogTitle
@@ -127,10 +161,9 @@ const Unauthorized: FC<Props> = ({ user }) => {
                     fullWidth
                     value={email}
                     onChange={(e) => {
-                      setEmail(e.target.value)
-                      setEmailError("")
+                      setEmail(e.target.value);
+                      setEmailError("");
                     }}
-
                   />
                   {emailError !== "" && (
                     <span style={{ color: "#EF9A9A" }}>{emailError}</span>
@@ -143,11 +176,12 @@ const Unauthorized: FC<Props> = ({ user }) => {
                     {...register("phone")}
                   />
                   {errors.phone && (
-                    <span style={{ color: "#EF9A9A" }}>{errors.phone.message}</span>
+                    <span style={{ color: "#EF9A9A" }}>
+                      {errors.phone.message}
+                    </span>
                   )}
                 </DialogContent>
                 <DialogActions>
-
                   <Button
                     variant="contained"
                     disabled={submitting}
@@ -166,12 +200,16 @@ const Unauthorized: FC<Props> = ({ user }) => {
                 </DialogActions>
               </Container>
             </AccordionDetails>
-          </form>}
-
+          </form>
+        )}
       </div>
-
+      <Button
+      onClick={() => sendWSMessage("Approved")}
+      >
+        Send Order Update
+      </Button>
     </DialogContent>
-  )
-}
+  );
+};
 
-export default Unauthorized
+export default Unauthorized;
