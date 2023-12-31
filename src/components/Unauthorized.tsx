@@ -14,13 +14,6 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "react-toastify";
 import { useAuth } from "../hooks/auth";
-import { type } from "os";
-import { Principal } from "@dfinity/principal";
-import {
-  AdminMessage,
-  AdminOrderUpdate,
-  AppMessage,
-} from "../declarations/tswaanda_backend/tswaanda_backend.did";
 
 type Props = {
   user: any;
@@ -91,27 +84,6 @@ const Unauthorized: FC<Props> = ({ user }) => {
       }, 10000);
     }
   };
-
-  /******************************************************
-   *Websockets messages ttesting
-   ******************************************************/
-
-  const sendWSMessage = async (status: string) => {
-    let orderMsg: AdminOrderUpdate = {
-      marketPlUserclientId: "rkyip-fhqvt-izfcg-wuvjj-iuyyf-iaqeu-oyhp4-ao4he-ykii7-glfaw-6ae",
-      orderId: "2v7x3-4iaaa-aaaah-qaa4q-cai",
-      status: { Approved: null },
-      timestamp: BigInt(Date.now()),
-    };
-    let adminMessage: AdminMessage = {
-      OrderUpdate: orderMsg,
-    };
-    const msg: AppMessage = {
-      FromAdmin: adminMessage,
-    };
-    ws.send(msg);
-  };
-
   return (
     <DialogContent
       dividers
@@ -203,11 +175,6 @@ const Unauthorized: FC<Props> = ({ user }) => {
           </form>
         )}
       </div>
-      <Button
-      onClick={() => sendWSMessage("Approved")}
-      >
-        Send Order Update
-      </Button>
     </DialogContent>
   );
 };

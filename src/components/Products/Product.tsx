@@ -10,7 +10,7 @@ import {
     useTheme,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { backendActor } from "../../config";
+import { backendActor } from "../../hooks/live-config";
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';

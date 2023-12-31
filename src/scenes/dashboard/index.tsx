@@ -22,7 +22,6 @@ import {
 import BreakdownChart from "../../components/BreakdownChart";
 import StatBox from "../../components/StatBox";
 import { useNavigate } from "react-router-dom";
-import NewOrders from "../../components/Dashboard/NewOrders";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../hooks/auth";
 import {
@@ -31,13 +30,15 @@ import {
   Stats,
 } from "../../declarations/marketplace_backend/marketplace_backend.did";
 import { Product } from "../../declarations/tswaanda_backend/tswaanda_backend.did";
+import { NewOrders } from "./components";
+import { CustomerType } from "./utils/types";
 
 const Dashboard = () => {
   const [products, setProducts] = useState<Product[]>([]);
 
   const [adminStats, setAdminStats] = useState(null);
   const [marketStats, setMarketStats] = useState<Stats | null>(null);
-  const [customers, setCustomers] = useState([]);
+  const [customers, setCustomers] = useState<CustomerType[] | null>(null);
   const [orders, setOrders] = useState([]);
   const [modifiedOrders, setModifiedOrders] = useState<ProductOrder[]>([]);
   const [customersGrowthRates, setCustomersGrowthRates] = useState<Record<
@@ -54,7 +55,7 @@ const Dashboard = () => {
   const [newKYCNum, setNewKYCNum] = useState<Number | null>(null);
 
   const [newOrders, setNewOrders] = useState(null);
-  const [newKYC, setNewKYC] = useState(null);
+  const [newKYC, setNewKYC] = useState<CustomerType[]| null>(null);
   const [newCustomersGrowthRates, setNewCustomersGrowthRates] = useState<Record<
     string,
     string
@@ -114,10 +115,10 @@ const Dashboard = () => {
   };
 
   const getCustomers = async () => {
-    const customers = await marketActor.getAllKYC();
+    const customers: CustomerType[] = await marketActor.getAllKYC();
 
     const newCustomers = customers.filter(
-      (customer: Customer) => customer.body[0]?.status === "pending"
+      (customer: CustomerType) => customer.body?.status === "pending"
     );
     setNewKYC(newCustomers);
     setCustomers(customers);
@@ -149,7 +150,7 @@ const Dashboard = () => {
   };
 
   const groupCustomersByMonth = (
-    customers: Customer[]
+    customers: CustomerType[]
   ): Record<string, number> => {
     return customers?.reduce((acc, customer) => {
       const date = new Date(Number(customer.created));

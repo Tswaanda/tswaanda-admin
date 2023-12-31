@@ -11,7 +11,7 @@ import {
   Button,
   TextField,
 } from "@mui/material";
-import { categories } from "../constants/index";
+import { categories } from "../../constants/index";
 import { deleteAsset, uploadFile } from "../../storage-config/functions";
 import { useSelector, useDispatch } from 'react-redux'
 import { useAuth } from "../../hooks/auth";

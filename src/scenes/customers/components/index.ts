@@ -1,0 +1,8 @@
+export {default as All} from './All'
+export {default as Anon} from './Anon'
+export {default as Approved} from './Approved'
+export {default as ContactCustomerForm} from './ContactCustomerForm'
+export {default as IdentficationDoc} from './IdentficationDoc'
+export {default as Pending} from './Pending'
+export {default as ProofOfAddress} from './ProofOfAddress'
+export {default as UpdateCustomerStatusForm} from './UpdateCustomerStatusForm'

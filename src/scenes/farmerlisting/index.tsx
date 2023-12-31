@@ -11,7 +11,7 @@ import {
   Button,
   TextField,
 } from "@mui/material";
-import { categories } from "../constants/index";
+import { categories } from "../../constants/index";
 import { v4 as uuidv4 } from "uuid";
 // import { backendActor } from "../../config";
 import { toast } from "react-toastify";

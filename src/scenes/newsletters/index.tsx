@@ -9,7 +9,7 @@ import Header from "../../components/Header";
 import SendEmails from '../../components/Newsletter/SendMails';
 import Clients from '../../components/Newsletter/Clients';
 import { useAuth } from '../../hooks/auth';
-import { formatDate, formatTime } from '../constants';
+import { formatDate } from '../../utils/time';
 
 
 const Newsletter = () => {
@@ -43,11 +43,10 @@ const Newsletter = () => {
 
 
             const formattedDate = formatDate(client.created);
-            const formattedTime = formatTime(client.created);
 
             return {
                 ...client,
-                created: `${formattedDate} at ${formattedTime}`,
+                created: `${formattedDate}`,
             };
         });
 

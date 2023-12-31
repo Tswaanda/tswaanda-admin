@@ -3,14 +3,11 @@ import { Box, Tabs, Tab, Button, useTheme } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import Header from "../../components/Header";
 import { toast } from "react-toastify";
-import PendingFarmers from "../../components/Farmers/PendingFarmers";
-import ApprovedFarmers from "../../components/Farmers/ApprovedFarmers";
 import FarmerListing from "../../scenes/farmerlisting";
-import SuspendedFarmers from "../../components/Farmers/SuspendedFarmers";
 import { useAuth } from "../../hooks/auth";
-import { formatDate, formatTime } from "../constants";
 import { Farmer } from "../../declarations/tswaanda_backend/tswaanda_backend.did";
-// import { backendActor } from "../../config";
+import { formatDate} from "../../utils/time";
+import { ApprovedFarmers, PendingFarmers, SuspendedFarmers } from "./components";
 
 const Farmers = () => {
   const { backendActor } = useAuth();
@@ -42,7 +39,7 @@ const Farmers = () => {
 
   const theme = useTheme();
 
-  const handleTabChange = (newValue: any) => {
+  const handleTabChange = (event: any, newValue: any) => {
     setValue(newValue);
   };
 
@@ -95,12 +92,11 @@ const Farmers = () => {
 
     const modifiedOrder = data.map((farmer: any) => {
       const formattedDate = formatDate(farmer.created);
-      const formattedTime = formatTime(farmer.created);
 
       return {
         ...farmer,
         step: Number(farmer.step),
-        created: `${formattedDate} at ${formattedTime}`,
+        created: `${formattedDate}`,
       };
     });
 

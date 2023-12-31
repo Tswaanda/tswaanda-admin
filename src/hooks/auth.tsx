@@ -29,15 +29,16 @@ import {
   AuthClientLoginOptions,
 } from "@dfinity/auth-client";
 import { canisterId as iiCanId } from "../declarations/internet_identity";
+// @ts-ignore
+import icblast from "@infu/icblast";
 
 const marketCanisterId = "55ger-liaaa-aaaal-qb33q-cai";
-const localMarketCanId = "asrmz-lmaaa-aaaaa-qaaeq-cai";
+const localMarketCanId = "bd3sg-teaaa-aaaaa-qaaba-cai";
 
 const gatewayUrl = "wss://gateway.icws.io";
 const icUrl = "https://icp0.io";
 const localGatewayUrl = "ws://127.0.0.1:8080";
 const localICUrl = "http://127.0.0.1:4943";
-
 const localhost = "http://localhost:3000";
 const host = "https://icp0.io";
 const network = process.env.DFX_NETWORK || "local";
@@ -137,6 +138,11 @@ export const useAuthClient = (options = defaultOptions) => {
       identity: identity,
     });
 
+    let ic = icblast({
+      local: network === "local" ? true : false,
+      identity: identity,
+    });
+
     if (network === "local") {
       agent.fetchRootKey();
     }
@@ -147,10 +153,9 @@ export const useAuthClient = (options = defaultOptions) => {
     });
     setBackendActor(_backendActor);
 
-    const _marketActor = Actor.createActor(marketIdlFactory, {
-      agent,
-      canisterId: network === "local" ? localMarketCanId : marketCanisterId,
-    });
+    let _marketActor = await ic(network === "local" ? localMarketCanId : marketCanisterId);
+
+    
     setMarketActor(_marketActor);
 
     const _ws = new IcWebSocket(

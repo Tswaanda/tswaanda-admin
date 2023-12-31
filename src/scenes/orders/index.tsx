@@ -2,15 +2,13 @@ import { Box, useTheme, Tabs, Tab } from "@mui/material";
 import Header from "../../components/Header";
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
-import PendingApprovalComponent from "../../components/Orders/PendingApprovalComponent";
-import ProcessingComponent from "../../components/Orders/ProcessingComponent";
-import ShippedComponent from "../../components/Orders/ShippedComponent";
-import DeliveredComponent from "../../components/Orders/DeliveredComponent";
-import { marketActor } from "../../config";
 import { sendAutomaticOrderUpdateEmail } from "../../emails/orders";
-import { formatDate, formatTime } from "../constants";
+import { formatDate} from "../../utils/time";
+import { useAuth } from "../../hooks/auth";
+import { DeliveredComponent, PendingApprovalComponent, ProcessingComponent, ShippedComponent } from "./components";
 
 const Orders = () => {
+  const { marketActor } = useAuth();
   const theme = useTheme();
   const [expanded, setExpanded] = useState(false);
   const [pendingData, setPendingData] = useState<any[] | null>(null);
@@ -91,17 +89,17 @@ const Orders = () => {
 
     const modifiedOrder = data.map((order: any) => {
       const formattedDate = formatDate(order.dateCreated);
-      const formattedTime = formatTime(order.dateCreated);
 
       return {
         ...order,
         step: Number(order.step),
-        dateCreated: `${formattedDate} at ${formattedTime}`,
+        dateCreated: `${formattedDate}`,
       };
     });
 
     return modifiedOrder;
   };
+
 
   const updatePendingOrderStatus = async (id: any) => {
     updateOrderStatus(id, pendingData, pendingOrders);

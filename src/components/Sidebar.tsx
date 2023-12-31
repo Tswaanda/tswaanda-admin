@@ -34,9 +34,9 @@ import ShoppingCartCheckoutIcon from "@mui/icons-material/ShoppingCartCheckout";
 import Badge from "@mui/material/Badge";
 import { useLocation, useNavigate } from "react-router-dom";
 import FlexBetween from "./FlexBetween";
-import { marketActor } from "../config";
 import StorageIcon from "@mui/icons-material/Storage";
 import ContentPasteIcon from "@mui/icons-material/ContentPaste";
+import { useAuth } from "../hooks/auth";
 
 type Props = {
   drawerWidth: number;
@@ -51,6 +51,7 @@ const Sidebar: FC<Props> = ({
   setIsSidebarOpen,
   isNonMobile,
 }) => {
+  const { marketActor } = useAuth();
   const [newOrders, setNewOrders] = useState<any | null>(null);
   const [newKYC, setNewKYC] = useState<any | null>(null);
 
@@ -85,10 +86,6 @@ const Sidebar: FC<Props> = ({
           <AgricultureIcon />
         </Badge>
       ),
-    },
-    {
-      text: "Transactions",
-      icon: <ReceiptLongOutlined />,
     },
     {
       text: "Orders",
@@ -164,8 +161,10 @@ const Sidebar: FC<Props> = ({
   };
 
   useEffect(() => {
-    getSize();
-  }, []);
+    if (marketActor) {
+      getSize();
+    }
+  }, [marketActor]);
 
   const { pathname } = useLocation();
   const [active, setActive] = useState("");

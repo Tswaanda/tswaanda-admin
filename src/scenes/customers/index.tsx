@@ -2,16 +2,14 @@ import React, { useEffect, useState } from "react";
 import { Box, Tabs, Tab, Button } from "@mui/material";
 import Header from "../../components/Header";
 import { toast } from "react-toastify";
-import { canister } from "../../config";
-import Pending from "../../components/Customers/Pending";
-import Approved from "../../components/Customers/Approved";
 import { sendAutomaticEmailMessage } from "../../emails/kycApprovals";
-import Anon from "../../components/Customers/Anon";
-import All from "../../components/Customers/All";
-import { formatDate, formatTime } from "../constants";
 import { Customer } from "../../declarations/marketplace_backend/marketplace_backend.did";
+import { useAuth } from "../../hooks/auth";
+import { formatDate} from "../../utils/time";
+import { All, Anon, Approved, Pending, ProofOfAddress } from "./components";
 
 const Customers = () => {
+  const {marketActor} = useAuth();
   const [expanded, setExpanded] = useState<string | false>(false);
   const [showStatus, setShowStatus] = useState(false);
   const [updating, setUpdating] = useState(false);
@@ -27,7 +25,7 @@ const Customers = () => {
   const [customerStatus, setCustomerStatus] = useState("");
   const [value, setValue] = useState(0);
 
-  const handleTabChange = (newValue: any) => {
+  const handleTabChange = (event, newValue) => {
     setValue(newValue);
   };
 
@@ -36,7 +34,7 @@ const Customers = () => {
   };
 
   const getPendingCustomers = async () => {
-    const res = await canister.getPendingKYCReaquest();
+    const res = await marketActor.getPendingKYCReaquest();
     const sortedData = res.sort(
       (a: any, b: any) => Number(b.created) - Number(a.created)
     );
@@ -45,7 +43,7 @@ const Customers = () => {
   };
 
   const getApprovedCustomers = async () => {
-    const res = await canister.getApprovedKYC();
+    const res = await marketActor.getApprovedKYC();
     const sortedData = res.sort(
       (a: any, b: any) => Number(b.created) - Number(a.created)
     );
@@ -54,7 +52,7 @@ const Customers = () => {
   };
 
   const getAnonUsers = async () => {
-    const res = await canister.getAnonUsers();
+    const res = await marketActor.getAnonUsers();
     const sortedData = res.sort(
       (a: any, b: any) => Number(b.created) - Number(a.created)
     );
@@ -69,12 +67,11 @@ const Customers = () => {
 
     const modfifiedCustomers = data.map((customer: any) => {
       const formattedDate = formatDate(customer.created);
-      const formattedTime = formatTime(customer.created);
 
       return {
         ...customer,
         step: Number(customer.step),
-        created: `${formattedDate} at ${formattedTime}`,
+        created: `${formattedDate}`,
       };
     });
 
@@ -83,7 +80,7 @@ const Customers = () => {
 
   const getCustomers = async () => {
     setIsLoading(true);
-    const res = await canister.getAllKYC();
+    const res = await marketActor.getAllKYC();
     setData(res);
   };
 
@@ -140,7 +137,7 @@ const Customers = () => {
               firstBodyElement.status = customerStatus;
             }
           }
-          await canister.updateKYCRequest(data[customerIndex]);
+          await marketActor.updateKYCRequest(data[customerIndex]);
           if (customerStatus === "approved") {
             await sendAutomaticEmailMessage(
               data[customerIndex].body[0]?.firstName,

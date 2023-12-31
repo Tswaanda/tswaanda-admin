@@ -5,10 +5,8 @@ import {
     Tab,
 } from "@mui/material";
 import Header from "../../components/Header";
-import Staff from '../../components/Admin/Staff';
-import AccessRequest from '../../components/Admin/AccessRequest';
 import { useAuth } from "../../hooks/auth";
-import Suspended from "../../components/Admin/Suspended";
+import { AccessRequest, Staff, Suspended } from "./components";
 
 const Support = () => {
     const { backendActor } = useAuth()
