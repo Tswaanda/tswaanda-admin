@@ -155,7 +155,6 @@ export const useAuthClient = (options = defaultOptions) => {
 
     let _marketActor = await ic(network === "local" ? localMarketCanId : marketCanisterId);
 
-    
     setMarketActor(_marketActor);
 
     const _ws = new IcWebSocket(
