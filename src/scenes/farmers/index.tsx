@@ -16,7 +16,7 @@ const Farmers = () => {
   const [updating, setUpdating] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [farmers, setFarmers] = useState<any[] | null>(null);
-  const [data, setData] = useState<Farmer[] | null>(null);
+  const [data, setData] = useState<any[] | null>(null);
   const [pendingFarmers, setPendingFarmers] = useState(null);
   const [approvedFarmers, setApprovedFarmers] = useState(null);
   const [suspendedFarmers, setSuspendedFarmers] = useState(null);
@@ -43,7 +43,7 @@ const Farmers = () => {
     setValue(newValue);
   };
 
-  const handleChange = (panel: any) => (isExpanded: any) => {
+  const handleChange = (panel: any) => (event: any, isExpanded: any) => {
     setExpanded(isExpanded ? panel : false);
   };
 

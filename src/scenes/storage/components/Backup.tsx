@@ -7,12 +7,11 @@ import {
   Typography,
   useTheme,
 } from "@mui/material";
-import { useAuth } from "../../hooks/auth";
-import RestoreProducts from "../../scenes/products/RestoreProducts";
-import RestoreUsersModal from "../../scenes/products/RestoreUsersModal";
-import { Principal } from "@dfinity/principal";
-import { Stats as adStats } from "../../declarations/tswaanda_backend/tswaanda_backend.did";
-import { Stats as mStats} from "../../declarations/marketplace_backend/marketplace_backend.did";
+import { useAuth } from "../../../hooks/auth";
+import RestoreProducts from "../../../scenes/products/RestoreProducts";
+import RestoreUsersModal from "../../../scenes/products/RestoreUsersModal";
+import { Stats as adStats } from "../../../declarations/tswaanda_backend/tswaanda_backend.did";
+import { Stats as mStats} from "../../../declarations/marketplace_backend/marketplace_backend.did";
 
 const Backup = () => {
   const { backendActor, marketActor } = useAuth();

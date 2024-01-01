@@ -1,14 +1,12 @@
 import { Box, useTheme, Tabs, Tab } from "@mui/material";
 import Header from "../../components/Header";
 import React, { useState } from "react";
-import StorageFiles from "../../components/storage/StorageFiles";
-import Canisters from "../../components/storage/Canisters";
-import Backup from "../../components/storage/Backup";
+import { Backup, Canisters, StorageFiles } from "./components";
 
 const Storage = () => {
 
   const [value, setValue] = useState(0);
-  const handleTabChange = (newValue:any) => {
+  const handleTabChange = (event: any, newValue:any) => {
     setValue(newValue);
   };
 

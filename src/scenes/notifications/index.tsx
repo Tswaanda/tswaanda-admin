@@ -11,10 +11,6 @@ import { Button } from "@mui/material";
 const NotificationsPage = () => {
   const { ws } = useAuth();
 
-  /******************************************************
-   *Websockets messages ttesting
-   ******************************************************/
-
   const sendOrderUpdateWSMessage = async (status: string) => {
     let orderMsg: AdminOrderUpdate = {
       marketPlUserclientId:

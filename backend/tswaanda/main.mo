@@ -57,7 +57,7 @@ shared ({ caller = initializer }) actor class TswaandaAdmin() = this {
     type AdminKYCUpdateNotification = Type.AdminKYCUpdateNotification;
 
     /***********************************
-    *  STATE VARIABLES IMPLEMENTATION
+    *  STATE VARIABLES IMPL
     ************************************/
     private stable var roles : AssocList.AssocList<Principal, Role> = List.nil();
     private stable var role_requests : AssocList.AssocList<Principal, Role> = List.nil();
@@ -108,7 +108,7 @@ shared ({ caller = initializer }) actor class TswaandaAdmin() = this {
     };
 
     /*---------------------------------
-    *  WEBSOCKETS IMPLEMENTATION
+    *  WEBSOCKETS IMPL
     *---------------------------------*/
 
     func on_open(args : IcWebSocketCdk.OnOpenCallbackArgs) : async () {
@@ -360,8 +360,107 @@ shared ({ caller = initializer }) actor class TswaandaAdmin() = this {
         return Buffer.toArray<IcWebSocketCdk.ClientPrincipal>(all_connected_clients);
     };
 
+    /***********************************
+    *  NOTIFICATIONS IMPL
+    ************************************/
+
+    /*************Admin notifications*************/
+
+    public shared query ({ caller }) func getAdminNotifications() : async [AdminNotification] {
+        assert (isAdmin(caller));
+        return Iter.toArray(adminNotifications.vals());
+    };
+
+    public shared ({ caller }) func deleteAdminNotification(id : Text) : async () {
+        assert (isAdmin(caller));
+        adminNotifications.delete(id);
+    };
+
+    public shared ({caller}) func markAllAdminNotificationsAsRead() : async () {
+        assert (isAdmin(caller));
+        for (notification in adminNotifications.vals()) {
+            let updatedNotification : AdminNotification = {
+                notification with
+                read = true;
+            };
+            adminNotifications.put(notification.id, updatedNotification);
+        };
+    };
+
+    public shared ({caller}) func markAdminNotificationAsRead(id : Text) : async () {
+        assert (isAdmin(caller));
+        switch (adminNotifications.get(id)) {
+            case (null) {
+                // Do nothing
+            };
+            case (?result) {
+                let updatedNotification : AdminNotification = {
+                    result with
+                    read = true;
+                };
+                adminNotifications.put(id, updatedNotification);
+            };
+        };
+    };
+
+    /************User notifications************/
+
+    public shared ({ caller }) func getUserNotifications() : async [UserNotification] {
+        assert (isAuthorized(caller));
+        switch (userNotifications.get(caller)) {
+            case (null) {
+                return [];
+            };
+            case (?result) {
+                return List.toArray(result);
+            };
+        };
+    };
+
+    public shared ({caller}) func markAllUserNotificationsAsRead() : async () {
+        switch (userNotifications.get(caller)) {
+            case (null) {
+                // Do nothing
+            };
+            case (?result) {
+                var updatedNotifications : List.List<UserNotification> = List.nil<UserNotification>();
+                for (notification in List.toArray(result).vals()) {
+                    let updatedNotification : UserNotification = {
+                        notification with
+                        read = true;
+                    };
+                    updatedNotifications := List.push(updatedNotification, updatedNotifications);
+                };
+                userNotifications.put(caller, updatedNotifications);
+            };
+        };
+    };
+
+    public shared ({caller}) func markUserNotificationAsRead(id : Text) : async () {
+        switch (userNotifications.get(caller)) {
+            case (null) {
+                // Do nothing
+            };
+            case (?results) {
+                var _nots = List.nil<UserNotification>();
+                for (notification in List.toArray(results).vals()) {
+                    if (notification.id == id) {
+                        let updatedNotification : UserNotification = {
+                            notification with
+                            read = true;
+                        };
+                        _nots := List.push(updatedNotification, _nots);
+                    } else {
+                        _nots := List.push(notification, _nots);
+                    };
+                };
+                userNotifications.put(caller, _nots);
+            };
+        };
+    };
+
     /********************************
-    *  ACCESS CONTROL IMPLEMENTATION
+    *  ACCESS CONTROL IMPL
     *********************************/
 
     // Determine if a principal has a role with permissions
@@ -596,7 +695,7 @@ shared ({ caller = initializer }) actor class TswaandaAdmin() = this {
     };
 
     /**************************************
-    *  FARMERS MANAGEMENT IMPLEMENTATION
+    *  FARMERS MANAGEMENT IMPL
     ***************************************/
 
     public shared func createFarmer(newFarmer : Farmer) : () {
@@ -660,7 +759,7 @@ shared ({ caller = initializer }) actor class TswaandaAdmin() = this {
     };
 
     /************************************
-    *  CANISTER STATS IMPLEMENTATION
+    *  CANISTER STATS IMPL
     *************************************/
 
     public shared query func getAdminStats() : async Stats {
@@ -677,7 +776,7 @@ shared ({ caller = initializer }) actor class TswaandaAdmin() = this {
     };
 
     /**********************************
-    *  CANISTER MANAGEMENT IMPLEMENTATION
+    *  CANISTER MANAGEMENT IMPL
     ***********************************/
 
     public query func get_health() : async Health {

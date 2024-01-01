@@ -54,7 +54,6 @@ function App() {
 
   const getMembers = async () => {
     try {
-      console.log(identity.getPrincipal().toString());
       const user = await backendActor.getStaffMember(identity.getPrincipal());
       if (user.ok) {
         setUser(user);

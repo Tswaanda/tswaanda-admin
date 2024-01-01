@@ -12,8 +12,7 @@ import AccordionSummary from "@mui/material/AccordionSummary";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import UpdateOrderStatusModal from "./UpdateOrderStatusModal";
 import ContactCustomerOnOrder from "./ContactCustomerOnOrder";
-import { type } from "os";
-import { ProductOrder } from "../../declarations/marketplace_backend/marketplace_backend.did";
+import { ProductOrderType } from "../utils/types";
 
 type Props = {
   updated: boolean,
@@ -48,7 +47,7 @@ const DeliveredComponent: FC<Props> = ({
   const [openStatusModal, setStatusModal] = useState(false);
   const [openContactModal, setContactModal] = useState(false);
 
-  const [modalOrder, setOrder] = useState(null)
+  const [modalOrder, setOrder] = useState<ProductOrderType| null>(null)
 
   const handleContactCustomer = (order: any) => {
     setOrder(order)

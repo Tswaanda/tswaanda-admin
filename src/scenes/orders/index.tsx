@@ -6,19 +6,21 @@ import { sendAutomaticOrderUpdateEmail } from "../../emails/orders";
 import { formatDate} from "../../utils/time";
 import { useAuth } from "../../hooks/auth";
 import { DeliveredComponent, PendingApprovalComponent, ProcessingComponent, ShippedComponent } from "./components";
+import { ProductOrder } from "../../declarations/marketplace_backend/marketplace_backend.did";
+import { ProductOrderType } from "./utils/types";
 
 const Orders = () => {
   const { marketActor } = useAuth();
   const theme = useTheme();
   const [expanded, setExpanded] = useState(false);
-  const [pendingData, setPendingData] = useState<any[] | null>(null);
-  const [shippedData, setShippedData] = useState<any[] | null>(null);
-  const [deliveredData, setDeliverdData] = useState<any[] | null>(null);
-  const [approvedData, setApprovedData] = useState<any[] | null>(null);
-  const [pendingOrders, setPendingOrders] = useState<any[] | null>(null);
-  const [shippedOrders, setShippedOrders] = useState<any[] | null>(null);
-  const [deliveredOrders, setDeliverdOrders] = useState<any[] | null>(null);
-  const [approvedOrders, setApprovedOrders] = useState<any[] | null>(null);
+  const [pendingData, setPendingData] = useState<ProductOrder[] | null>(null);
+  const [shippedData, setShippedData] = useState<ProductOrder[] | null>(null);
+  const [deliveredData, setDeliverdData] = useState<ProductOrder[] | null>(null);
+  const [approvedData, setApprovedData] = useState<ProductOrder[] | null>(null);
+  const [pendingOrders, setPendingOrders] = useState<ProductOrderType[] | null>(null);
+  const [shippedOrders, setShippedOrders] = useState<ProductOrderType[] | null>(null);
+  const [deliveredOrders, setDeliverdOrders] = useState<ProductOrderType[] | null>(null);
+  const [approvedOrders, setApprovedOrders] = useState<ProductOrderType[] | null>(null);
 
   const [showStep, setShowStep] = useState(false);
 
@@ -29,7 +31,7 @@ const Orders = () => {
 
   //Setting of the value of the currect tab
   const [value, setValue] = useState(0);
-  const handleTabChange = (newValue: any) => {
+  const handleTabChange = (event: any, newValue: any) => {
     setValue(newValue);
   };
 
@@ -201,7 +203,7 @@ const Orders = () => {
     setShowStep(true);
   };
 
-  const handleChange = (panel:any) => (isExpanded:any) => {
+  const handleChange = (panel:any) => (event: any, isExpanded:any) => {
     setExpanded(isExpanded ? panel : false);
   };
 

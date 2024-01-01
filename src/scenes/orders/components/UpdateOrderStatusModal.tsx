@@ -21,11 +21,13 @@ import {
 } from "../../../emails/orderUpdateEmails";
 import { useAuth } from "../../../hooks/auth";
 import {
-    AdminMessage,
+  AdminMessage,
   AdminOrderUpdate,
   AppMessage,
   OrderStatus,
 } from "../../../declarations/tswaanda_backend/tswaanda_backend.did";
+import { ProductOrderType } from "../utils/types";
+import { Principal } from "@dfinity/principal";
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   "& .MuiDialogContent-root": {
@@ -44,7 +46,7 @@ type Props = {
   setOrderStatus: any;
   updating: boolean;
   theme: any;
-  modalOrder: any;
+  modalOrder: ProductOrderType | null;
   updated: boolean;
   setUpdated: any;
 };
@@ -69,7 +71,7 @@ const UpdateOrderStatusModal: FC<Props> = ({
 
   const handleUpdateOrderStatus = async () => {
     const product = await backendActor.getProductById(
-      modalOrder.orderProducts.id
+      modalOrder?.orderProducts.id
     );
     if (product.ok) {
       const farmerInfo = await backendActor.getFarmerByEmail(product.ok.farmer);
@@ -77,13 +79,13 @@ const UpdateOrderStatusModal: FC<Props> = ({
         try {
           if (orderStatus === "approved") {
             // sendOrderApprovedEmail(farmerInfo.ok, modalOrder);
-            sendWSMessage(orderStatus);
+            await sendOrderUpdateWSMessage(orderStatus);
           } else if (orderStatus === "shipped") {
             // sendOrderShippedEmail(farmerInfo.ok, modalOrder);
-            sendWSMessage(orderStatus);
+            await sendOrderUpdateWSMessage(orderStatus);
           } else if (orderStatus === "delivered") {
             // sendOrderDeliveredEmail(farmerInfo.ok, modalOrder);
-            sendWSMessage(orderStatus);
+            await sendOrderUpdateWSMessage(orderStatus);
           } else {
             console.log("No email sent");
           }
@@ -102,44 +104,44 @@ const UpdateOrderStatusModal: FC<Props> = ({
     }
   }, [updated]);
 
-  const sendWSMessage = async (status: string) => {
-    const getStatus = (status: string): OrderStatus => {
-      switch (status) {
-        case "pending":
-          return { Pending: null };
-        case "approved":
-          return { Approved: null };
-        case "shipped":
-          return { Shipped: null };
-        case "delivered":
-          return { Delivered: null };
-        case "completed":
-          return { Completed: null };
-        case "cancelled":
-          return { Cancelled: null };
-        case "rejected":
-          return { Rejected: null };
-        default:
-          return { Pending: null };
-      }
-    };
-
-    let orderMsg: AdminOrderUpdate = {
-      marketPlUserclientId: modalOrder.orderOwner.toString(),
-      orderId: modalOrder.orderId,
-      status: getStatus(status),
-      timestamp: BigInt(Date.now()),
-    };
-    let adminMessage: AdminMessage ={
-        "OrderUpdate": orderMsg
+  const getStatus = (status: string): OrderStatus => {
+    switch (status) {
+      case "pending":
+        return { Pending: null };
+      case "approved":
+        return { Approved: null };
+      case "shipped":
+        return { Shipped: null };
+      case "delivered":
+        return { Delivered: null };
+      case "completed":
+        return { Completed: null };
+      case "cancelled":
+        return { Cancelled: null };
+      case "rejected":
+        return { Rejected: null };
+      default:
+        return { Pending: null };
     }
-    const msg: AppMessage = {
-        "FromAdmin": adminMessage
-    }
-    ws.send((msg));
   };
 
-  console.log("Modal order", modalOrder);
+  const sendOrderUpdateWSMessage = async (status: string) => {
+    if (modalOrder) {
+      let orderMsg: AdminOrderUpdate = {
+        marketPlUserclientId: modalOrder.orderOwner.toString(),
+        orderId: modalOrder.orderId,
+        status: getStatus(status),
+        timestamp: BigInt(Date.now()),
+      };
+      let adminMessage: AdminMessage = {
+        OrderUpdate: orderMsg,
+      };
+      const msg: AppMessage = {
+        FromAdmin: adminMessage,
+      };
+      ws.send(msg);
+    }
+  };
 
   return (
     <div>
@@ -181,6 +183,7 @@ const UpdateOrderStatusModal: FC<Props> = ({
                   <InputLabel id="status-label">Order status</InputLabel>
                   <Select
                     labelId="status-label"
+                    value={orderStatus}
                     onChange={(e) => setOrderStatus(e.target.value)}
                   >
                     <MenuItem value="pending">Pending Approval</MenuItem>

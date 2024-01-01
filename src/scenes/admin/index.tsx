@@ -13,7 +13,7 @@ const Support = () => {
     const [value, setValue] = useState(0);
     const [expanded, setExpanded] = useState<string | false>(false);
 
-    const handleTabChange = (newValue: any) => {
+    const handleTabChange = (event: any, newValue: any) => {
         setValue(newValue);
     };
 

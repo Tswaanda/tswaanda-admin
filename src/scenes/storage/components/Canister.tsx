@@ -13,9 +13,9 @@ import AccordionDetails from "@mui/material/AccordionDetails";
 import AccordionSummary from "@mui/material/AccordionSummary";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { Principal } from "@dfinity/principal";
-import { useAuth } from '../../hooks/auth';
+import { useAuth } from '../../../hooks/auth';
 import { type } from 'os';
-import { Status } from '../../declarations/tswaanda_backend/tswaanda_backend.did';
+import { Status } from '../../../declarations/tswaanda_backend/tswaanda_backend.did';
 
 type Props = {
     canister: any,

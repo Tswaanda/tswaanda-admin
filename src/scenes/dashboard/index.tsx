@@ -25,7 +25,6 @@ import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../hooks/auth";
 import {
-  Customer,
   ProductOrder,
   Stats,
 } from "../../declarations/marketplace_backend/marketplace_backend.did";

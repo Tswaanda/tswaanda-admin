@@ -82,7 +82,7 @@ const PendingFarmers : FC<PendingFarmersProps> = ({
 
     return (
         <Box m="1rem 0 0 0">
-            {pendingFarmers && pendingFarmers.length > 0 ? <>{pendingFarmers?.map((farmer: Farmer) => (
+            {pendingFarmers && pendingFarmers.length > 0 ? <>{pendingFarmers?.map((farmer: any) => (
                 <Accordion
                     key={farmer.id}
                     expanded={expanded === farmer.id}

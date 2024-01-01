@@ -15,15 +15,14 @@ import {
     Tab,
     Button,
 } from "@mui/material";
-import Header from "../Header";
 import Accordion from "@mui/material/Accordion";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import AccordionSummary from "@mui/material/AccordionSummary";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 
 // ts-ignore
-import { deleteAsset, getAllAssets } from "../../storage-config/functions";
-import { Asset } from "../../declarations/file_storage/file_storage.did";
+import { deleteAsset, getAllAssets } from "../../../storage-config/functions";
+import { Asset } from "../../../declarations/file_storage/file_storage.did";
 
 const StorageFiles = () => {
     const theme = useTheme();
