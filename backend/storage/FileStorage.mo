@@ -3,7 +3,7 @@ import Buffer "mo:base/Buffer";
 import Error "mo:base/Error";
 import Float "mo:base/Float";
 import Iter "mo:base/Iter";
-import Map "mo:motoko-hash-map/Map";
+import Map "mo:hash-map";
 import Nat "mo:base/Nat";
 import Nat32 "mo:base/Nat32";
 import Option "mo:base/Option";
@@ -42,8 +42,8 @@ actor class FileStorage(is_prod : Bool) = this {
 	// change me when in production
 	let IS_PROD : Bool = is_prod;
 
-	private var assets = Map.new<Asset_ID, Asset>();
-	private var chunks = Map.new<Chunk_ID, AssetChunk>();
+	private var assets = Map.new<Asset_ID, Asset>(thash);
+	private var chunks = Map.new<Chunk_ID, AssetChunk>(nhash);
 
 	stable var assets_stable_storage : [(Asset_ID, Asset)] = [];
 	stable var chunks_stable_storage : [(Chunk_ID, AssetChunk)] = [];

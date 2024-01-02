@@ -29,7 +29,7 @@ import Result "mo:base/Result";
 import Buffer "mo:base/Buffer";
 import Principal "mo:base/Principal";
 import Time "mo:base/Time";
-import Map "mo:motoko-hash-map/Map";
+import Map "mo:hash-map/Map/Map";
 import Utils "./utils";
 
 shared ({ caller = initializer }) actor class TswaandaAdmin() = this {
