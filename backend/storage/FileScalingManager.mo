@@ -1,6 +1,6 @@
 import Cycles "mo:base/ExperimentalCycles";
 import Iter "mo:base/Iter";
-import Map "mo:hashmap/Map";
+import Map "mo:motoko-hash-map/Map";
 import Principal "mo:base/Principal";
 import Time "mo:base/Time";
 import Timer "mo:base/Timer";

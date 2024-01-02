@@ -3,7 +3,7 @@ import Buffer "mo:base/Buffer";
 import Error "mo:base/Error";
 import Float "mo:base/Float";
 import Iter "mo:base/Iter";
-import Map "mo:hashmap/Map";
+import Map "mo:motoko-hash-map/Map";
 import Nat "mo:base/Nat";
 import Nat32 "mo:base/Nat32";
 import Option "mo:base/Option";

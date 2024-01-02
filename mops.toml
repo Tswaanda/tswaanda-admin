@@ -1,5 +1,5 @@
 [dependencies]
 base = "0.8.8"
-hashmap = "https://github.com/ZhenyaUsenko/motoko-hash-map#master"
 hash-map = "0.0.2"
 ic-websocket-cdk = "0.3.2"
+motoko-hash-map = "https://github.com/ZhenyaUsenko/motoko-hash-map#master"

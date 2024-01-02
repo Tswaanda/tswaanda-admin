@@ -94,7 +94,7 @@ const UpdateOrderStatusModal: FC<Props> = ({
         }
       }
     }
-    // updateOrderStatus(modalOrder.orderId);
+    updateOrderStatus(modalOrder?.orderId);
   };
 
   useEffect(() => {

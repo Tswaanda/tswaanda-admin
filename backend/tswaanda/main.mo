@@ -29,7 +29,7 @@ import Result "mo:base/Result";
 import Buffer "mo:base/Buffer";
 import Principal "mo:base/Principal";
 import Time "mo:base/Time";
-import Map "mo:hashmap/Map";
+import Map "mo:motoko-hash-map/Map";
 import Utils "./utils";
 
 shared ({ caller = initializer }) actor class TswaandaAdmin() = this {
@@ -123,13 +123,8 @@ shared ({ caller = initializer }) actor class TswaandaAdmin() = this {
                     case (#FromAdmin(msg)) {
                         // Check if the client already exist in the list of admin clients, if not we add it
                         let index = Buffer.indexOf<Principal>(args.client_principal, admin_clients, Principal.equal);
-                        switch (index) {
-                            case (null) {
-                                // Do nothing
-                            };
-                            case (?index) {
-                                admin_clients.add(args.client_principal);
-                            };
+                        if (index == null) {
+                            admin_clients.add(args.client_principal);
                         };
                         switch (msg) {
                             case (#KYCUpdate(msg)) {
@@ -197,8 +192,10 @@ shared ({ caller = initializer }) actor class TswaandaAdmin() = this {
                                         result;
                                     };
                                 };
+        
                                 notifications := List.push(notification, notifications);
                                 userNotifications.put(client, notifications);
+
 
                                 // Create a notification message and send it to the client with the websocket
                                 // Sending the notfication message as a #FromAdmin message to the marketplace user client
@@ -376,7 +373,7 @@ shared ({ caller = initializer }) actor class TswaandaAdmin() = this {
         adminNotifications.delete(id);
     };
 
-    public shared ({caller}) func markAllAdminNotificationsAsRead() : async () {
+    public shared ({ caller }) func markAllAdminNotificationsAsRead() : async () {
         assert (isAdmin(caller));
         for (notification in adminNotifications.vals()) {
             let updatedNotification : AdminNotification = {
@@ -387,7 +384,7 @@ shared ({ caller = initializer }) actor class TswaandaAdmin() = this {
         };
     };
 
-    public shared ({caller}) func markAdminNotificationAsRead(id : Text) : async () {
+    public shared ({ caller }) func markAdminNotificationAsRead(id : Text) : async () {
         assert (isAdmin(caller));
         switch (adminNotifications.get(id)) {
             case (null) {
@@ -406,7 +403,7 @@ shared ({ caller = initializer }) actor class TswaandaAdmin() = this {
     /************User notifications************/
 
     public shared ({ caller }) func getUserNotifications() : async [UserNotification] {
-        assert (isAuthorized(caller));
+        let _nots = userNotifications.get(caller);
         switch (userNotifications.get(caller)) {
             case (null) {
                 return [];
@@ -417,7 +414,7 @@ shared ({ caller = initializer }) actor class TswaandaAdmin() = this {
         };
     };
 
-    public shared ({caller}) func markAllUserNotificationsAsRead() : async () {
+    public shared ({ caller }) func markAllUserNotificationsAsRead() : async () {
         switch (userNotifications.get(caller)) {
             case (null) {
                 // Do nothing
@@ -436,7 +433,7 @@ shared ({ caller = initializer }) actor class TswaandaAdmin() = this {
         };
     };
 
-    public shared ({caller}) func markUserNotificationAsRead(id : Text) : async () {
+    public shared ({ caller }) func markUserNotificationAsRead(id : Text) : async () {
         switch (userNotifications.get(caller)) {
             case (null) {
                 // Do nothing
