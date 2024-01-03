@@ -72,6 +72,13 @@ const Customers = () => {
         ...customer,
         step: Number(customer.step),
         created: `${formattedDate}`,
+        body: customer.body
+          ? {
+              ...customer.body,
+              zipCode: Number(customer.body.zipCode),
+              phoneNumber: Number(customer.body.phoneNumber),
+            }
+          : undefined,
       };
     });
 
