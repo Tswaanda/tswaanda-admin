@@ -2,35 +2,32 @@
   "canisters": {
     "internet_identity": {
       "type": "custom",
-      "candid": "https://github.com/dfinity/internet-identity/releases/latest/download/internet_identity.did",
-      "wasm": "https://github.com/dfinity/internet-identity/releases/latest/download/internet_identity_dev.wasm.gz",
-      "shrink": false,
+      "candid": "https://github.com/dfinity/internet-identity/releases/download/release-2023-11-17/internet_identity.did",
+      "wasm": "https://github.com/dfinity/internet-identity/releases/download/release-2023-11-17/internet_identity_dev.wasm.gz",
       "remote": {
         "id": {
           "ic": "rdmx6-jaaaa-aaaaa-aaadq-cai"
         }
-      }
+      },
+      "frontend": {}
     },
     "file_scaling_manager": {
-      "main": "src/tswaanda_backend/storage/FileScalingManager.mo",
+      "main": "backend/storage/FileScalingManager.mo",
       "type": "motoko"
     },
     "file_storage": {
-      "main": "src/tswaanda_backend/storage/FileStorage.mo",
+      "main": "backend/storage/FileStorage.mo",
       "type": "motoko",
       "dependencies": []
     },
     "tswaanda_backend": {
-      "main": "src/tswaanda_backend/tswaanda/main.mo",
+      "main": "backend/tswaanda/main.mo",
       "type": "motoko"
     },
     "tswaanda_frontend": {
       "dependencies": ["tswaanda_backend"],
-      "frontend": {
-        "entrypoint": "src/tswaanda_frontend/src/index.html"
-      },
-      "source": ["src/tswaanda_frontend/assets", "dist/tswaanda_frontend/"],
-      "type": "assets"
+      "type": "assets",
+      "source": ["dist/"]
     }
   },
   "defaults": {
