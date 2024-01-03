@@ -184,7 +184,7 @@ const Pending : FC<PendingProps> = ({
                                         }}
                                     >
                                         <span style={{ fontWeight: "bold" }}>Phone Number</span>:{" "}
-                                        {customer.body ? customer.body.phoneNumber : "Anon"}
+                                        {customer.body ? Number(customer.body.phoneNumber) : "Anon"}
                                     </Typography>
                                 </AccordionSummary>
                                 <AccordionSummary>

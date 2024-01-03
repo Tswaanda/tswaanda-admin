@@ -26,6 +26,7 @@ module {
         marketPlUserclientId : Text;
         orderId : Text;
         status : OrderStatus;
+        message : Text;
         timestamp : Int;
     };
 
@@ -71,6 +72,7 @@ module {
     public type UserOrderUpdateNotification = {
         orderId : Text;
         status : OrderStatus;
+        message : Text;
     };
 
     public type UserKYCUpdateNotification = {

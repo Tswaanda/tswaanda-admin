@@ -174,6 +174,7 @@ shared ({ caller = initializer }) actor class TswaandaAdmin() = this {
                                 let currentTime = Time.now();
                                 let orderNotf : UserOrderUpdateNotification = {
                                     orderId = msg.orderId;
+                                    message = msg.message;
                                     status = msg.status;
                                 };
 
@@ -203,6 +204,7 @@ shared ({ caller = initializer }) actor class TswaandaAdmin() = this {
                                     marketPlUserclientId = msg.marketPlUserclientId;
                                     orderId = msg.orderId;
                                     status = msg.status;
+                                    message = msg.message;
                                     timestamp = currentTime;
                                 };
 

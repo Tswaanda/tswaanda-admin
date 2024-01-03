@@ -3,10 +3,10 @@ import { Box, Tabs, Tab, Button } from "@mui/material";
 import Header from "../../components/Header";
 import { toast } from "react-toastify";
 import { sendAutomaticEmailMessage } from "../../emails/kycApprovals";
-import { Customer } from "../../declarations/marketplace_backend/marketplace_backend.did";
 import { useAuth } from "../../hooks/auth";
 import { formatDate} from "../../utils/time";
-import { All, Anon, Approved, Pending, ProofOfAddress } from "./components";
+import { All, Anon, Approved, Pending} from "./components";
+import { CustomerType } from "../dashboard/utils/types";
 
 const Customers = () => {
   const {marketActor} = useAuth();
@@ -15,7 +15,7 @@ const Customers = () => {
   const [updating, setUpdating] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [customers, setCustomers] = useState<any[] | null>(null);
-  const [data, setData] = useState<Customer[] | null>(null);
+  const [data, setData] = useState<CustomerType[] | null>(null);
   const [pendingCustomers, setPendingCustomers] = useState(null);
   const [approvedCustomers, setApprovedCustomers] = useState(null);
   const [updated, setUpdated] = useState(false);
@@ -93,8 +93,8 @@ const Customers = () => {
         body: customer.body
           ? {
               ...customer.body,
-              zipCode: Number(customer.body[0]?.zipCode),
-              phoneNumber: Number(customer.body[0]?.phoneNumber),
+              zipCode: Number(customer.body.zipCode),
+              phoneNumber: Number(customer.body.phoneNumber),
             }
           : undefined,
       }));
@@ -131,17 +131,14 @@ const Customers = () => {
 
         if (customerIndex !== -1) {
           const customer = data[customerIndex];
-          if (customer.body && customer.body.length > 0) {
-            const firstBodyElement = customer.body[0];
-            if (firstBodyElement) {
-              firstBodyElement.status = customerStatus;
-            }
+          if (customer.body) {
+              customer.body.status = customerStatus;
           }
           await marketActor.updateKYCRequest(data[customerIndex]);
           if (customerStatus === "approved") {
             await sendAutomaticEmailMessage(
-              data[customerIndex].body[0]?.firstName,
-              data[customerIndex].body[0]?.email
+              data[customerIndex].body?.firstName,
+              data[customerIndex].body?.email
             );
           }
           setUpdated(true);

@@ -11,22 +11,22 @@ import { Button } from "@mui/material";
 const NotificationsPage = () => {
   const { ws } = useAuth();
 
-  const sendOrderUpdateWSMessage = async (status: string) => {
-    let orderMsg: AdminOrderUpdate = {
-      marketPlUserclientId:
-        "vnw6d-awyvd-bvqjd-mxu3r-zwfmv-hnkt5-7b5j3-zttj6-gyyv3-urq3r-pqe",
-      orderId: "2v7x3-4iaaa-aaaah-qaa4q-cai",
-      status: { Approved: null },
-      timestamp: BigInt(Date.now()),
-    };
-    let adminMessage: AdminMessage = {
-      OrderUpdate: orderMsg,
-    };
-    const msg: AppMessage = {
-      FromAdmin: adminMessage,
-    };
-    ws.send(msg);
-  };
+  // const sendOrderUpdateWSMessage = async (status: string) => {
+  //   let orderMsg: AdminOrderUpdate = {
+  //     marketPlUserclientId:
+  //       "vnw6d-awyvd-bvqjd-mxu3r-zwfmv-hnkt5-7b5j3-zttj6-gyyv3-urq3r-pqe",
+  //     orderId: "2v7x3-4iaaa-aaaah-qaa4q-cai",
+  //     status: { Approved: null },
+  //     timestamp: BigInt(Date.now()),
+  //   };
+  //   let adminMessage: AdminMessage = {
+  //     OrderUpdate: orderMsg,
+  //   };
+  //   const msg: AppMessage = {
+  //     FromAdmin: adminMessage,
+  //   };
+  //   ws.send(msg);
+  // };
 
   const sendKYCUpdateWSMessage = async (status: string) => {
     let kycMsg: AdminKYCUpdate = {
@@ -48,7 +48,9 @@ const NotificationsPage = () => {
   return (
     <div>
       {" "}
-      <Button onClick={() => sendOrderUpdateWSMessage("Approved")}>
+      <Button
+      //  onClick={() => sendOrderUpdateWSMessage("Approved")}
+       >
         Send Order Update
       </Button>
       <Button onClick={() => sendKYCUpdateWSMessage("Approved")}>
