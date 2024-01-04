@@ -81,7 +81,7 @@ const UpdateCustomerStatusForm: FC<UpdateCustomerStatusFormProps> = ({
   const updateStatus = async () => {
     try {
       sendKYCUpdateWSMessage(localStatus);
-      // updateCustomerStatus(customer.id);
+      updateCustomerStatus(customer.id);
     } catch (err) {
       console.log("Error updating customer status", err);
     }

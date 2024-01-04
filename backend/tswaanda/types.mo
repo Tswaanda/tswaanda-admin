@@ -13,6 +13,7 @@ module {
     public type AppMessage = {
         #FromAdmin : AdminMessage;
         #FromMarket : MarketMessage;
+        #AdminConnected;
     };
 
     // From Admin

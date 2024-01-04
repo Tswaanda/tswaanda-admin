@@ -121,11 +121,6 @@ shared ({ caller = initializer }) actor class TswaandaAdmin() = this {
             case (?msg) {
                 switch (msg) {
                     case (#FromAdmin(msg)) {
-                        // Check if the client already exist in the list of admin clients, if not we add it
-                        let index = Buffer.indexOf<Principal>(args.client_principal, admin_clients, Principal.equal);
-                        if (index == null) {
-                            admin_clients.add(args.client_principal);
-                        };
                         switch (msg) {
                             case (#KYCUpdate(msg)) {
 
@@ -193,10 +188,9 @@ shared ({ caller = initializer }) actor class TswaandaAdmin() = this {
                                         result;
                                     };
                                 };
-        
+
                                 notifications := List.push(notification, notifications);
                                 userNotifications.put(client, notifications);
-
 
                                 // Create a notification message and send it to the client with the websocket
                                 // Sending the notfication message as a #FromAdmin message to the marketplace user client
@@ -291,6 +285,13 @@ shared ({ caller = initializer }) actor class TswaandaAdmin() = this {
                             };
                         };
                         market_clients.add(args.client_principal);
+                    };
+                    case (#AdminConnected(msg)) {
+                        // Check if the client already exist in the list of admin clients, if not we add it
+                        let index = Buffer.indexOf<Principal>(args.client_principal, admin_clients, Principal.equal);
+                        if (index == null) {
+                            admin_clients.add(args.client_principal);
+                        };
                     };
                 };
             };

@@ -31,15 +31,17 @@ import {
 import { canisterId as iiCanId } from "../declarations/internet_identity";
 // @ts-ignore
 import icblast from "@infu/icblast";
+import { handleWebSocketMessage } from "../service/main.js";
+import { processWsMessage } from "./utils";
 
 const marketCanisterId = "55ger-liaaa-aaaal-qb33q-cai";
-const localMarketCanId = "avqkn-guaaa-aaaaa-qaaea-cai";
+const localMarketCanId = "bd3sg-teaaa-aaaaa-qaaba-cai";
 
 const gatewayUrl = "wss://gateway.icws.io";
 const icUrl = "https://icp0.io";
 const localGatewayUrl = "ws://127.0.0.1:8080";
 const localICUrl = "http://127.0.0.1:4943";
-const localhost = "http://localhost:3001";
+const localhost = "http://localhost:3000";
 const host = "https://icp0.io";
 const network = process.env.DFX_NETWORK || "local";
 
@@ -51,6 +53,7 @@ interface ContextType {
   backendActor: any;
   isAuthenticated: boolean;
   ws: any;
+  wsMessage: any;
   setStorageInitiated(args: boolean): void;
   setAccessLevel(args: string): void;
   login(): void;
@@ -65,6 +68,7 @@ const initialContext: ContextType = {
   accessLevel: "",
   marketActor: null,
   ws: null,
+  wsMessage: null,
   setStorageInitiated: (): void => {
     throw new Error("setStorageInitiated function must be overridden");
   },
@@ -109,6 +113,7 @@ export const useAuthClient = (options = defaultOptions) => {
   const [ws, setWs] = useState<IcWebSocket<_SERVICE, AppMessage> | null>(null);
   const [storageInitiated, setStorageInitiated] = useState(false);
   const [accessLevel, setAccessLevel] = useState("");
+  const [wsMessage, setWsMessage] = useState(null);
 
   useEffect(() => {
     AuthClient.create(options.createOptions).then(async (client) => {
@@ -153,7 +158,9 @@ export const useAuthClient = (options = defaultOptions) => {
     });
     setBackendActor(_backendActor);
 
-    let _marketActor = await ic(network === "local" ? localMarketCanId : marketCanisterId);
+    let _marketActor = await ic(
+      network === "local" ? localMarketCanId : marketCanisterId
+    );
 
     setMarketActor(_marketActor);
 
@@ -177,12 +184,23 @@ export const useAuthClient = (options = defaultOptions) => {
     }
     ws.onopen = () => {
       console.log("Connected to the canister");
+      const msg: AppMessage = {
+        AdminConnected: null,
+      };
+      ws.send(msg);
     };
     ws.onclose = () => {
       console.log("Disconnected from the canister");
     };
     ws.onerror = (error: any) => {
       console.log("Error:", error);
+    };
+    ws.onmessage = async (event: any) => {
+      let res = processWsMessage(event.data);
+      await handleWebSocketMessage(res);
+      const recievedMessage = event.data;
+      console.log("Message recieved:", recievedMessage)
+      setWsMessage(recievedMessage);
     };
   }, [ws]);
 
@@ -205,6 +223,7 @@ export const useAuthClient = (options = defaultOptions) => {
     setAccessLevel,
     login,
     logout,
+    wsMessage,
   };
 };
 
