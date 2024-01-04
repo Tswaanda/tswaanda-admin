@@ -94,7 +94,7 @@ const UpdateOrderStatusModal: FC<Props> = ({
         }
       }
     }
-    updateOrderStatus(modalOrder?.orderId);
+    // updateOrderStatus(modalOrder?.orderId);
   };
 
   useEffect(() => {
@@ -104,33 +104,81 @@ const UpdateOrderStatusModal: FC<Props> = ({
     }
   }, [updated]);
 
-  const getStatus = (status: string): OrderStatus => {
-    switch (status) {
-      case "pending":
-        return { Pending: null };
-      case "approved":
-        return { Approved: null };
-      case "shipped":
-        return { Shipped: null };
-      case "delivered":
-        return { Delivered: null };
-      case "completed":
-        return { Completed: null };
-      case "cancelled":
-        return { Cancelled: null };
-      case "rejected":
-        return { Rejected: null };
-      default:
-        return { Pending: null };
+  const getStatus = (status: string) => {
+    if (status === "pending") {
+      let _status: OrderStatus = { Pending: null };
+      let message: string = "Order is pending approval";
+      let res = {
+        status: _status,
+        message: message,
+      };
+      return res;
+    } else if (status === "approved") {
+      let _status: OrderStatus = { Approved: null };
+      let message: string = "Order has been approved";
+      let res = {
+        status: _status,
+        message: message,
+      };
+      return res;
+    } else if (status === "shipped") {
+      let _status: OrderStatus = { Shipped: null };
+      let message: string = "Order has been shipped";
+      let res = {
+        status: _status,
+        message: message,
+      };
+      return res;
+    } else if (status === "delivered") {
+      let _status: OrderStatus = { Delivered: null };
+      let message: string = "Order has been delivered";
+      let res = {
+        status: _status,
+        message: message,
+      };
+      return res;
+    } else if (status === "completed") {
+      let _status: OrderStatus = { Completed: null };
+      let message: string = "Order has been completed";
+      let res = {
+        status: _status,
+        message: message,
+      };
+      return res;
+    } else if (status === "cancelled") {
+      let _status: OrderStatus = { Cancelled: null };
+      let message: string = "Order has been cancelled";
+      let res = {
+        status: _status,
+        message: message,
+      };
+      return res;
+    } else if (status === "rejected") {
+      let _status: OrderStatus = { Rejected: null };
+      let message: string = "Order has been rejected";
+      let res = {
+        status: _status,
+        message: message,
+      };
+      return res;
+    } else {
+      let _status: OrderStatus = { Pending: null };
+      let message: string = "Order is pending approval";
+      let res = {
+        status: _status,
+        message: message,
+      };
+      return res;
     }
   };
-
   const sendOrderUpdateWSMessage = async (status: string) => {
+    let data = getStatus(status);
     if (modalOrder) {
       let orderMsg: AdminOrderUpdate = {
         marketPlUserclientId: modalOrder.orderOwner.toString(),
         orderId: modalOrder.orderId,
-        status: getStatus(status),
+        status: data.status,
+        message: data.message,
         timestamp: BigInt(Date.now()),
       };
       let adminMessage: AdminMessage = {

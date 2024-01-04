@@ -1,16 +1,3 @@
-import IcWebSocket, { generateRandomIdentity } from "ic-websocket-js";
-import { canisterId, tswaanda_backend } from "../declarations/tswaanda_backend";
-
-// WebSocket Setup
-const gatewayUrl = "ws://127.0.0.1:8080"; // Local test URL
-const icUrl = "http://127.0.0.1:4943"; // Local test network URL
-
-export const ws = new IcWebSocket(gatewayUrl, undefined, {
-  canisterId: canisterId,
-  canisterActor: tswaanda_backend,
-  identity: generateRandomIdentity(),
-  networkUrl: icUrl,
-});
 
 // Service Worker Registration
 if ("serviceWorker" in navigator) {
@@ -42,16 +29,15 @@ const requestPermission = async () => {
 }
 
 // WebSocket Message Handling
-export const handleWebSocketMessage = async (event) => {
+export const handleWebSocketMessage = async (message) => {
   if (!isPermitted) {
     await requestPermission();
   }
   if (Notification.permission === 'granted') {
-    console.log(event.data)
-    const data = event.data
-    const title = 'New Message'; 
+
+    const title = message.title; 
     const options = {
-      body: data.message, 
+      body: message.message, 
       icon: '../../assets/logo.png' 
     }
 

@@ -13,6 +13,7 @@ module {
     public type AppMessage = {
         #FromAdmin : AdminMessage;
         #FromMarket : MarketMessage;
+        #AdminConnected;
     };
 
     // From Admin
@@ -26,6 +27,7 @@ module {
         marketPlUserclientId : Text;
         orderId : Text;
         status : OrderStatus;
+        message : Text;
         timestamp : Int;
     };
 
@@ -71,6 +73,7 @@ module {
     public type UserOrderUpdateNotification = {
         orderId : Text;
         status : OrderStatus;
+        message : Text;
     };
 
     public type UserKYCUpdateNotification = {

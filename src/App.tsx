@@ -42,7 +42,7 @@ import { RootState } from "./state/Store";
 function App() {
   const dispatch = useDispatch();
 
-  const { isAuthenticated, identity, backendActor, ws } = useAuth();
+  const { isAuthenticated, identity, backendActor } = useAuth();
   const [authorized, setAuthorized] = useState<boolean | null>(null);
   const [user, setUser] = useState(null);
 
