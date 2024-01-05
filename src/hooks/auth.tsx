@@ -5,9 +5,9 @@ import {
   Identity,
   SignIdentity,
 } from "@dfinity/agent";
-import { idlFactory as marketIdlFactory } from "../declarations/marketplace_backend";
+import { canisterId as marketLocalId, idlFactory as marketIdlFactory } from "../declarations/marketplace_backend";
 import {
-  canisterId,
+  canisterId as backendCanId,
   tswaanda_backend,
   idlFactory as tswaandaIdl,
 } from "../declarations/tswaanda_backend/index";
@@ -35,7 +35,7 @@ import { handleWebSocketMessage } from "../service/main.js";
 import { processWsMessage } from "./utils";
 
 const marketCanisterId = "55ger-liaaa-aaaal-qb33q-cai";
-const localMarketCanId = "bd3sg-teaaa-aaaaa-qaaba-cai";
+const localMarketCanId = "avqkn-guaaa-aaaaa-qaaea-cai";
 
 const gatewayUrl = "wss://gateway.icws.io";
 const icUrl = "https://icp0.io";
@@ -154,12 +154,12 @@ export const useAuthClient = (options = defaultOptions) => {
 
     const _backendActor = Actor.createActor(tswaandaIdl, {
       agent,
-      canisterId: canisterId,
+      canisterId: backendCanId,
     });
     setBackendActor(_backendActor);
 
     let _marketActor = await ic(
-      network === "local" ? localMarketCanId : marketCanisterId
+      network === "local" ? marketLocalId : marketCanisterId
     );
 
     setMarketActor(_marketActor);
@@ -168,7 +168,7 @@ export const useAuthClient = (options = defaultOptions) => {
       network === "local" ? localGatewayUrl : gatewayUrl,
       undefined,
       {
-        canisterId: canisterId,
+        canisterId: backendCanId,
         canisterActor: tswaanda_backend,
         identity: identity as SignIdentity,
         networkUrl: network === "local" ? localICUrl : icUrl,
