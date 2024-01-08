@@ -5,7 +5,10 @@ import {
   Identity,
   SignIdentity,
 } from "@dfinity/agent";
-import { canisterId as marketLocalId, idlFactory as marketIdlFactory } from "../declarations/marketplace_backend";
+import {
+  canisterId as marketLocalId,
+  idlFactory as marketIdlFactory,
+} from "../declarations/marketplace_backend";
 import {
   canisterId as backendCanId,
   tswaanda_backend,
@@ -52,8 +55,10 @@ interface ContextType {
   identity: any;
   backendActor: any;
   isAuthenticated: boolean;
+  updateNotifications: boolean;
   ws: any;
   wsMessage: any;
+  setUpdateNotifications: (args: boolean) => void;
   setStorageInitiated(args: boolean): void;
   setAccessLevel(args: string): void;
   login(): void;
@@ -65,22 +70,16 @@ const initialContext: ContextType = {
   backendActor: null,
   isAuthenticated: false,
   storageInitiated: false,
+  updateNotifications: false,
   accessLevel: "",
   marketActor: null,
   ws: null,
   wsMessage: null,
-  setStorageInitiated: (): void => {
-    throw new Error("setStorageInitiated function must be overridden");
-  },
-  setAccessLevel: (): void => {
-    throw new Error("setAccessLevel function must be overridden");
-  },
-  login: (): void => {
-    throw new Error("login function must be overridden");
-  },
-  logout: (): void => {
-    throw new Error("logout function must be overridden");
-  },
+  setStorageInitiated: (): void => {},
+  setAccessLevel: (): void => {},
+  login: (): void => {},
+  logout: (): void => {},
+  setUpdateNotifications: (): void => {}
 };
 
 const AuthContext = createContext<ContextType>(initialContext);
@@ -114,6 +113,7 @@ export const useAuthClient = (options = defaultOptions) => {
   const [storageInitiated, setStorageInitiated] = useState(false);
   const [accessLevel, setAccessLevel] = useState("");
   const [wsMessage, setWsMessage] = useState(null);
+  const [updateNotifications, setUpdateNotifications] = useState(false);
 
   useEffect(() => {
     AuthClient.create(options.createOptions).then(async (client) => {
@@ -199,7 +199,7 @@ export const useAuthClient = (options = defaultOptions) => {
       let res = processWsMessage(event.data);
       await handleWebSocketMessage(res);
       const recievedMessage = event.data;
-      console.log("Message recieved:", recievedMessage)
+      console.log("Message recieved:", recievedMessage);
       setWsMessage(recievedMessage);
     };
   }, [ws]);
@@ -219,6 +219,8 @@ export const useAuthClient = (options = defaultOptions) => {
     storageInitiated,
     accessLevel,
     ws,
+    updateNotifications,
+    setUpdateNotifications,
     setStorageInitiated,
     setAccessLevel,
     login,

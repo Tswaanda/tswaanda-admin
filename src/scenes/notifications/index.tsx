@@ -1,71 +1,109 @@
-import React from 'react';
-import { Card, CardContent, Typography, Button, Box } from '@mui/material';
-import Header from '../../components/Header';
-import FlexBetween from '../../components/FlexBetween';
-import CampaignIcon from '@mui/icons-material/Campaign';
+import { useEffect, useState } from "react";
+import Header from "../../components/Header";
+import { AdminNotification } from "../../declarations/tswaanda_backend/tswaanda_backend.did";
+import { useAuth } from "../../hooks/auth";
+import NotificationCard from "./components/NotificationCard";
+import { Box } from "@mui/material";
 
-const NotificationCard = ({ title, content, dateTime }) => {
-  const maxContentLength = 100; // Set a maximum length for the content before "Read More"
+const _notifications = [
+  {
+    id: 1,
+    title: "New products listed",
+    content: `More products have been listed and you can go ahead and look for the products you might have been looking out for`,
+    dateTime: "2022-01-01T12:34:56",
+    read: true,
+  },
+  {
+    id: 2,
+    title: "New user added",
+    content: "New signup, please go and review the user .",
+    dateTime: "2022-01-01T12:34:56",
+    read: false,
+  },
+  {
+    id: 3,
+    title: "New user added",
+    content: "New signup, please go and review the user .",
+    dateTime: "2022-01-01T12:34:56",
+    read: false,
+  },
+  {
+    id: 4,
+    title: "New user added",
+    content: "New signup, please go and review the user .",
+    dateTime: "2022-01-01T12:34:56",
+    read: false,
+  },
+  {
+    id: 5,
+    title: "New user added",
+    content: "New signup, please go and review the user .",
+    dateTime: "2022-01-01T12:34:56",
+    read: false,
+  },
+  {
+    id: 6,
+    title: "New user added",
+    content: "New signup, please go and review the user .",
+    dateTime: "2022-01-01T12:34:56",
+    read: true,
+  },
+  {
+    id: 7,
+    title: "New user added",
+    content: "New signup, please go and review the user .",
+    dateTime: "2022-01-01T12:34:56",
+    read: true,
+  },
+  {
+    id: 8,
+    title: "New user added",
+    content: "New signup, please go and review the user .",
+    dateTime: "2022-01-01T12:34:56",
+    read: false,
+  },
+  {
+    id: 9,
+    title: "New user added",
+    content: "New signup, please go and review the user .",
+    dateTime: "2022-01-01T12:34:56",
+    read: false,
+  }
+  // Add more notifications as needed
+];
 
-  const renderContent = () => {
-    if (content.length <= maxContentLength) {
-      return content;
+const NotificationsPage = () => {
+  const { setUpdateNotifications, backendActor } = useAuth();
+  const [notifications, setNotifications] = useState<
+    AdminNotification[] | null
+  >(null);
+
+  useEffect(() => {
+    if (backendActor) {
+      fetchNotifications();
     }
+  }, [backendActor]);
 
-    const truncatedContent = content.substring(0, maxContentLength);
-    return (
-      <>
-        {truncatedContent}
-        {' '}
-        <Button color="secondary" size="small">
-          View More
-        </Button>
-      </>
-    );
+  const fetchNotifications = async () => {
+    const notifications = await backendActor.getAdminNotifications();
+    setNotifications(notifications);
   };
 
   return (
-    <Card sx={{ backgroundColor: 'transparent', marginBottom: 1 }}>
-      <CardContent>
-      <FlexBetween>
-        
-      </FlexBetween>
-      <CampaignIcon color="secondary" />
-        <FlexBetween>
-          <Typography variant="h5" sx={{ fontWeight: 'bold' }} gutterBottom>
-            {title}
-          </Typography>
-          <Typography variant="caption" color="secondary">
-              {new Date(dateTime).toLocaleString()}
-          </Typography>
-        </FlexBetween>
-        <Typography variant="body1" color="lightgrey">
-          {renderContent()}
-        </Typography>
-      </CardContent>
-    </Card>
-  );
-};
-
-const NotificationsPage = () => {
-  const notifications = [
-    { id: 1, title: 'New products listed', content: `More products have been listed and you can go ahead and look for the products you might have been looking out for`, dateTime: '2022-01-01T12:34:56' },
-    { id: 2, title: 'New user added', content: 'New signup, please go and review the user .', dateTime: '2022-01-01T12:34:56' },
-    // Add more notifications as needed
-  ];
-
-  return (
     <Box m="1.5rem 2.5rem">
-      <Box display="flex" justifyContent="space-between" alignItems="center" sx={{ marginBottom: 5 }}>
+      <Box
+        display="flex"
+        justifyContent="space-between"
+        alignItems="center"
+        sx={{ marginBottom: 5 }}
+      >
         <Header title="NOTIFICATIONS" subtitle="List of Notifications" />
       </Box>
-      
-      {notifications.map((notification) => (
+
+      {notifications?.map((notification) => (
         <NotificationCard
           key={notification.id}
-          title={notification.title}
-          content={notification.content}
-          dateTime={notification.dateTime}
+          {...{notification}}
         />
       ))}
     </Box>
@@ -73,4 +111,3 @@ const NotificationsPage = () => {
 };
 
 export default NotificationsPage;
-
