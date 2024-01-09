@@ -403,6 +403,17 @@ shared ({ caller = initializer }) actor class TswaandaAdmin() = this {
         };
     };
 
+    public shared query ({caller}) func getUnreadAdminNotifications() : async [AdminNotification] {
+        assert (isAdmin(caller));
+        let unreadNotifications = Buffer.Buffer<AdminNotification>(0);
+        for (notification in adminNotifications.vals()) {
+            if (notification.read == false) {
+                unreadNotifications.add(notification);
+            };
+        };
+        return Buffer.toArray<AdminNotification>(unreadNotifications);
+    };
+
     /************User notifications************/
 
     public shared ({ caller }) func getUserNotifications() : async [UserNotification] {
@@ -455,6 +466,23 @@ shared ({ caller = initializer }) actor class TswaandaAdmin() = this {
                     };
                 };
                 userNotifications.put(caller, _nots);
+            };
+        };
+    };
+
+    public shared query ({caller}) func getUnreadUserNotifications() : async [UserNotification] {
+        let unreadNotifications = Buffer.Buffer<UserNotification>(0);
+        switch (userNotifications.get(caller)) {
+            case (null) {
+                return [];
+            };
+            case (?result) {
+                for (notification in List.toArray(result).vals()) {
+                    if (notification.read == false) {
+                        unreadNotifications.add(notification);
+                    };
+                };
+                return Buffer.toArray<UserNotification>(unreadNotifications);
             };
         };
     };

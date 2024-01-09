@@ -36,6 +36,7 @@ import { canisterId as iiCanId } from "../declarations/internet_identity";
 import icblast from "@infu/icblast";
 import { handleWebSocketMessage } from "../service/main.js";
 import { processWsMessage } from "./utils";
+import { set } from "zod";
 
 const marketCanisterId = "55ger-liaaa-aaaal-qb33q-cai";
 const localMarketCanId = "avqkn-guaaa-aaaaa-qaaea-cai";
@@ -201,6 +202,7 @@ export const useAuthClient = (options = defaultOptions) => {
       const recievedMessage = event.data;
       console.log("Message recieved:", recievedMessage);
       setWsMessage(recievedMessage);
+      setUpdateNotifications(true);
     };
   }, [ws]);
 

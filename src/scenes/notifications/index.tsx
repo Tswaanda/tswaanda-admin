@@ -73,7 +73,7 @@ const _notifications = [
 ];
 
 const NotificationsPage = () => {
-  const { setUpdateNotifications, backendActor } = useAuth();
+  const {  backendActor } = useAuth();
   const [notifications, setNotifications] = useState<
     AdminNotification[] | null
   >(null);
@@ -86,6 +86,9 @@ const NotificationsPage = () => {
 
   const fetchNotifications = async () => {
     const notifications = await backendActor.getAdminNotifications();
+    notifications.sort((a: AdminNotification, b: AdminNotification) => {
+      return Number(b.created) - Number(a.created);
+    });
     setNotifications(notifications);
   };
 

@@ -12,7 +12,7 @@ type Props = {
 
 const NotificationCard: FC<Props> = ({ notification }) => {
   const [localNotification, setLocalNotification] = useState(notification);
-  const { backendActor } = useAuth();
+  const { backendActor, setUpdateNotifications } = useAuth();
   const maxContentLength = 100;
 
   const renderContent = () => {
@@ -56,8 +56,8 @@ const NotificationCard: FC<Props> = ({ notification }) => {
   const markAsRead = async () => {
     setLocalNotification({ ...localNotification, read: true });
     try {
-      const res = await backendActor.markAdminNotificationAsRead(notification.id);
-    console.log(res);
+      await backendActor.markAdminNotificationAsRead(notification.id);
+      setUpdateNotifications(true);
     } catch (error) {
       console.log("Error marking notification as read", error)
     }

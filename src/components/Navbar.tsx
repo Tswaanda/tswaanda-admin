@@ -1,4 +1,4 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import {
   LightModeOutlined,
   DarkModeOutlined,
@@ -10,7 +10,7 @@ import {
 import FlexBetween from "./FlexBetween";
 import { useDispatch } from "react-redux";
 import NotificationsIcon from "@mui/icons-material/Notifications";
-import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 
 import { setMode } from "../state/globalSlice";
 import {
@@ -26,20 +26,28 @@ import {
   Menu,
   Popover,
   Badge,
-  List, 
-  ListItem, 
-  ListItemText, 
-  Divider
+  List,
+  ListItem,
+  ListItemText,
+  Divider,
 } from "@mui/material";
 import { useAuth } from "../hooks/auth";
 import { useNavigate } from "react-router-dom";
+import { AdminNotification } from "../declarations/tswaanda_backend/tswaanda_backend.did";
 
 const Navbar = ({ user, isSidebarOpen, setIsSidebarOpen }) => {
   const dispatch = useDispatch();
   const theme = useTheme();
   const navigate = useNavigate();
 
-  const { logout, isAuthenticated } = useAuth();
+  const {
+    logout,
+    isAuthenticated,
+    backendActor,
+    updateNotifications,
+    setUpdateNotifications,
+    wsMessage,
+  } = useAuth();
 
   const [anchorEl, setAnchorEl] = useState(null);
   const isOpen = Boolean(anchorEl);
@@ -50,51 +58,45 @@ const Navbar = ({ user, isSidebarOpen, setIsSidebarOpen }) => {
     navigate("/notifications");
   };
 
-  const notifications = [
-    {
-      id: 1,
-      title: 'New Product Approval',
-      description: 'A new product has been submitted and is awaiting your approval.',
-      date: new Date().toISOString(),
-    },
-    {
-      id: 2,
-      title: 'Order Shipped',
-      description: 'Order #123456 has been shipped and is on its way to the customer.',
-      date: new Date().toISOString(),
-    },
-    {
-      id: 3,
-      title: 'Low Stock Alert',
-      description: 'The stock for product XYZ is running low. Consider restocking soon.',
-      date: new Date().toISOString(),
-    },
-    {
-      id: 4,
-      title: 'Low Bitches Alert',
-      description: 'The stock for product XYZ is running low. Consider restocking soon. The stock for product XYZ is running low. Consider restocking soon. The stock for product XYZ is running low. Consider restocking soon.',
-      date: new Date().toISOString(),
-    },
-    {
-      id: 5,
-      title: 'Low Bitches Alert',
-      description: 'The stock for product XYZ is running low. Consider restocking soon. The stock for product XYZ is running low. Consider restocking soon. The stock for product XYZ is running low. Consider restocking soon.',
-      date: new Date().toISOString(),
-    },
-];
-
   const [notificationsAnchorEl, setNotificationsAnchorEl] = useState(null);
   const isNotificationsOpen = Boolean(notificationsAnchorEl);
-  const handleNotificationsClick = (event: any) => setNotificationsAnchorEl(event.currentTarget);
+  const handleNotificationsClick = (event: any) =>
+    setNotificationsAnchorEl(event.currentTarget);
   const handleNotificationsClose = () => setNotificationsAnchorEl(null);
+  const [notifications, setNotifications] = useState<AdminNotification[]>([]);
 
-  const recentNotifications = notifications.slice(0, 4);
+  const recentNotifications = notifications?.slice(0, 4);
 
   const truncateText = (text, maxLength) => {
     if (text.length <= maxLength) {
       return text;
     }
-    return text.substr(0, maxLength) + '...';
+    return text.substr(0, maxLength) + "...";
+  };
+
+  useEffect(() => {
+    if (backendActor) {
+      fetchNotifications();
+    }
+  }, [backendActor]);
+
+  useEffect(() => {
+    if (updateNotifications) {
+      fetchNotifications();
+      setUpdateNotifications(false);
+    }
+  }, [updateNotifications]);
+
+  const fetchNotifications = async () => {
+    try {
+      const _notifications = await backendActor.getUnreadAdminNotifications();
+      _notifications.sort((a: AdminNotification, b: AdminNotification) => {
+        return Number(b.created) - Number(a.created);
+      });
+      setNotifications(_notifications);
+    } catch (error) {
+      console.log("Error fetching notifications", error);
+    }
   };
 
   if (!isAuthenticated) return null;
@@ -129,10 +131,12 @@ const Navbar = ({ user, isSidebarOpen, setIsSidebarOpen }) => {
         {/* RIGHT SIDE */}
 
         <FlexBetween gap="1.5rem">
-          <IconButton 
-            onClick={handleNotificationsClick}
-          >
-            <Badge color="secondary" variant="dot" overlap="circular">
+          <IconButton onClick={handleNotificationsClick}>
+            <Badge
+              color="secondary"
+              variant={`${notifications.length > 0 ? "dot" : "standard"}`}
+              overlap="circular"
+            >
               <NotificationsIcon sx={{ fontSize: "25px" }} />
             </Badge>
           </IconButton>
@@ -150,24 +154,32 @@ const Navbar = ({ user, isSidebarOpen, setIsSidebarOpen }) => {
               horizontal: "right",
             }}
             slotProps={{
-              paper : { sx: { width: "20%", backgroundColor: theme.palette.background.default },
+              paper: {
+                sx: {
+                  width: "20%",
+                  backgroundColor: theme.palette.background.default,
                 },
+              },
             }}
           >
             <List>
-              <ListItem >
+              <ListItem>
                 <Box
                   sx={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    width: '100%',
-                    alignItems: 'center', 
-                  }} 
+                    display: "flex",
+                    justifyContent: "space-between",
+                    width: "100%",
+                    alignItems: "center",
+                  }}
                 >
                   <Typography
                     variant="body2"
                     color="primary"
-                    sx={{ cursor: 'pointer', marginLeft: 'auto', color: theme.palette.secondary.light }}
+                    sx={{
+                      cursor: "pointer",
+                      marginLeft: "auto",
+                      color: theme.palette.secondary.light,
+                    }}
                     onClick={handleNotificationsPage}
                   >
                     View All
@@ -176,26 +188,65 @@ const Navbar = ({ user, isSidebarOpen, setIsSidebarOpen }) => {
                 </Box>
               </ListItem>
               <Divider />
-              {recentNotifications.map((notification, index) => (
-                <React.Fragment key={index}>
-                  <ListItem
-                    onClick={handleNotificationsPage}
-                    sx={{ cursor: "pointer", "&:hover": { color: theme.palette.secondary.light } }}
-                  >
-                    <ListItemText
-                      primary={<Typography variant="body1" fontWeight="bold">{notification.title}</Typography>}
-                      secondary={
-                        <>
-                          <Typography variant="body2" color="textSecondary">
-                            {truncateText(notification.description, 50)} {/*Truncate to 20 letters */}
-                          </Typography>
-                        </>
-                      }
-                    />
-                  </ListItem>
-                  {index !== recentNotifications.length - 1 && <Divider />}
-                </React.Fragment>
-              ))}
+              {notifications.length > 0 ? (
+                <>
+                  {" "}
+                  {recentNotifications?.map((notification, index) => (
+                    <React.Fragment key={index}>
+                      <ListItem
+                        onClick={handleNotificationsPage}
+                        sx={{
+                          cursor: "pointer",
+                          "&:hover": { color: theme.palette.secondary.light },
+                        }}
+                      >
+                        <ListItemText
+                          primary={
+                            <Typography variant="body1" fontWeight="bold">
+                              {" "}
+                              {("KYCUpdate" in notification.notification &&
+                                "KYC Update") ||
+                                ("OrderUpdate" in notification.notification &&
+                                  "Order Update")}
+                            </Typography>
+                          }
+                          secondary={
+                            <>
+                              <Typography variant="body2" color="textSecondary">
+                                {("KYCUpdate" in notification.notification &&
+                                  `${truncateText(
+                                    notification.notification.KYCUpdate.message,
+                                    50
+                                  )}`) ||
+                                  ("OrderUpdate" in notification.notification &&
+                                    `${truncateText(
+                                      notification.notification.OrderUpdate
+                                        .message,
+                                      50
+                                    )}`)}
+
+                                {/* {truncateText(notification.description, 50)}{" "}
+                            Truncate to 20 letters */}
+                              </Typography>
+                            </>
+                          }
+                        />
+                      </ListItem>
+                      {index !== recentNotifications.length - 1 && <Divider />}
+                    </React.Fragment>
+                  ))}
+                </>
+              ) : (
+                <ListItem>
+                  <ListItemText
+                    primary={
+                      <Typography variant="body1" fontWeight="bold">
+                        No new notifications
+                      </Typography>
+                    }
+                  />
+                </ListItem>
+              )}
             </List>
           </Popover>
 
