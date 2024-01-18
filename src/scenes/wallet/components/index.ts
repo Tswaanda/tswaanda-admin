@@ -1,2 +1,2 @@
-export {default as Wallet} from './Wallet'
+export {default as Wallet} from './Accounts'
 export {default as Transactions} from './Transactions'
