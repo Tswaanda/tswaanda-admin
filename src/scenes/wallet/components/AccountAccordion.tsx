@@ -153,7 +153,7 @@ const AccountAccordion = () => {
                     fontSize: "14px",
                   }}
                 >
-                  Add Controllers
+                  Add Controller
                 </Button>
                 <Button
                   variant="outlined"

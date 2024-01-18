@@ -1,9 +1,9 @@
 import React from 'react'
 
-const AddControllerModal = () => {
+const AddControllersModal = () => {
   return (
-    <div>AddControllerModal</div>
+    <div>AddControllersModal</div>
   )
 }
 
-export default AddControllerModal
+export default AddControllersModal
