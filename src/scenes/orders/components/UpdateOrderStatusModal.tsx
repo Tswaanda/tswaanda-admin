@@ -21,7 +21,7 @@ import {
 } from "../../../emails/orderUpdateEmails";
 import { useAuth } from "../../../hooks/auth";
 import {
-  AdminMessage,
+  FromAdminMessage,
   AdminOrderUpdate,
   AppMessage,
   OrderStatus,
@@ -181,7 +181,7 @@ const UpdateOrderStatusModal: FC<Props> = ({
         message: data.message,
         timestamp: BigInt(Date.now()),
       };
-      let adminMessage: AdminMessage = {
+      let adminMessage: FromAdminMessage = {
         OrderUpdate: orderMsg,
       };
       const msg: AppMessage = {

@@ -11,13 +11,13 @@ module {
     ***********************************************/
     // Websocket message types
     public type AppMessage = {
-        #FromAdmin : AdminMessage;
-        #FromMarket : MarketMessage;
+        #FromAdmin : FromAdminMessage;
+        #FromMarket : FromMarketMessage;
         #AdminConnected;
     };
 
     // From Admin
-    public type AdminMessage = {
+    public type FromAdminMessage = {
         #OrderUpdate : AdminOrderUpdate;
         #KYCUpdate : AdminKYCUpdate;
 
@@ -39,19 +39,30 @@ module {
     };
 
     // From Market
-    public type MarketMessage = {
+    public type FromMarketMessage = {
         #OrderUpdate : MarketOrderUpdate;
         #KYCUpdate : MarketKYCUpdate;
+        #ProductReview : ProductReviewUpdate;
     };
 
-    type MarketOrderUpdate = {
+    public type ProductReviewUpdate = {
+        marketPlUserclientId : Text;
+        userName : Text;
+        userLastName : Text;
+        rating : Int;
+        review : Text;
+        message : Text;
+        timestamp : Int;
+    };
+
+    public type MarketOrderUpdate = {
         marketPlUserclientId : Text;
         orderId : Text;
         message : Text;
         timestamp : Int;
     };
 
-    type MarketKYCUpdate = {
+    public type MarketKYCUpdate = {
         marketPlUserclientId : Text;
         message : Text;
         timestamp : Int;
@@ -97,6 +108,7 @@ module {
         notification : {
             #OrderUpdate : AdminOrderUpdateNotification;
             #KYCUpdate : AdminKYCUpdateNotification;
+            #ProductReview : AdminProductReviewUpdateNotification;
         };
         read : Bool;
         created : Int;
@@ -110,6 +122,15 @@ module {
 
     public type AdminKYCUpdateNotification = {
         marketPlUserclientId : Text;
+        message : Text;
+    };
+
+    public type AdminProductReviewUpdateNotification = {
+        marketPlUserclientId : Text;
+        userName : Text;
+        userLastName : Text;
+        rating : Int;
+        review : Text;
         message : Text;
     };
 

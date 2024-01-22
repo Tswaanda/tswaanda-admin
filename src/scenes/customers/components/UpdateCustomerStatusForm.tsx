@@ -17,7 +17,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import {
   AdminKYCUpdate,
-  AdminMessage,
+  FromAdminMessage,
   AppMessage,
 } from "../../../declarations/tswaanda_backend/tswaanda_backend.did";
 import { useAuth } from "../../../hooks/auth";
@@ -114,7 +114,7 @@ const UpdateCustomerStatusForm: FC<UpdateCustomerStatusFormProps> = ({
         message: data.message,
         timestamp: BigInt(Date.now()),
       };
-      let adminMessage: AdminMessage = {
+      let adminMessage: FromAdminMessage = {
         KYCUpdate: kycmsg,
       };
       const msg: AppMessage = {

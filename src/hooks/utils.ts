@@ -14,6 +14,12 @@ export const processWsMessage = (message: AppMessage) => {
             message: message.FromMarket.KYCUpdate.message,
         }
       return res;
+    } else if ("ProductReview" in message.FromMarket) {
+        let res = {
+            title : "Tswaanda Product Review",
+            message: message.FromMarket.ProductReview.message,
+        }
+      return res;
     }
   } else {
     return {

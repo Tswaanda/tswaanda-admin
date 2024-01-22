@@ -50,11 +50,13 @@ shared ({ caller = initializer }) actor class TswaandaAdmin() = this {
     type ProductId = Text;
     type UserOrderUpdateNotification = Type.UserOrderUpdateNotification;
     type UserKYCUpdateNotification = Type.UserKYCUpdateNotification;
-    type AdminMessage = Type.AdminMessage;
-    type MarketMessage = Type.MarketMessage;
+    type ProductReviewUpdate = Type.ProductReviewUpdate;
+    type FromAdminMessage = Type.FromAdminMessage;
+    type FromMarketMessage = Type.FromMarketMessage;
     type AdminNotification = Type.AdminNotification;
-    type AdminOrderUpdateNotification = Type.AdminOrderUpdateNotification;
     type AdminKYCUpdateNotification = Type.AdminKYCUpdateNotification;
+    type AdminOrderUpdateNotification = Type.AdminOrderUpdateNotification;
+    type AdminProductReviewUpdateNotification = Type.AdminProductReviewUpdateNotification;
 
     /***********************************
     *  STATE VARIABLES IMPL
@@ -114,6 +116,8 @@ shared ({ caller = initializer }) actor class TswaandaAdmin() = this {
     func on_open(args : IcWebSocketCdk.OnOpenCallbackArgs) : async () {
         all_connected_clients.add(args.client_principal);
     };
+
+    // TODO: ADD PRODUCT REVIEW NOTIFICATION
 
     func on_message(args : IcWebSocketCdk.OnMessageCallbackArgs) : async () {
         let app_msg : ?AppMessage = from_candid (args.message);
@@ -218,11 +222,11 @@ shared ({ caller = initializer }) actor class TswaandaAdmin() = this {
                                 market_clients.add(args.client_principal);
                             };
                         };
+
+                        let currentTime = Time.now();
+                        let ntfId = Utils.generate_uuid();
                         switch (msg) {
                             case (#OrderUpdate(msg)) {
-                                // Create a notification for the admin and add it to the map of notifications
-                                let currentTime = Time.now();
-                                let ntfId = Utils.generate_uuid();
 
                                 let orderNotf : AdminOrderUpdateNotification = {
                                     marketPlUserclientId = Principal.toText(args.client_principal);
@@ -253,10 +257,6 @@ shared ({ caller = initializer }) actor class TswaandaAdmin() = this {
                                 };
                             };
                             case (#KYCUpdate(msg)) {
-                                // Create a notification for the admin and add it to the map of notifications
-                                let currentTime = Time.now();
-                                let ntfId = Utils.generate_uuid();
-
                                 let kycNotf : AdminKYCUpdateNotification = {
                                     marketPlUserclientId = Principal.toText(args.client_principal);
                                     message = msg.message;
@@ -281,6 +281,41 @@ shared ({ caller = initializer }) actor class TswaandaAdmin() = this {
                                 // Send the notification to the admin clients
                                 for (client in admin_clients.vals()) {
                                     await send_app_message(client, #FromMarket(#KYCUpdate(kycUpdate)));
+                                };
+                            };
+                            case (#ProductReview(msg)) {
+                                let reviewNotf : AdminProductReviewUpdateNotification = {
+                                    marketPlUserclientId = Principal.toText(args.client_principal);
+                                    message = msg.message;
+                                    rating = msg.rating;
+                                    review = msg.review;
+                                    userName = msg.userName;
+                                    userLastName = msg.userLastName;
+                                };
+
+                                let notification : AdminNotification = {
+                                    id = ntfId;
+                                    notification = #ProductReview(reviewNotf);
+                                    read = false;
+                                    created = currentTime;
+                                };
+                                adminNotifications.put(ntfId, notification);
+
+                                // Create a notification message and send it to the admin clients with the websocket
+                                // Sending the notfication message as a #FromMarket message to the admin clients
+                                let review : ProductReviewUpdate = {
+                                    marketPlUserclientId = Principal.toText(args.client_principal);
+                                    userName = msg.userName;
+                                    userLastName = msg.userLastName;
+                                    rating = msg.rating;
+                                    review = msg.review;
+                                    message = msg.review;
+                                    timestamp = currentTime;
+                                };
+
+                                // Send the notification to the admin clients
+                                for (client in admin_clients.vals()) {
+                                    await send_app_message(client, #FromMarket(#ProductReview(review)));
                                 };
                             };
                         };
@@ -403,7 +438,7 @@ shared ({ caller = initializer }) actor class TswaandaAdmin() = this {
         };
     };
 
-    public shared query ({caller}) func getUnreadAdminNotifications() : async [AdminNotification] {
+    public shared query ({ caller }) func getUnreadAdminNotifications() : async [AdminNotification] {
         assert (isAdmin(caller));
         let unreadNotifications = Buffer.Buffer<AdminNotification>(0);
         for (notification in adminNotifications.vals()) {
@@ -470,7 +505,7 @@ shared ({ caller = initializer }) actor class TswaandaAdmin() = this {
         };
     };
 
-    public shared query ({caller}) func getUnreadUserNotifications() : async [UserNotification] {
+    public shared query ({ caller }) func getUnreadUserNotifications() : async [UserNotification] {
         let unreadNotifications = Buffer.Buffer<UserNotification>(0);
         switch (userNotifications.get(caller)) {
             case (null) {
