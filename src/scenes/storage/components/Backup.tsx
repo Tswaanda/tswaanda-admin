@@ -24,24 +24,30 @@ const Backup = () => {
   const [openRestoreUsersModal, setRestoreUsersModal] = useState(false);
 
   useEffect(() => {
+   if (backendActor && marketActor) {
     getMarketStatistics()
     getAdminStatistics()
-  }, []);
+   }
+  }, [backendActor, marketActor]);
 
   const getAdminStatistics = async () => {
-    const stats = await backendActor.getAdminStats()
-    setAdminStats(stats)
+    const stats = await backendActor?.getAdminStats()
+    if (stats) {
+      setAdminStats(stats)
+    }
   }
 
   const getMarketStatistics = async () => {
-    const stats = await marketActor.getMarketPlaceStats()
-    setMarketStats(stats)
+    const stats = await marketActor?.getMarketPlaceStats()
+    if (stats) {
+      setMarketStats(stats)
+    }
   }
 
   const handleBackupProducts = async () => {
-    const products = await backendActor.getAllProducts();
+    const products = await backendActor?.getAllProducts();
 
-    const productsWithBigIntAsString = products.map((product: any) => ({
+    const productsWithBigIntAsString = products?.map((product: any) => ({
       ...product,
       created: product.created.toString(),
     }));
@@ -58,9 +64,9 @@ const Backup = () => {
   }
 
   const handleMarketplaceUsersBackup = async () => {
-    const users = await marketActor.getAllKYC();
+    const users = await marketActor?.getAllKYC();
 
-    const usersWithBigIntAsString = users.map((user : any) => ({
+    const usersWithBigIntAsString = users?.map((user : any) => ({
       ...user,
       userId: user.userId.toString(),
       zipCode: user.zipCode.toString(),

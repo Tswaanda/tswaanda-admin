@@ -48,7 +48,7 @@ const Orders = () => {
   }, [value]);
 
   const getPendingOrders = async () => {
-    const res = (await marketActor.getPendingOrders()) as any[];
+    const res = (await marketActor?.getPendingOrders()) as any[];
     const sortedData = res.sort(
       (a: any, b: any) => Number(b.dateCreated) - Number(a.dateCreated)
     );
@@ -57,7 +57,7 @@ const Orders = () => {
     setPendingOrders(convertedOrders);
   };
   const getApprovedOrders = async () => {
-    const res = (await marketActor.getApprovedOrders()) as any[];
+    const res = (await marketActor?.getPurchasedOrders()) as any[];
     const sortedData = res.sort(
       (a: any, b: any) => Number(b.dateCreated) - Number(a.dateCreated)
     );
@@ -66,7 +66,7 @@ const Orders = () => {
     setApprovedOrders(convertedOrders);
   };
   const getShippedOrders = async () => {
-    const res = (await marketActor.getShippedOrders()) as any[];
+    const res = (await marketActor?.getShippedOrders()) as any[];
     const sortedData = res.sort(
       (a: any, b: any) => Number(b.dateCreated) - Number(a.dateCreated)
     );
@@ -75,7 +75,7 @@ const Orders = () => {
     setShippedOrders(convertedOrders);
   };
   const getDeliveredOrders = async () => {
-    const res = (await marketActor.getDeliveredOrders()) as any[];
+    const res = (await marketActor?.getDeliveredOrders()) as any[];
     const sortedData = res.sort(
       (a: any, b: any) => Number(b.dateCreated) - Number(a.dateCreated)
     );
@@ -132,7 +132,7 @@ const Orders = () => {
         } else if (orderStatus === "delivered") {
           data[orderIndex].step = Number(3);
         }
-        await marketActor.updatePOrder(id, data[orderIndex]);
+        await marketActor?.updatePOrder(id, data[orderIndex]);
         if (orderStatus !== "pending") {
           await sendAutomaticOrderUpdateEmail(
             data[orderIndex].fistName,

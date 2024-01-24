@@ -19,6 +19,7 @@ import { uploadFile } from "../../storage-config/functions";
 import { useAuth } from "../../hooks/auth";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "../../state/Store";
+import { Farmer } from "../../declarations/tswaanda_backend/tswaanda_backend.did";
 
 type FarmerListingProps = {
   isOpen: boolean;
@@ -58,7 +59,7 @@ const FarmerListing: FC<FarmerListingProps> = ({
       if (idCopy) {
         idCopyUrl = await uploadAssets(idCopy);
       }
-      const farmer = {
+      const farmer: Farmer = {
         id: uuidv4(),
         fullName: farmerName,
         email: farmerEmail,
@@ -75,7 +76,7 @@ const FarmerListing: FC<FarmerListingProps> = ({
         isVerified: false,
         created: BigInt(Date.now()),
       };
-      await backendActor.createFarmer(farmer);
+      await backendActor?.createFarmer(farmer);
       toast.success("Farmer added successfully", {
         autoClose: 5000,
         position: "top-center",

@@ -14,10 +14,11 @@ import {
   tswaanda_backend,
   idlFactory as tswaandaIdl,
 } from "../declarations/tswaanda_backend/index";
+import {idlFactory as walletIdl} from "../walletIDL/index"
 import IcWebSocket from "ic-websocket-js";
 import {
   AppMessage,
-  _SERVICE,
+  _SERVICE as _BACKENDSERVICE,
 } from "../declarations/tswaanda_backend/tswaanda_backend.did";
 import React, {
   createContext,
@@ -36,10 +37,11 @@ import { canisterId as iiCanId } from "../declarations/internet_identity";
 import icblast from "@infu/icblast";
 import { handleWebSocketMessage } from "../service/main.js";
 import { processWsMessage } from "./utils";
-import { set } from "zod";
+import { _SERVICE as _MKTSERVICE } from "../declarations/marketplace_backend/marketplace_backend.did";
+import { _SERVICE as _WALLETSERVICE } from "../walletIDL/wallet.did";
 
-const marketCanisterId = "55ger-liaaa-aaaal-qb33q-cai";
-const localMarketCanId = "avqkn-guaaa-aaaaa-qaaea-cai";
+const marketLiveCanisterId = "55ger-liaaa-aaaal-qb33q-cai";
+const walletCanisterId = "qg5ne-wqaaa-aaaam-ab47a-cai";
 
 const gatewayUrl = "wss://gateway.icws.io";
 const icUrl = "https://icp0.io";
@@ -51,10 +53,11 @@ const network = process.env.DFX_NETWORK || "local";
 
 interface ContextType {
   accessLevel: string;
-  marketActor: any;
+  marketActor: ActorSubclass<_MKTSERVICE> | null;
+  walletActor: ActorSubclass<_WALLETSERVICE> | null;
   storageInitiated: boolean;
   identity: any;
-  backendActor: any;
+  backendActor: ActorSubclass<_BACKENDSERVICE> | null
   isAuthenticated: boolean;
   updateNotifications: boolean;
   ws: any;
@@ -69,6 +72,7 @@ interface ContextType {
 const initialContext: ContextType = {
   identity: null,
   backendActor: null,
+  walletActor: null,
   isAuthenticated: false,
   storageInitiated: false,
   updateNotifications: false,
@@ -108,9 +112,11 @@ export const useAuthClient = (options = defaultOptions) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [authClient, setAuthClient] = useState<AuthClient | null>(null);
   const [identity, setIdentity] = useState<Identity | null>(null);
-  const [backendActor, setBackendActor] = useState<ActorSubclass | null>(null);
-  const [marketActor, setMarketActor] = useState<ActorSubclass | null>(null);
-  const [ws, setWs] = useState<IcWebSocket<_SERVICE, AppMessage> | null>(null);
+  const [backendActor, setBackendActor] = useState<ActorSubclass<_BACKENDSERVICE> | null>(null);
+  const [marketActor, setMarketActor] = useState<ActorSubclass<_MKTSERVICE> | null>(null);
+  const [walletActor, setWalletActor] = useState<ActorSubclass<_WALLETSERVICE> | null>(null);
+
+  const [ws, setWs] = useState<IcWebSocket<_BACKENDSERVICE, AppMessage> | null>(null);
   const [storageInitiated, setStorageInitiated] = useState(false);
   const [accessLevel, setAccessLevel] = useState("");
   const [wsMessage, setWsMessage] = useState(null);
@@ -153,15 +159,23 @@ export const useAuthClient = (options = defaultOptions) => {
       agent.fetchRootKey();
     }
 
-    const _backendActor = Actor.createActor(tswaandaIdl, {
+    const _backendActor: ActorSubclass<_BACKENDSERVICE> = Actor.createActor(tswaandaIdl, {
       agent,
       canisterId: backendCanId,
     });
     setBackendActor(_backendActor);
 
-    let _marketActor = await ic(
-      network === "local" ? marketLocalId : marketCanisterId
-    );
+    const _walletActor: ActorSubclass<_WALLETSERVICE> = Actor.createActor(walletIdl, {
+      agent,
+      canisterId: walletCanisterId,
+    });
+
+    setWalletActor(_walletActor);
+
+    let _marketActor: ActorSubclass<_MKTSERVICE> = Actor.createActor(marketIdlFactory, {
+      agent: agent,
+      canisterId: network === "local" ? marketLocalId : marketLiveCanisterId,
+    });
 
     setMarketActor(_marketActor);
 
@@ -218,6 +232,7 @@ export const useAuthClient = (options = defaultOptions) => {
     backendActor,
     isAuthenticated,
     marketActor,
+    walletActor,
     storageInitiated,
     accessLevel,
     ws,

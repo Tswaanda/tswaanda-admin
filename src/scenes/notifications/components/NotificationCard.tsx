@@ -121,7 +121,7 @@ const NotificationCard: FC<Props> = ({ notification }) => {
   const markAsRead = async () => {
     setLocalNotification({ ...localNotification, read: true });
     try {
-      await backendActor.markAdminNotificationAsRead(notification.id);
+      await backendActor?.markAdminNotificationAsRead(notification.id);
       setUpdateNotifications(true);
     } catch (error) {
       console.log("Error marking notification as read", error);

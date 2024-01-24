@@ -70,31 +70,39 @@ const UpdateOrderStatusModal: FC<Props> = ({
   };
 
   const handleUpdateOrderStatus = async () => {
-    const product = await backendActor.getProductById(
-      modalOrder?.orderProducts.id
-    );
-    if (product.ok) {
-      const farmerInfo = await backendActor.getFarmerByEmail(product.ok.farmer);
-      if (farmerInfo.ok) {
-        try {
-          if (orderStatus === "approved") {
-            // sendOrderApprovedEmail(farmerInfo.ok, modalOrder);
-            await sendOrderUpdateWSMessage(orderStatus);
-          } else if (orderStatus === "shipped") {
-            // sendOrderShippedEmail(farmerInfo.ok, modalOrder);
-            await sendOrderUpdateWSMessage(orderStatus);
-          } else if (orderStatus === "delivered") {
-            // sendOrderDeliveredEmail(farmerInfo.ok, modalOrder);
-            await sendOrderUpdateWSMessage(orderStatus);
-          } else {
-            console.log("No email sent");
+    if (modalOrder) {
+      const product = await backendActor?.getProductById(
+        modalOrder.orderProducts.id
+      );
+      if (product) {
+        if ("ok" in product) {
+          const farmerInfo = await backendActor?.getFarmerByEmail(
+            product.ok.farmer
+          );
+          if (farmerInfo) {
+            if ("ok" in farmerInfo) {
+              try {
+                if (orderStatus === "approved") {
+                  // sendOrderApprovedEmail(farmerInfo.ok, modalOrder);
+                  await sendOrderUpdateWSMessage(orderStatus);
+                } else if (orderStatus === "shipped") {
+                  // sendOrderShippedEmail(farmerInfo.ok, modalOrder);
+                  await sendOrderUpdateWSMessage(orderStatus);
+                } else if (orderStatus === "delivered") {
+                  // sendOrderDeliveredEmail(farmerInfo.ok, modalOrder);
+                  await sendOrderUpdateWSMessage(orderStatus);
+                } else {
+                  console.log("No email sent");
+                }
+              } catch (error) {
+                console.log("Error sending email", error);
+              }
+            }
           }
-        } catch (error) {
-          console.log("Error sending email", error);
         }
       }
+      // updateOrderStatus(modalOrder?.orderId);
     }
-    // updateOrderStatus(modalOrder?.orderId);
   };
 
   useEffect(() => {

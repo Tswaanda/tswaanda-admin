@@ -6,7 +6,7 @@ import NotificationCard from "./components/NotificationCard";
 import { Box } from "@mui/material";
 
 const NotificationsPage = () => {
-  const {  backendActor } = useAuth();
+  const { backendActor } = useAuth();
   const [notifications, setNotifications] = useState<
     AdminNotification[] | null
   >(null);
@@ -18,11 +18,13 @@ const NotificationsPage = () => {
   }, [backendActor]);
 
   const fetchNotifications = async () => {
-    const notifications = await backendActor.getAdminNotifications();
-    notifications.sort((a: AdminNotification, b: AdminNotification) => {
-      return Number(b.created) - Number(a.created);
-    });
-    setNotifications(notifications);
+    const notifications = await backendActor?.getAdminNotifications();
+    if (notifications) {
+      notifications.sort((a: AdminNotification, b: AdminNotification) => {
+        return Number(b.created) - Number(a.created);
+      });
+      setNotifications(notifications);
+    }
   };
 
   return (
@@ -37,10 +39,7 @@ const NotificationsPage = () => {
       </Box>
 
       {notifications?.map((notification) => (
-        <NotificationCard
-          key={notification.id}
-          {...{notification}}
-        />
+        <NotificationCard key={notification.id} {...{ notification }} />
       ))}
     </Box>
   );

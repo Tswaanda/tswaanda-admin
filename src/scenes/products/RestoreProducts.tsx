@@ -72,7 +72,7 @@ const RestoreProducts: FC<Props> = ({ openRestoreProductsModal, setRestoreProduc
                 };
       
                 console.log("Restoring product:", updatedProduct);
-                await backendActor.createProduct(updatedProduct);
+                await backendActor?.createProduct(updatedProduct);
                 getAdminStatistics();
               }
               console.log("Data restored successfully!");

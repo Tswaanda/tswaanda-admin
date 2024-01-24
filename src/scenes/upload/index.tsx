@@ -13,23 +13,22 @@ import {
 } from "@mui/material";
 import { categories } from "../../constants/index";
 import { v4 as uuidv4 } from "uuid";
-import { useSelector, useDispatch } from 'react-redux'
+import { useSelector, useDispatch } from "react-redux";
 import { uploadFile } from "../../storage-config/functions";
 import { useAuth } from "../../hooks/auth";
 import { HSCodes } from "../../hscodes/hscodes";
 import { sendOrderListedEmail } from "../../emails/orderListedMail";
 import { toast } from "react-toastify";
-import Autocomplete from '@mui/lab/Autocomplete';
+import Autocomplete from "@mui/lab/Autocomplete";
 import { RootState } from "../../state/Store";
 
 function UpLoadProduct({ isOpen, onClose, setProductsUpdated }) {
-
-  const { storageInitiated } = useSelector((state: RootState) => state.global)
-  const { backendActor } = useAuth()
+  const { storageInitiated } = useSelector((state: RootState) => state.global);
+  const { backendActor } = useAuth();
 
   const [farmer, setFarmer] = useState("");
-  const [minOrder, setMinOrder] = useState<any|null>(null);
-  const [product, setProduct] = useState<any|null>(null);
+  const [minOrder, setMinOrder] = useState<any | null>(null);
+  const [product, setProduct] = useState<any | null>(null);
   const [shortDescription, setShortDescription] = useState("");
   const [fullDesc, setFullDesc] = useState("");
   const [price, setPrice] = useState("");
@@ -40,14 +39,14 @@ function UpLoadProduct({ isOpen, onClose, setProductsUpdated }) {
   const [saving, setSaving] = useState(false);
 
   const [uploads, setUploads] = useState<any[]>([]);
-  const [imgCount, setImgCount] = useState<any|null>(null)
+  const [imgCount, setImgCount] = useState<any | null>(null);
   const [uploading, setUpLoading] = useState(false);
 
   const handleImageInputChange = (e) => {
     setloadingImages(true);
     const files = Array.from(e.target.files);
     const selected = files.slice(0, 4);
-    setImgCount(selected.length)
+    setImgCount(selected.length);
     setUploads(selected);
   };
 
@@ -60,13 +59,15 @@ function UpLoadProduct({ isOpen, onClose, setProductsUpdated }) {
   const handleFormSubmit = async (event) => {
     event.preventDefault();
     if (uploading || saving) {
-      console.log("Currently busy")
+      console.log("Currently busy");
     } else {
       try {
         // Get farmer by email and return if not found and toast error
-        const farmerRes = await backendActor.getFarmerByEmail(farmer)
-        if (!farmerRes.ok) {
-          console.log("Farmer not found, please check email address or register farmer first")
+        const farmerRes = await backendActor?.getFarmerByEmail(farmer);
+        if (!farmerRes) {
+          console.log(
+            "Farmer not found, please check email address or register farmer first"
+          );
           toast.error(
             `Farmer not found, please check email address or register farmer first`,
             {
@@ -75,52 +76,58 @@ function UpLoadProduct({ isOpen, onClose, setProductsUpdated }) {
               hideProgressBar: true,
             }
           );
-          return
+          return;
         }
-        const urls = await uploadAssets();
-        setSaving(true);
-        if (urls) {
-          const newProduct = {
-            id: uuidv4(),
-            name: product.name,
-            hscode: product.code,
-            farmer: farmer,
-            price: parseInt(price),
-            minOrder: parseInt(minOrder),
-            shortDescription: shortDescription,
-            fullDescription: fullDesc,
-            ordersPlaced : 0,
-            category: category,
-            weight: parseInt(weight),
-            availability: availability,
-            images: urls,
-            created: BigInt(Date.now()),
-          };
+        if (farmerRes && "ok" in farmerRes) {
+          const urls = await uploadAssets();
+          setSaving(true);
+          if (urls) {
+            const newProduct = {
+              id: uuidv4(),
+              name: product.name,
+              hscode: product.code,
+              farmer: farmer,
+              price: parseInt(price),
+              minOrder: parseInt(minOrder),
+              shortDescription: shortDescription,
+              fullDescription: fullDesc,
+              ordersPlaced: 0,
+              category: category,
+              weight: parseInt(weight),
+              availability: availability,
+              images: urls,
+              created: BigInt(Date.now()),
+            };
 
-          // Create product and update farmer
-          let updatedFarmer = {
-            ...farmerRes.ok,
-            listedProducts:  [...farmerRes.ok.listedProducts, newProduct.id]
-          }
-          console.log("Updated farmer", updatedFarmer)
-          await backendActor.updateFarmer(updatedFarmer)
-          await backendActor.createProduct(newProduct);
+            // Create product and update farmer
+            let updatedFarmer = {
+              ...farmerRes.ok,
+              listedProducts: [...farmerRes.ok.listedProducts, newProduct.id],
+            };
+            console.log("Updated farmer", updatedFarmer);
+            await backendActor?.updateFarmer(updatedFarmer);
+            await backendActor?.createProduct(newProduct);
 
-          // Send email to farmer to notify them of new product
-          const res = await sendOrderListedEmail(farmerRes.ok, newProduct)
-          if (res) {
-            console.log("Email sent")
+            // Send email to farmer to notify them of new product
+            const res = await sendOrderListedEmail(farmerRes.ok, newProduct);
+            if (res) {
+              console.log("Email sent");
+            }
+            toast.success(
+              `Product saved! Notification email sent to the farmer.`,
+              {
+                autoClose: 5000,
+                position: "top-center",
+                hideProgressBar: true,
+              }
+            );
+            setProductsUpdated(true);
+            setSaving(false);
+            onClose();
           }
-          toast.success(`Product saved! Notification email sent to the farmer.`, {
-            autoClose: 5000,
-            position: "top-center",
-            hideProgressBar: true,
-          });
-          setProductsUpdated(true);
-          setSaving(false)
-          onClose();
+        } else {
+          console.log("Error getting farmer", farmerRes);
         }
-
       } catch (error) {
         console.log(error);
       }
@@ -138,7 +145,7 @@ function UpLoadProduct({ isOpen, onClose, setProductsUpdated }) {
           const assetUrl = await uploadFile(image, file_path);
           assetsUrls.push(assetUrl);
           console.log("This file was successfully uploaded:", image.name);
-          setImgCount(prevCount => prevCount - 1);
+          setImgCount((prevCount) => prevCount - 1);
         } catch (error) {
           console.error("Error uploading file:", image.name, error);
         }
@@ -148,7 +155,6 @@ function UpLoadProduct({ isOpen, onClose, setProductsUpdated }) {
       return assetsUrls;
     }
   };
-
 
   return (
     <Dialog open={isOpen} onClose={onClose}>
@@ -173,13 +179,14 @@ function UpLoadProduct({ isOpen, onClose, setProductsUpdated }) {
               // getOptionLabel={(option) => `${option.name} - ${option.code}`}
               getOptionLabel={(option) => {
                 if (!option) return "Select a product";
-                return `${option.name ? option.name : "Product Name"} - ${option.code ? option.code : "HSCode"}`;
-              }}              
+                return `${option.name ? option.name : "Product Name"} - ${
+                  option.code ? option.code : "HSCode"
+                }`;
+              }}
               renderInput={(params) => (
                 <TextField {...params} label="Product Name" margin="dense" />
               )}
             />
-            
           </FormControl>
           <TextField
             autoFocus

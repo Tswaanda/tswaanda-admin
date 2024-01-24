@@ -4,18 +4,19 @@ import Header from "../../components/Header";
 import { toast } from "react-toastify";
 import { sendAutomaticEmailMessage } from "../../emails/kycApprovals";
 import { useAuth } from "../../hooks/auth";
-import { formatDate} from "../../utils/time";
-import { All, Anon, Approved, Pending} from "./components";
-import { CustomerType } from "../dashboard/utils/types";
+import { formatDate } from "../../utils/time";
+import { All, Anon, Approved, Pending } from "./components";
+import { backendActor } from "../../hooks/live-config";
+import { Customer } from "../../declarations/marketplace_backend/marketplace_backend.did";
 
 const Customers = () => {
-  const {marketActor} = useAuth();
+  const { marketActor } = useAuth();
   const [expanded, setExpanded] = useState<string | false>(false);
   const [showStatus, setShowStatus] = useState(false);
   const [updating, setUpdating] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [customers, setCustomers] = useState<any[] | null>(null);
-  const [data, setData] = useState<CustomerType[] | null>(null);
+  const [data, setData] = useState<Customer[] | null>(null);
   const [pendingCustomers, setPendingCustomers] = useState(null);
   const [approvedCustomers, setApprovedCustomers] = useState(null);
   const [updated, setUpdated] = useState(false);
@@ -34,30 +35,42 @@ const Customers = () => {
   };
 
   const getPendingCustomers = async () => {
-    const res = await marketActor.getPendingKYCReaquest();
-    const sortedData = res.sort(
-      (a: any, b: any) => Number(b.created) - Number(a.created)
-    );
-    const convertedCustomers = convertData(sortedData);
-    setPendingCustomers(convertedCustomers);
+    const res = await marketActor?.getPendingKYCReaquest();
+    if (res) {
+      const sortedData = res.sort(
+        (a: any, b: any) => Number(b.created) - Number(a.created)
+      );
+      const convertedCustomers = convertData(sortedData);
+      setPendingCustomers(convertedCustomers);
+    } else {
+      console.log("Pending customers undefined");
+    }
   };
 
   const getApprovedCustomers = async () => {
-    const res = await marketActor.getApprovedKYC();
-    const sortedData = res.sort(
-      (a: any, b: any) => Number(b.created) - Number(a.created)
-    );
-    const convertedCustomers = convertData(sortedData);
-    setApprovedCustomers(convertedCustomers);
+    const res = await marketActor?.getApprovedKYC();
+    if (res) {
+      const sortedData = res.sort(
+        (a: any, b: any) => Number(b.created) - Number(a.created)
+      );
+      const convertedCustomers = convertData(sortedData);
+      setApprovedCustomers(convertedCustomers);
+    } else {
+      console.log("Approved customers undefined");
+    }
   };
 
   const getAnonUsers = async () => {
-    const res = await marketActor.getAnonUsers();
-    const sortedData = res.sort(
-      (a: any, b: any) => Number(b.created) - Number(a.created)
-    );
-    const convertedCustomers = convertData(sortedData);
-    setAnonUsers(convertedCustomers);
+    const res = await marketActor?.getAnonUsers();
+    if (res) {
+      const sortedData = res.sort(
+        (a: any, b: any) => Number(b.created) - Number(a.created)
+      );
+      const convertedCustomers = convertData(sortedData);
+      setAnonUsers(convertedCustomers);
+    } else {
+      console.log("Anon users undefined");
+    }
   };
 
   const convertData = (data: any) => {
@@ -87,8 +100,10 @@ const Customers = () => {
 
   const getCustomers = async () => {
     setIsLoading(true);
-    const res = await marketActor.getAllKYC();
-    setData(res);
+    const res = await marketActor?.getAllKYC();
+    if (res) {
+      setData(res);
+    }
   };
 
   useEffect(() => {
@@ -100,8 +115,8 @@ const Customers = () => {
         body: customer.body
           ? {
               ...customer.body,
-              zipCode: Number(customer.body.zipCode),
-              phoneNumber: Number(customer.body.phoneNumber),
+              zipCode: Number(customer.body[0]?.zipCode),
+              phoneNumber: Number(customer.body[0]?.phoneNumber),
             }
           : undefined,
       }));
@@ -111,11 +126,13 @@ const Customers = () => {
   }, [data]);
 
   useEffect(() => {
-    getCustomers();
-    getPendingCustomers();
-    getApprovedCustomers();
-    getAnonUsers();
-  }, []);
+    if (backendActor) {
+      getCustomers();
+      getPendingCustomers();
+      getApprovedCustomers();
+      getAnonUsers();
+    }
+  }, [backendActor]);
 
   useEffect(() => {
     if (value === 0 && !pendingCustomers) {
@@ -131,53 +148,56 @@ const Customers = () => {
   };
 
   const updateCustomerStatus = async (id: any) => {
-    if (data && customerStatus != "") {
+    if (data && customerStatus != "" ) {
       try {
         setUpdating(true);
         const customerIndex = data.findIndex((customer) => customer.id === id);
 
         if (customerIndex !== -1) {
           const customer = data[customerIndex];
-          if (customer.body) {
-              customer.body.status = customerStatus;
-          }
-          await marketActor.updateKYCRequest(data[customerIndex]);
-          if (customerStatus === "approved") {
-            await sendAutomaticEmailMessage(
-              data[customerIndex].body?.firstName,
-              data[customerIndex].body?.email
+          if (customer.body[0]) {
+            if (customer.body) {
+              customer.body[0].status = customerStatus;
+            }
+            await marketActor?.updateKYCRequest(data[customerIndex]);
+            if (customerStatus === "approved") {
+              await sendAutomaticEmailMessage(
+                data[customerIndex].body[0]?.firstName,
+                data[customerIndex].body[0]?.email
+              );
+            }
+            setUpdated(true);
+            toast.success(
+              `Customer status have been updated to ${customerStatus} ${
+                customerStatus === "approved"
+                  ? ", Approval email have been sent"
+                  : ""
+              } `,
+              {
+                autoClose: 5000,
+                position: "top-center",
+                hideProgressBar: true,
+              }
             );
-          }
-          setUpdated(true);
-          toast.success(
-            `Customer status have been updated to ${customerStatus} ${
-              customerStatus === "approved"
-                ? ", Approval email have been sent"
-                : ""
-            } `,
-            {
+            const customerPosition = customers?.findIndex(
+              (customer) => customer.id === id
+            );
+            if (customerPosition !== undefined) {
+              if (customers) {
+                customers[customerPosition].body.status = customerStatus;
+              }
+            }
+            setUpdating(false);
+            setSelectedCustomerId(null);
+          } else {
+            toast.warning("Customer not found", {
               autoClose: 5000,
               position: "top-center",
               hideProgressBar: true,
-            }
-          );
-          const customerPosition = customers?.findIndex(
-            (customer) => customer.id === id
-          );
-          if (customerPosition !== undefined) {
-            if (customers) {
-              customers[customerPosition].body.status = customerStatus;
-            }
+            });
           }
-          setUpdating(false);
-          setSelectedCustomerId(null);
-        } else {
-          toast.warning("Customer not found", {
-            autoClose: 5000,
-            position: "top-center",
-            hideProgressBar: true,
-          });
-        }
+          }
+          
       } catch (error) {
         console.log("Error updating the customer status", error);
       }

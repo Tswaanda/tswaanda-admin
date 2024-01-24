@@ -25,20 +25,23 @@ import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../hooks/auth";
 import {
+  Customer,
   ProductOrder,
-  Stats,
+  Stats as MarketStats,
 } from "../../declarations/marketplace_backend/marketplace_backend.did";
-import { Product } from "../../declarations/tswaanda_backend/tswaanda_backend.did";
+import {
+  Product,
+  Stats,
+} from "../../declarations/tswaanda_backend/tswaanda_backend.did";
 import { NewOrders } from "./components";
-import { CustomerType } from "./utils/types";
 
 const Dashboard = () => {
   const [products, setProducts] = useState<Product[]>([]);
 
-  const [adminStats, setAdminStats] = useState(null);
-  const [marketStats, setMarketStats] = useState<Stats | null>(null);
-  const [customers, setCustomers] = useState<CustomerType[] | null>(null);
-  const [orders, setOrders] = useState([]);
+  const [adminStats, setAdminStats] = useState<Stats | null>(null);
+  const [marketStats, setMarketStats] = useState<MarketStats | null>(null);
+  const [customers, setCustomers] = useState<Customer[] | null>(null);
+  const [orders, setOrders] = useState<ProductOrder[] | null>(null);
   const [modifiedOrders, setModifiedOrders] = useState<ProductOrder[]>([]);
   const [customersGrowthRates, setCustomersGrowthRates] = useState<Record<
     string,
@@ -53,8 +56,8 @@ const Dashboard = () => {
   const [newOrdersNum, setNewOrdersNum] = useState<Number | null>(null);
   const [newKYCNum, setNewKYCNum] = useState<Number | null>(null);
 
-  const [newOrders, setNewOrders] = useState(null);
-  const [newKYC, setNewKYC] = useState<CustomerType[]| null>(null);
+  const [newOrders, setNewOrders] = useState<ProductOrder[] | null>(null);
+  const [newKYC, setNewKYC] = useState<Customer[] | null>(null);
   const [newCustomersGrowthRates, setNewCustomersGrowthRates] = useState<Record<
     string,
     string
@@ -95,61 +98,77 @@ const Dashboard = () => {
   const isNonMediumScreens = useMediaQuery("(min-width: 1200px");
 
   useEffect(() => {
-    getMarketStatistics();
-    getAdminStatistics();
-    getCustomers();
-    getProducts();
-    getOrders();
-    getSize();
-  }, []);
+    if (backendActor && marketActor) {
+      getMarketStatistics();
+      getAdminStatistics();
+      getCustomers();
+      getProducts();
+      getOrders();
+      getSize();
+    }
+  }, [backendActor, marketActor]);
 
   const getAdminStatistics = async () => {
-    const stats = await backendActor.getAdminStats();
-    setAdminStats(stats);
+    const stats = await backendActor?.getAdminStats();
+    if (stats) {
+      setAdminStats(stats);
+    } else {
+      console.log("Admin stats undefined");
+    }
   };
 
   const getMarketStatistics = async () => {
-    const stats = await marketActor.getMarketPlaceStats();
-    setMarketStats(stats);
+    const stats = await marketActor?.getMarketPlaceStats();
+    if (stats) {
+      setMarketStats(stats);
+    }
   };
 
   const getCustomers = async () => {
-    const customers: CustomerType[] = await marketActor.getAllKYC();
+    const customers = await marketActor?.getAllKYC();
 
-    const newCustomers = customers.filter(
-      (customer: CustomerType) => customer.body?.status === "pending"
-    );
-    setNewKYC(newCustomers);
-    setCustomers(customers);
+    if (customers) {
+      const newCustomers = customers.filter(
+        (customer: Customer) => customer.body[0]?.status === "pending"
+      );
+      setNewKYC(newCustomers);
+      setCustomers(customers);
+    }
   };
 
   const getOrders = async () => {
-    const orders = await marketActor.getAllOrders();
-    const newOrders = orders.filter(
-      (order: ProductOrder) => order.status === "pending"
-    );
-    const convertedOrders = convertData(newOrders);
-    convertedOrders.splice(7, convertedOrders.length - 1);
-    setModifiedOrders(convertedOrders);
-    setNewOrders(newOrders);
-    setOrders(orders);
+    const orders = await marketActor?.getAllOrders();
+    if (orders) {
+      const newOrders = orders.filter(
+        (order: ProductOrder) =>
+          JSON.stringify(order.orderStage) ===
+          JSON.stringify({ orderplaced: null })
+      );
+      const convertedOrders = convertData(newOrders);
+      convertedOrders.splice(7, convertedOrders.length - 1);
+      setModifiedOrders(convertedOrders);
+      setNewOrders(newOrders);
+      setOrders(orders);
+    }
   };
 
   const getSize = async () => {
-    const orderSize = await marketActor.getPendingOrdersSize();
-    const kycSize = await marketActor.getPendingKYCReaquestSize();
+    const orderSize = await marketActor?.getPendingOrdersSize();
+    const kycSize = await marketActor?.getPendingKYCReaquestSize();
     setNewOrdersNum(Number(orderSize));
     setNewKYCNum(Number(kycSize));
   };
 
   const getProducts = async () => {
-    const products = await backendActor.getAllProducts();
-    products.splice(3, products.length - 1);
-    setProducts(products);
+    const products = await backendActor?.getAllProducts();
+    if (products) {
+      products.splice(3, products.length - 1);
+      setProducts(products);
+    }
   };
 
   const groupCustomersByMonth = (
-    customers: CustomerType[]
+    customers: Customer[]
   ): Record<string, number> => {
     return customers?.reduce((acc, customer) => {
       const date = new Date(Number(customer.created));
@@ -190,9 +209,9 @@ const Dashboard = () => {
   const groupOrdersByMonth = (orders: ProductOrder[]) => {
     const sortedOrders = orders
       .slice()
-      .sort((a, b) => Number(a.dateCreated) - Number(b.dateCreated));
+      .sort((a, b) => Number(a.created) - Number(b.created));
     return sortedOrders.reduce((acc, order) => {
-      const date = new Date(Number(order.dateCreated));
+      const date = new Date(Number(order.created));
       const month = `${date.getFullYear()}-${String(
         date.getMonth() + 1
       ).padStart(2, "0")}`;
@@ -303,13 +322,13 @@ const Dashboard = () => {
     };
 
     const modifiedOrder = data.map((order: any) => {
-      const formattedDate = formatOrderDate(order.dateCreated);
-      const formattedTime = formatOrderTime(order.dateCreated);
+      const formattedDate = formatOrderDate(order.created);
+      const formattedTime = formatOrderTime(order.created);
 
       return {
         ...order,
         step: Number(order.step),
-        dateCreated: `${formattedDate} at ${formattedTime}`,
+        created: `${formattedDate} at ${formattedTime}`,
       };
     });
 
@@ -410,7 +429,7 @@ const Dashboard = () => {
         <Box
           gridColumn="span 8"
           gridRow="span 2"
-          sx={{backgroundColor: theme.palette.background.default}}
+          sx={{ backgroundColor: theme.palette.background.default }}
           p="0.5rem"
           component="div"
           borderRadius="0.55rem"
@@ -470,7 +489,10 @@ const Dashboard = () => {
           description="Since last month"
           icon={
             <PersonAdd
-              sx={{ color: (theme.palette.secondary as any)[300], fontSize: "26px" }}
+              sx={{
+                color: (theme.palette.secondary as any)[300],
+                fontSize: "26px",
+              }}
             />
           }
         />
@@ -481,7 +503,10 @@ const Dashboard = () => {
           description="Since last month"
           icon={
             <Traffic
-              sx={{ color: (theme.palette.secondary as any)[300], fontSize: "26px" }}
+              sx={{
+                color: (theme.palette.secondary as any)[300],
+                fontSize: "26px",
+              }}
             />
           }
         />
@@ -489,7 +514,7 @@ const Dashboard = () => {
 
         <Box
           gridColumn="span 8"
-          sx={{backgroundColor: theme.palette.background.default}}
+          sx={{ backgroundColor: theme.palette.background.default }}
           gridRow="span 3"
           p="1rem"
           borderRadius="0.55rem"
@@ -516,11 +541,14 @@ const Dashboard = () => {
         <Box
           gridColumn="span 4"
           gridRow="span 3"
-          sx={{backgroundColor: theme.palette.background.default}}
+          sx={{ backgroundColor: theme.palette.background.default }}
           p="1.5rem"
           borderRadius="0.55rem"
         >
-          <Typography variant="h6" sx={{ color: (theme.palette.secondary as any)[100] }}>
+          <Typography
+            variant="h6"
+            sx={{ color: (theme.palette.secondary as any)[100] }}
+          >
             Sales by Category
           </Typography>
           <BreakdownChart isDashboard={true} />

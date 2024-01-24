@@ -1,6 +1,3 @@
-Hi Enoch, this is the wallet interface: 
-Kolade will also be working on it - maybe you can share some react code also and support each other 😉
-
 type AccessLevel = variant {
   ReadOnly;
   Limited : vec OperationAccess;

@@ -88,14 +88,18 @@ const Navbar = ({ user, isSidebarOpen, setIsSidebarOpen }) => {
   }, [updateNotifications]);
 
   const fetchNotifications = async () => {
-    try {
-      const _notifications = await backendActor.getUnreadAdminNotifications();
-      _notifications.sort((a: AdminNotification, b: AdminNotification) => {
-        return Number(b.created) - Number(a.created);
-      });
-      setNotifications(_notifications);
-    } catch (error) {
-      console.log("Error fetching notifications", error);
+    if (backendActor) {
+      try {
+        const _notifications = await backendActor.getUnreadAdminNotifications();
+        _notifications.sort((a: AdminNotification, b: AdminNotification) => {
+          return Number(b.created) - Number(a.created);
+        });
+        setNotifications(_notifications);
+      } catch (error) {
+        console.log("Error fetching notifications", error);
+      }
+    } else {
+      console.log("No backend actor");
     }
   };
 

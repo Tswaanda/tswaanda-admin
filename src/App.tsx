@@ -38,35 +38,40 @@ import Unauthorized from "./components/Unauthorized";
 import Newsletter from "./scenes/newsletters";
 import NotificationsPage from "./scenes/notifications";
 import { RootState } from "./state/Store";
+import { Staff } from "./declarations/tswaanda_backend/tswaanda_backend.did";
 
 function App() {
   const dispatch = useDispatch();
 
   const { isAuthenticated, identity, backendActor } = useAuth();
   const [authorized, setAuthorized] = useState<boolean | null>(null);
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState<Staff|null>(null);
 
   useEffect(() => {
-    if (identity) {
+    if (identity && backendActor) {
       getMembers();
     }
-  }, [identity]);
+  }, [identity, backendActor]);
 
   const getMembers = async () => {
-    try {
-      const user = await backendActor.getStaffMember(identity.getPrincipal());
-      if (user.ok) {
-        setUser(user);
+    if (backendActor) {
+      try {
+        const user = await backendActor.getStaffMember(identity.getPrincipal());
+        if ("ok" in user) {
+          setUser(user.ok);
+        }
+      } catch (error) {
+        console.log("Error on getting members", error);
       }
-    } catch (error) {
-      console.log("Error on getting members", error);
+    } else {
+      console.log("No backend actor");
     }
   };
 
   const getRole = async () => {
     console.log("Your principal id:", identity.getPrincipal().toString());
     try {
-      const role = await backendActor.my_role();
+      const role = await backendActor?.my_role();
       if (role === "unauthorized") {
         setAuthorized(false);
       } else {
@@ -80,11 +85,11 @@ function App() {
   };
 
   useEffect(() => {
-    if (isAuthenticated) {
+    if (isAuthenticated && backendActor) {
       getRole();
       initializeRepositoryCanister();
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, backendActor]);
 
   const init = async () => {
     const res = await initActors();

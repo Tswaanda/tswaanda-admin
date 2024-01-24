@@ -37,19 +37,26 @@ const AccessRequest: FC<AccessRequestProps> = ({ expanded, handleChange }) => {
   const [member, setMember] = useState({});
 
   useEffect(() => {
-    getAccessRequest()
-  }, [])
+    if (backendActor) {
+      getAccessRequest()
+    }
+  }, [backendActor])
 
   const getAccessRequest = async () => {
     try {
-      const _accessRequest = await backendActor.getUnapprovedStaff()
-      let accessReq = _accessRequest.map((member: any) => {
-        return {
-          ...member,
-          created: formatDate(member.created)
-        }
-      })
-      setAccessRequest(accessReq)
+      const _accessRequest = await backendActor?.getUnapprovedStaff()
+      if (_accessRequest) {
+        let accessReq = _accessRequest.map((member: any) => {
+          return {
+            ...member,
+            created: formatDate(member.created)
+          }
+        })
+        setAccessRequest(accessReq)
+      } else {
+        console.log("Access request undefined")
+      }
+      
     } catch (error) {
       console.log("Error getting access request", error)
     }

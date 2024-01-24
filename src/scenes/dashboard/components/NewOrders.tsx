@@ -57,7 +57,7 @@ const NewOrders: FC<NewOrdersProps> = ({
                         </Typography>
                         <Typography sx={{ color: "text.secondary" }}>
                             <span style={{ fontWeight: "bold" }}>Date</span>:{" "}
-                            {Number(order.dateCreated)}
+                            {Number(order.created)}
                         </Typography>
                     </AccordionSummary>
                     <AccordionDetails>
