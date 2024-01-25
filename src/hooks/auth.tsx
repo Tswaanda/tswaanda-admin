@@ -150,11 +150,6 @@ export const useAuthClient = (options = defaultOptions) => {
       identity: identity,
     });
 
-    let ic = icblast({
-      local: network === "local" ? true : false,
-      identity: identity,
-    });
-
     if (network === "local") {
       agent.fetchRootKey();
     }

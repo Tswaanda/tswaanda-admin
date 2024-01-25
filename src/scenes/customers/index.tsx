@@ -11,8 +11,6 @@ import { Customer } from "../../declarations/marketplace_backend/marketplace_bac
 
 const Customers = () => {
   const { marketActor } = useAuth();
-  const [expanded, setExpanded] = useState<string | false>(false);
-  const [showStatus, setShowStatus] = useState(false);
   const [updating, setUpdating] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [customers, setCustomers] = useState<any[] | null>(null);
@@ -21,17 +19,11 @@ const Customers = () => {
   const [approvedCustomers, setApprovedCustomers] = useState(null);
   const [updated, setUpdated] = useState(false);
   const [anonUsers, setAnonUsers] = useState(null);
-
-  const [selectedCustomerId, setSelectedCustomerId] = useState(null);
   const [customerStatus, setCustomerStatus] = useState("");
   const [value, setValue] = useState(0);
 
   const handleTabChange = (event, newValue) => {
     setValue(newValue);
-  };
-
-  const handleChange = (panel: any) => (isExpanded: any) => {
-    setExpanded(isExpanded ? panel : false);
   };
 
   const getPendingCustomers = async () => {
@@ -142,13 +134,8 @@ const Customers = () => {
     }
   }, [value]);
 
-  const handleShowStatusForm = (id: any) => {
-    setSelectedCustomerId(id);
-    setShowStatus(true);
-  };
-
   const updateCustomerStatus = async (id: any) => {
-    if (data && customerStatus != "" ) {
+    if (data && customerStatus != "") {
       try {
         setUpdating(true);
         const customerIndex = data.findIndex((customer) => customer.id === id);
@@ -188,7 +175,6 @@ const Customers = () => {
               }
             }
             setUpdating(false);
-            setSelectedCustomerId(null);
           } else {
             toast.warning("Customer not found", {
               autoClose: 5000,
@@ -196,8 +182,7 @@ const Customers = () => {
               hideProgressBar: true,
             });
           }
-          }
-          
+        }
       } catch (error) {
         console.log("Error updating the customer status", error);
       }
@@ -210,19 +195,12 @@ const Customers = () => {
         return (
           <All
             {...{
-              updated,
-              setUpdated,
               customers,
               updateCustomerStatus,
-              handleShowStatusForm,
               setCustomerStatus,
-              expanded,
-              showStatus,
               updating,
-              isLoading,
-              selectedCustomerId,
-              customerStatus,
-              handleChange,
+              setUpdated,
+              updated,
             }}
           />
         );
@@ -230,19 +208,13 @@ const Customers = () => {
         return (
           <Pending
             {...{
-              updated,
-              setUpdated,
               pendingCustomers,
+              customers,
               updateCustomerStatus,
-              handleShowStatusForm,
               setCustomerStatus,
-              expanded,
-              showStatus,
               updating,
-              isLoading,
-              selectedCustomerId,
-              customerStatus,
-              handleChange,
+              setUpdated,
+              updated,
             }}
           />
         );
@@ -250,19 +222,14 @@ const Customers = () => {
         return (
           <Approved
             {...{
-              updated,
-              setUpdated,
               approvedCustomers,
+              pendingCustomers,
+              customers,
               updateCustomerStatus,
-              handleShowStatusForm,
               setCustomerStatus,
-              expanded,
-              showStatus,
               updating,
-              isLoading,
-              selectedCustomerId,
-              customerStatus,
-              handleChange,
+              setUpdated,
+              updated,
             }}
           />
         );
@@ -270,19 +237,15 @@ const Customers = () => {
         return (
           <Anon
             {...{
-              updated,
-              setUpdated,
               anonUsers,
+              approvedCustomers,
+              pendingCustomers,
+              customers,
               updateCustomerStatus,
-              handleShowStatusForm,
               setCustomerStatus,
-              expanded,
-              showStatus,
               updating,
-              isLoading,
-              selectedCustomerId,
-              customerStatus,
-              handleChange,
+              setUpdated,
+              updated,
             }}
           />
         );

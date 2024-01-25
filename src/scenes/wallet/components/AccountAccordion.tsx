@@ -12,10 +12,13 @@ import Accordion from "@mui/material/Accordion";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import AccordionSummary from "@mui/material/AccordionSummary";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import { ChainEnum } from "../../../walletIDL/wallet.did";
+import { useAuth } from "../../../hooks/auth";
 
 const AccountAccordion = () => {
   const theme = useTheme();
   const [expanded, setExpanded] = useState(false);
+  const { walletActor } = useAuth();
 
   const accordionRef = useRef<HTMLDivElement>(null);
 
@@ -34,6 +37,40 @@ const AccountAccordion = () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [accordionRef]);
+
+  useEffect(() => {
+    if (walletActor) {
+      getBalance();
+    }
+  }, [walletActor]);
+
+  const createAccountAddress = async () => {
+    try {
+      let arg: ChainEnum = {
+        BTC: {
+          Testnet: null,
+        },
+      };
+      let res = await walletActor?.account_create_address("Tswaanda", arg);
+      console.log("Create Account Address response", res);
+    } catch (error) {
+      console.log("Create Account Address error", error);
+    }
+  };
+
+  const getBalance = async () => {
+    try {
+      let arg: ChainEnum = {
+        BTC: {
+          Testnet: null,
+        },
+      };
+      let res = await walletActor?.account_balance("Tswaanda", arg);
+      console.log("Get Balance response", res);
+    } catch (error) {
+      console.log("Get Balance error", error);
+    }
+  };
 
   return (
     <Box m="1rem 0 0 0" ref={accordionRef}>
@@ -119,9 +156,10 @@ const AccountAccordion = () => {
                   sx={{
                     width: "50%",
                     flexShrink: 0,
+                    fontWeight: "bold",
                   }}
                 >
-                  <h3 style={{ fontWeight: "bold" }}>Controllers:</h3>{" "}
+                  Controllers:{" "}
                   {/* {status.settings.controllers.map((controller, index) => (
             <Typography key={index}>
                 {controller.toString()}
@@ -167,6 +205,7 @@ const AccountAccordion = () => {
                   Recieve
                 </Button>
                 <Button
+                  onClick={createAccountAddress}
                   variant="outlined"
                   size="small"
                   style={{
