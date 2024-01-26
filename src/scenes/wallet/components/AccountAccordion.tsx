@@ -8,16 +8,31 @@ import {
   CardActions,
   Button,
 } from "@mui/material";
+
 import Accordion from "@mui/material/Accordion";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import AccordionSummary from "@mui/material/AccordionSummary";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 
+import SendModal from "./SendModal";
+import AddControllersModal from "./AddControllerModal";
+import ReceiveModal from "./ReceiveModal";
+
 const AccountAccordion = () => {
   const theme = useTheme();
   const [expanded, setExpanded] = useState(false);
 
+  const [openSendModal, setOpenSendModal] = useState(false);
+  const [openControllerModal, setOpenControllerModal] = useState(false);
+  const [openReceiveModal, setOpenReceiveModal] = useState(false);
+
   const accordionRef = useRef<HTMLDivElement>(null);
+
+  const handleSend = (address, amount) => {
+    console.log(`Sending ${amount} to ${address}`);
+    // Add logic to handle sending cryptocurrency
+    };
+
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -141,9 +156,15 @@ const AccountAccordion = () => {
                     fontWeight: "bold",
                     fontSize: "14px",
                   }}
+                  onClick={() => setOpenSendModal(true)}
                 >
                   Send
                 </Button>
+                <SendModal
+                  isOpen={openSendModal}
+                  onClose={() => setOpenSendModal(false)}
+                  onSend={handleSend}
+                />
                 <Button
                   variant="outlined"
                   size="small"
@@ -152,9 +173,14 @@ const AccountAccordion = () => {
                     fontWeight: "bold",
                     fontSize: "14px",
                   }}
+                  onClick={() => setOpenControllerModal(true)}
                 >
                   Add Controller
                 </Button>
+                <AddControllersModal
+                  isOpen={openControllerModal}
+                  onClose={() => setOpenControllerModal(false)}
+                /> 
                 <Button
                   variant="outlined"
                   size="small"
@@ -163,9 +189,14 @@ const AccountAccordion = () => {
                     fontWeight: "bold",
                     fontSize: "14px",
                   }}
+                  onClick={() => setOpenReceiveModal(true)}
                 >
-                  Recieve
+                  Receive
                 </Button>
+                <ReceiveModal
+                  isOpen={openReceiveModal}
+                  onClose={() => setOpenReceiveModal(false)}  
+                />
                 <Button
                   variant="outlined"
                   size="small"
