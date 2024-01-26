@@ -24,6 +24,7 @@ const All: FC<Props> = ({
     <Box m="1rem 0 0 0">
       {customers?.map((customer) => (
         <CustomerAccordion
+          key={customer.id}
           {...{
             customer,
             theme,

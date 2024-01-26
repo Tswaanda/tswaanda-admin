@@ -83,9 +83,10 @@ shared ({ caller = initializer }) actor class TswaandaAdmin() = this {
     private stable var userNotificationsEntries : [(Principal, List.List<UserNotification>)] = [];
 
     let all_connected_clients = Buffer.Buffer<IcWebSocketCdk.ClientPrincipal>(0);
-    let market_clients = Buffer.Buffer<IcWebSocketCdk.ClientPrincipal>(0);
+    var market_clients = Buffer.Buffer<IcWebSocketCdk.ClientPrincipal>(0);
     var admin_clients = Buffer.Buffer<IcWebSocketCdk.ClientPrincipal>(0);
     private stable var admin_clients_entries : [IcWebSocketCdk.ClientPrincipal] = [];
+    private stable var market_clients_entries : [IcWebSocketCdk.ClientPrincipal] = [];
 
     //----------------------------------------------Upgrade methods--------------------------------------------------------
 
@@ -97,6 +98,7 @@ shared ({ caller = initializer }) actor class TswaandaAdmin() = this {
         adminNotificationsEntries := Iter.toArray(adminNotifications.entries());
         userNotificationsEntries := Iter.toArray(userNotifications.entries());
         admin_clients_entries := Buffer.toArray<IcWebSocketCdk.ClientPrincipal>(admin_clients);
+        market_clients_entries := Buffer.toArray<IcWebSocketCdk.ClientPrincipal>(market_clients);
     };
 
     system func postupgrade() {
@@ -107,6 +109,7 @@ shared ({ caller = initializer }) actor class TswaandaAdmin() = this {
         adminNotifications := HashMap.fromIter<Text, AdminNotification>(adminNotificationsEntries.vals(), 0, Text.equal, Text.hash);
         userNotifications := HashMap.fromIter<Principal, List.List<UserNotification>>(userNotificationsEntries.vals(), 0, Principal.equal, Principal.hash);
         admin_clients := Buffer.fromIter<IcWebSocketCdk.ClientPrincipal>(admin_clients_entries.vals());
+        market_clients := Buffer.fromIter<IcWebSocketCdk.ClientPrincipal>(market_clients_entries.vals());
     };
 
     /*---------------------------------
@@ -114,7 +117,21 @@ shared ({ caller = initializer }) actor class TswaandaAdmin() = this {
     *---------------------------------*/
 
     func on_open(args : IcWebSocketCdk.OnOpenCallbackArgs) : async () {
-        all_connected_clients.add(args.client_principal);
+        let index_in_all_c = Buffer.indexOf<IcWebSocketCdk.ClientPrincipal>(args.client_principal, all_connected_clients, Principal.equal);
+        let index_in_market_c = Buffer.indexOf<IcWebSocketCdk.ClientPrincipal>(args.client_principal, market_clients, Principal.equal);
+        let index_in_admin_c = Buffer.indexOf<IcWebSocketCdk.ClientPrincipal>(args.client_principal, admin_clients, Principal.equal);
+        switch (index_in_all_c) {
+            case (null) {
+                // Do nothing
+            };
+            case (?index_in_all_c) {
+                // remove the client at the given even
+                ignore all_connected_clients.remove(index_in_all_c);
+            };
+        };
+        if (index_in_market_c == null and index_in_admin_c == null) {
+            market_clients.add(args.client_principal);
+        };
     };
 
     // TODO: ADD PRODUCT REVIEW NOTIFICATION
@@ -127,199 +144,44 @@ shared ({ caller = initializer }) actor class TswaandaAdmin() = this {
                     case (#FromAdmin(msg)) {
                         switch (msg) {
                             case (#KYCUpdate(msg)) {
-
-                                // Create a notification for the client and add it to the map of notifications
                                 let client = Principal.fromText(msg.marketPlUserclientId);
-                                let currentTime = Time.now();
-                                let kycNotf : UserKYCUpdateNotification = {
-                                    status = msg.status;
-                                    message = msg.message;
-                                };
-
-                                let notification : UserNotification = {
-                                    id = msg.status;
-                                    notification = #KYCUpdate(kycNotf);
-                                    read = false;
-                                    created = currentTime;
-                                };
-
-                                var notifications : List.List<UserNotification> = switch (userNotifications.get(client)) {
-                                    case (null) {
-                                        List.nil();
-                                    };
-                                    case (?result) {
-                                        result;
-                                    };
-                                };
-
-                                notifications := List.push(notification, notifications);
-                                userNotifications.put(client, notifications);
-
-                                // Create a notification message and send it to the client with the websocket
                                 let kycUpdate = {
                                     marketPlUserclientId = msg.marketPlUserclientId;
                                     status = msg.status;
                                     message = msg.message;
-                                    timestamp = currentTime;
                                 };
-
-                                // Send the notification to the client
                                 await send_app_message(client, #FromAdmin(#KYCUpdate(kycUpdate)));
                             };
                             case (#OrderUpdate(msg)) {
-
-                                // Create a notification for the client and add it to the map of notifications
                                 let client = Principal.fromText(msg.marketPlUserclientId);
-                                let currentTime = Time.now();
-                                let orderNotf : UserOrderUpdateNotification = {
-                                    orderId = msg.orderId;
-                                    message = msg.message;
-                                    status = msg.status;
-                                };
-
-                                let notification : UserNotification = {
-                                    id = msg.orderId;
-                                    notification = #OrderUpdate(orderNotf);
-                                    read = false;
-                                    created = currentTime;
-                                };
-
-                                var notifications : List.List<UserNotification> = switch (userNotifications.get(client)) {
-                                    case (null) {
-                                        List.nil();
-                                    };
-                                    case (?result) {
-                                        result;
-                                    };
-                                };
-
-                                notifications := List.push(notification, notifications);
-                                userNotifications.put(client, notifications);
-
-                                // Create a notification message and send it to the client with the websocket
-                                // Sending the notfication message as a #FromAdmin message to the marketplace user client
                                 let orderUpdate = {
                                     marketPlUserclientId = msg.marketPlUserclientId;
-                                    orderId = msg.orderId;
                                     status = msg.status;
                                     message = msg.message;
-                                    timestamp = currentTime;
                                 };
-
-                                // Send the notification to the client
                                 await send_app_message(client, #FromAdmin(#OrderUpdate(orderUpdate)));
+                            };
+                            case (#NewProductDrop(msg)) {
+                                let newProductDrop = {
+                                    productName = msg.productName;
+                                };
+                                for (client in market_clients.vals()) {
+                                    await send_app_message(client, #FromAdmin(#NewProductDrop(newProductDrop)));
+                                };
                             };
                         };
                     };
                     case (#FromMarket(msg)) {
-                        // Check if the client already exist in the list of admin clients, if not we add it
                         let index = Buffer.indexOf<Principal>(args.client_principal, market_clients, Principal.equal);
                         switch (index) {
-                            case (null) {
-                                // Do nothing
-                            };
+                            case (null) {};
                             case (?index) {
                                 market_clients.add(args.client_principal);
                             };
                         };
-
-                        let currentTime = Time.now();
-                        let ntfId = Utils.generate_uuid();
-                        switch (msg) {
-                            case (#OrderUpdate(msg)) {
-
-                                let orderNotf : AdminOrderUpdateNotification = {
-                                    marketPlUserclientId = Principal.toText(args.client_principal);
-                                    orderId = msg.orderId;
-                                    message = msg.message;
-                                };
-
-                                let notification : AdminNotification = {
-                                    id = ntfId;
-                                    notification = #OrderUpdate(orderNotf);
-                                    read = false;
-                                    created = currentTime;
-                                };
-                                adminNotifications.put(ntfId, notification);
-
-                                // Create a notification message and send it to the admin clients with the websocket
-                                // Sending the notfication message as a #FromMarket message to the admin clients
-                                let orderUpdate = {
-                                    marketPlUserclientId = Principal.toText(args.client_principal);
-                                    orderId = msg.orderId;
-                                    message = msg.message;
-                                    timestamp = currentTime;
-                                };
-
-                                // Send the notification to the admin clients
-                                for (client in admin_clients.vals()) {
-                                    await send_app_message(client, #FromMarket(#OrderUpdate(orderUpdate)));
-                                };
-                            };
-                            case (#KYCUpdate(msg)) {
-                                let kycNotf : AdminKYCUpdateNotification = {
-                                    marketPlUserclientId = Principal.toText(args.client_principal);
-                                    message = msg.message;
-                                };
-
-                                let notification : AdminNotification = {
-                                    id = ntfId;
-                                    notification = #KYCUpdate(kycNotf);
-                                    read = false;
-                                    created = currentTime;
-                                };
-                                adminNotifications.put(ntfId, notification);
-
-                                // Create a notification message and send it to the admin clients with the websocket
-                                // Sending the notfication message as a #FromMarket message to the admin clients
-                                let kycUpdate = {
-                                    marketPlUserclientId = Principal.toText(args.client_principal);
-                                    message = msg.message;
-                                    timestamp = currentTime;
-                                };
-
-                                // Send the notification to the admin clients
-                                for (client in admin_clients.vals()) {
-                                    await send_app_message(client, #FromMarket(#KYCUpdate(kycUpdate)));
-                                };
-                            };
-                            case (#ProductReview(msg)) {
-                                let reviewNotf : AdminProductReviewUpdateNotification = {
-                                    marketPlUserclientId = Principal.toText(args.client_principal);
-                                    message = msg.message;
-                                    rating = msg.rating;
-                                    review = msg.review;
-                                    userName = msg.userName;
-                                    userLastName = msg.userLastName;
-                                };
-
-                                let notification : AdminNotification = {
-                                    id = ntfId;
-                                    notification = #ProductReview(reviewNotf);
-                                    read = false;
-                                    created = currentTime;
-                                };
-                                adminNotifications.put(ntfId, notification);
-
-                                // Create a notification message and send it to the admin clients with the websocket
-                                // Sending the notfication message as a #FromMarket message to the admin clients
-                                let review : ProductReviewUpdate = {
-                                    marketPlUserclientId = Principal.toText(args.client_principal);
-                                    userName = msg.userName;
-                                    userLastName = msg.userLastName;
-                                    rating = msg.rating;
-                                    review = msg.review;
-                                    message = msg.review;
-                                    timestamp = currentTime;
-                                };
-
-                                // Send the notification to the admin clients
-                                for (client in admin_clients.vals()) {
-                                    await send_app_message(client, #FromMarket(#ProductReview(review)));
-                                };
-                            };
+                        for (client in admin_clients.vals()) {
+                            await send_app_message(client, #FromMarket(msg));
                         };
-                        market_clients.add(args.client_principal);
                     };
                     case (#AdminConnected(msg)) {
                         // Check if the client already exist in the list of admin clients, if not we add it
@@ -338,14 +200,14 @@ shared ({ caller = initializer }) actor class TswaandaAdmin() = this {
 
     func on_close(args : IcWebSocketCdk.OnCloseCallbackArgs) : async () {
         /// On close event we remove the client from the list of client
-        let index = Buffer.indexOf<IcWebSocketCdk.ClientPrincipal>(args.client_principal, all_connected_clients, Principal.equal);
-        switch (index) {
+        let index_in_all_c = Buffer.indexOf<IcWebSocketCdk.ClientPrincipal>(args.client_principal, all_connected_clients, Principal.equal);
+        switch (index_in_all_c) {
             case (null) {
                 // Do nothing
             };
-            case (?index) {
+            case (?index_in_all_c) {
                 // remove the client at the given even
-                ignore all_connected_clients.remove(index);
+                ignore all_connected_clients.remove(index_in_all_c);
             };
         };
     };
@@ -390,9 +252,26 @@ shared ({ caller = initializer }) actor class TswaandaAdmin() = this {
         ws.ws_get_messages(caller, args);
     };
 
-    // Returns an array of the the clients connect to the canister
-    public shared query func getAllConnectedClients() : async [IcWebSocketCdk.ClientPrincipal] {
+    public shared query ({ caller }) func getAllConnectedClients() : async [IcWebSocketCdk.ClientPrincipal] {
+        assert (isAdmin(caller));
         return Buffer.toArray<IcWebSocketCdk.ClientPrincipal>(all_connected_clients);
+    };
+
+    public shared func createUserNotification(user_id : Principal, ntf : UserNotification) : async () {
+        var notifications : List.List<UserNotification> = switch (userNotifications.get(user_id)) {
+            case (null) {
+                List.nil();
+            };
+            case (?result) {
+                result;
+            };
+        };
+        notifications := List.push(ntf, notifications);
+        userNotifications.put(user_id, notifications);
+    };
+
+    public shared func createAdminNotification(ntf : AdminNotification) : async () {
+        adminNotifications.put(ntf.id, ntf);
     };
 
     /***********************************

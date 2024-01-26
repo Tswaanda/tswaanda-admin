@@ -21,10 +21,15 @@ import { sendOrderListedEmail } from "../../emails/orderListedMail";
 import { toast } from "react-toastify";
 import Autocomplete from "@mui/lab/Autocomplete";
 import { RootState } from "../../state/Store";
+import {
+  AppMessage,
+  Product,
+  UserNotification,
+} from "../../declarations/tswaanda_backend/tswaanda_backend.did";
 
 function UpLoadProduct({ isOpen, onClose, setProductsUpdated }) {
   const { storageInitiated } = useSelector((state: RootState) => state.global);
-  const { backendActor } = useAuth();
+  const { backendActor, marketActor, ws } = useAuth();
 
   const [farmer, setFarmer] = useState("");
   const [minOrder, setMinOrder] = useState<any | null>(null);
@@ -82,7 +87,7 @@ function UpLoadProduct({ isOpen, onClose, setProductsUpdated }) {
           const urls = await uploadAssets();
           setSaving(true);
           if (urls) {
-            const newProduct = {
+            const newProduct: Product = {
               id: uuidv4(),
               name: product.name,
               hscode: product.code,
@@ -104,10 +109,9 @@ function UpLoadProduct({ isOpen, onClose, setProductsUpdated }) {
               ...farmerRes.ok,
               listedProducts: [...farmerRes.ok.listedProducts, newProduct.id],
             };
-            console.log("Updated farmer", updatedFarmer);
             await backendActor?.updateFarmer(updatedFarmer);
             await backendActor?.createProduct(newProduct);
-
+            await sendNewProductDropWSMessage(newProduct);
             // Send email to farmer to notify them of new product
             const res = await sendOrderListedEmail(farmerRes.ok, newProduct);
             if (res) {
@@ -132,6 +136,38 @@ function UpLoadProduct({ isOpen, onClose, setProductsUpdated }) {
         console.log(error);
       }
     }
+  };
+
+  const sendNewProductDropWSMessage = async (_prod: Product) => {
+    const msg: AppMessage = {
+      FromAdmin: {
+        NewProductDrop: {
+          productName: _prod.name,
+        },
+      },
+    };
+    let notification: UserNotification = {
+      id: uuidv4(),
+      notification: {
+        NewProductDrop: {
+          productId: _prod.id,
+          link: `https://tswaanda.com/product/${_prod.id}`,
+          productName: _prod.name,
+          price: _prod.price,
+          image: _prod.images[0],
+        },
+      },
+      read: false,
+      created: BigInt(Date.now()),
+    };
+
+    let all_users = await marketActor?.getAllCustomersPrincipals();
+    if (all_users) {
+      for (const user of all_users) {
+        await backendActor?.createUserNotification(user, notification);
+      }
+    }
+    ws.send(msg);
   };
 
   const uploadAssets = async () => {

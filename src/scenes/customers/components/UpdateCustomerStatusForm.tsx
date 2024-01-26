@@ -16,11 +16,12 @@ import {
 import CloseIcon from "@mui/icons-material/Close";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import {
-  AdminKYCUpdate,
-  FromAdminMessage,
   AppMessage,
+  UserNotification,
 } from "../../../declarations/tswaanda_backend/tswaanda_backend.did";
 import { useAuth } from "../../../hooks/auth";
+import { v4 as uuidv4 } from "uuid";
+import { Principal } from "@dfinity/principal";
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   "& .MuiDialogContent-root": {
@@ -48,14 +49,13 @@ const UpdateCustomerStatusForm: FC<UpdateCustomerStatusFormProps> = ({
   openStatusModal,
   setStatusModal,
   setCustomerStatus,
-  updateCustomerStatus,
   updating,
   theme,
   setUpdated,
   updated,
 }) => {
   const [localStatus, setLocalStatus] = useState(customer.status || "pending");
-  const { ws } = useAuth();
+  const { ws, backendActor } = useAuth();
 
   useEffect(() => {
     setLocalStatus(customer.status || "pending");
@@ -81,7 +81,7 @@ const UpdateCustomerStatusForm: FC<UpdateCustomerStatusFormProps> = ({
   const updateStatus = async () => {
     try {
       sendKYCUpdateWSMessage(localStatus);
-      updateCustomerStatus(customer.id);
+      // updateCustomerStatus(customer.id);
     } catch (err) {
       console.log("Error updating customer status", err);
     }
@@ -96,9 +96,9 @@ const UpdateCustomerStatusForm: FC<UpdateCustomerStatusFormProps> = ({
       };
       return res;
     } else {
-      let message: string = "Your KYC has been rejected";
+      let message: string = "Your KYC is pending approval";
       let res = {
-        status: "Rejected",
+        status: "Pending",
         message: message,
       };
       return res;
@@ -108,19 +108,33 @@ const UpdateCustomerStatusForm: FC<UpdateCustomerStatusFormProps> = ({
   const sendKYCUpdateWSMessage = async (status: string) => {
     let data = getStatus(status);
     if (customer) {
-      let kycmsg: AdminKYCUpdate = {
-        marketPlUserclientId: customer.principal,
-        status: data.status,
-        message: data.message,
-        timestamp: BigInt(Date.now()),
-      };
-      let adminMessage: FromAdminMessage = {
-        KYCUpdate: kycmsg,
-      };
-      const msg: AppMessage = {
-        FromAdmin: adminMessage,
-      };
-      ws.send(msg);
+      try {
+        const msg: AppMessage = {
+          FromAdmin: {
+            KYCUpdate: {
+              marketPlUserclientId: customer.principal.toString(),
+              status: data.status,
+              message: data.message,
+            },
+          },
+        };
+
+        let notification: UserNotification = {
+          id: uuidv4(),
+          notification: {
+            KYCUpdate: {
+              status: data.status,
+              message: data.message,
+            },
+          },
+          read: false,
+          created: BigInt(Date.now()),
+        };
+        await backendActor?.createUserNotification(Principal.fromText(customer.principal), notification);
+        ws.send(msg);
+      } catch (error) {
+        console.log("Error sending KYC update message", error);
+      }
     }
   };
 

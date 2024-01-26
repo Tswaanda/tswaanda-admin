@@ -20,22 +20,23 @@ module {
     public type FromAdminMessage = {
         #OrderUpdate : AdminOrderUpdate;
         #KYCUpdate : AdminKYCUpdate;
-
+        #NewProductDrop : AdminNewProductDrop;
     };
 
     type AdminOrderUpdate = {
         marketPlUserclientId : Text;
-        orderId : Text;
         status : OrderStatus;
         message : Text;
-        timestamp : Int;
     };
 
     type AdminKYCUpdate = {
         marketPlUserclientId : Text;
         status : Text;
         message : Text;
-        timestamp : Int;
+    };
+
+    type AdminNewProductDrop = {
+        productName : Text;
     };
 
     // From Market
@@ -46,26 +47,15 @@ module {
     };
 
     public type ProductReviewUpdate = {
-        marketPlUserclientId : Text;
-        userName : Text;
-        userLastName : Text;
-        rating : Int;
-        review : Text;
         message : Text;
-        timestamp : Int;
     };
 
     public type MarketOrderUpdate = {
-        marketPlUserclientId : Text;
-        orderId : Text;
         message : Text;
-        timestamp : Int;
     };
 
     public type MarketKYCUpdate = {
-        marketPlUserclientId : Text;
         message : Text;
-        timestamp : Int;
     };
 
     //**********Notifications***********
@@ -76,6 +66,7 @@ module {
         notification : {
             #OrderUpdate : UserOrderUpdateNotification;
             #KYCUpdate : UserKYCUpdateNotification;
+            #NewProductDrop : UserNewProductDropNotification;
         };
         read : Bool;
         created : Int;
@@ -92,14 +83,20 @@ module {
         message : Text;
     };
 
+    public type UserNewProductDropNotification = {
+        productId : Text;
+        link : Text;
+        productName : Text;
+        price : Int32;
+        image : Text;
+    };
+
     type OrderStatus = {
-        #Pending;
-        #Approved;
-        #Rejected;
-        #Cancelled;
-        #Shipped;
-        #Delivered;
-        #Completed;
+        #orderplaced;
+        #purchased;
+        #cancelled;
+        #shippment;
+        #fulfillment;
     };
 
     // Admin Notifications

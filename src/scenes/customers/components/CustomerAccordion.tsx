@@ -34,7 +34,7 @@ const CustomerAccordion = ({
   const [openContactModal, setContactModal] = useState(false);
   const [openPOAModal, setPOAModal] = useState(false);
   const [openIDModal, setIDModal] = useState(false);
-  const [expanded, setExpanded] = useState<boolean| false>(false);
+  const [expanded, setExpanded] = useState<boolean | false>(false);
 
   const handleChange = () => {
     setExpanded(!expanded);
@@ -148,18 +148,19 @@ const CustomerAccordion = ({
                 aria-controls="panel1bh-content"
                 id="panel1bh-header"
               >
-                <Typography sx={{ width: "50%", flexShrink: 0 }}>
-                  <span style={{ fontWeight: "bold" }}>Username</span>:
+                <Typography sx={{ width: "50%", flexShrink: 0, fontWeight: "bold"  }}>
+                  Username: {" "}
                   {customer.body[0] ? customer.body[0].userName : "Anon"}
                 </Typography>
                 <Typography
                   sx={{
                     width: "50%",
                     flexShrink: 0,
+                    fontWeight: "bold",
                   }}
                 >
-                  <span style={{ fontWeight: "bold" }}>Phone Number</span>:{" "}
-                  {customer.body[0] ? customer.body[0].phoneNumber : "Anon"}
+                  Phone Number:{" "}
+                  {customer.body[0] ? String(customer.body[0].phoneNumber) : "Anon"}
                 </Typography>
               </AccordionSummary>
               <AccordionSummary>
@@ -202,7 +203,7 @@ const CustomerAccordion = ({
                     Update Customer status
                   </Button>
                   <Button
-                    onClick={ showContactForm}
+                    onClick={showContactForm}
                     variant="outlined"
                     size="small"
                     style={{

@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { Box, Tabs, Tab, Button } from "@mui/material";
+import { useEffect, useState } from "react";
+import { Box, Tabs, Tab} from "@mui/material";
 import Header from "../../components/Header";
 import { toast } from "react-toastify";
 import { sendAutomaticEmailMessage } from "../../emails/kycApprovals";
@@ -12,7 +12,6 @@ import { Customer } from "../../declarations/marketplace_backend/marketplace_bac
 const Customers = () => {
   const { marketActor } = useAuth();
   const [updating, setUpdating] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const [customers, setCustomers] = useState<any[] | null>(null);
   const [data, setData] = useState<Customer[] | null>(null);
   const [pendingCustomers, setPendingCustomers] = useState(null);
@@ -91,7 +90,6 @@ const Customers = () => {
   };
 
   const getCustomers = async () => {
-    setIsLoading(true);
     const res = await marketActor?.getAllKYC();
     if (res) {
       setData(res);
@@ -113,7 +111,6 @@ const Customers = () => {
           : undefined,
       }));
       setCustomers(modfifiedCustomers);
-      setIsLoading(false);
     }
   }, [data]);
 

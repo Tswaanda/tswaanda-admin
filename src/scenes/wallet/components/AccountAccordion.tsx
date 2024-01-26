@@ -143,10 +143,10 @@ const AccountAccordion = () => {
                   <span style={{ fontWeight: "bold" }}>Memory allocation:</span>{" "}
                   {/* {Number(status.settings.memory_allocation)} GB */}3 GB
                 </Typography>
-                <Typography sx={{ width: "50%", flexShrink: 0 }}>
-                  <span style={{ fontWeight: "bold" }}>
-                    Freezing threshold:
-                  </span>{" "}
+                <Typography
+                  sx={{ width: "50%", flexShrink: 0, fontWeight: "bold" }}
+                >
+                  Freezing threshold:{" "}
                   {/* {Number(status.settings.freezing_threshold) / 86400} Days */}
                   3 Days
                 </Typography>
