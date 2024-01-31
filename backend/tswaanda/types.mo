@@ -11,48 +11,51 @@ module {
     ***********************************************/
     // Websocket message types
     public type AppMessage = {
-        #FromAdmin : AdminMessage;
-        #FromMarket : MarketMessage;
+        #FromAdmin : FromAdminMessage;
+        #FromMarket : FromMarketMessage;
+        #AdminConnected;
     };
 
     // From Admin
-    public type AdminMessage = {
+    public type FromAdminMessage = {
         #OrderUpdate : AdminOrderUpdate;
         #KYCUpdate : AdminKYCUpdate;
-
+        #NewProductDrop : AdminNewProductDrop;
     };
 
     type AdminOrderUpdate = {
         marketPlUserclientId : Text;
-        orderId : Text;
         status : OrderStatus;
-        timestamp : Int;
+        message : Text;
     };
 
     type AdminKYCUpdate = {
         marketPlUserclientId : Text;
         status : Text;
         message : Text;
-        timestamp : Int;
+    };
+
+    type AdminNewProductDrop = {
+        productName : Text;
     };
 
     // From Market
-    public type MarketMessage = {
+    public type FromMarketMessage = {
         #OrderUpdate : MarketOrderUpdate;
         #KYCUpdate : MarketKYCUpdate;
+        #ProductReview : ProductReviewUpdate;
     };
 
-    type MarketOrderUpdate = {
-        marketPlUserclientId : Text;
-        orderId : Text;
+    public type ProductReviewUpdate = {
         message : Text;
-        timestamp : Int;
     };
 
-    type MarketKYCUpdate = {
-        marketPlUserclientId : Text;
+    public type MarketOrderUpdate = {
         message : Text;
-        timestamp : Int;
+    };
+
+    public type MarketKYCUpdate = {
+        message : Text;
     };
 
     //**********Notifications***********
@@ -63,6 +66,7 @@ module {
         notification : {
             #OrderUpdate : UserOrderUpdateNotification;
             #KYCUpdate : UserKYCUpdateNotification;
+            #NewProductDrop : UserNewProductDropNotification;
         };
         read : Bool;
         created : Int;
@@ -71,6 +75,7 @@ module {
     public type UserOrderUpdateNotification = {
         orderId : Text;
         status : OrderStatus;
+        message : Text;
     };
 
     public type UserKYCUpdateNotification = {
@@ -78,14 +83,20 @@ module {
         message : Text;
     };
 
+    public type UserNewProductDropNotification = {
+        productId : Text;
+        link : Text;
+        productName : Text;
+        price : Int32;
+        image : Text;
+    };
+
     type OrderStatus = {
-        #Pending;
-        #Approved;
-        #Rejected;
-        #Cancelled;
-        #Shipped;
-        #Delivered;
-        #Completed;
+        #orderplaced;
+        #purchased;
+        #cancelled;
+        #shippment;
+        #fulfillment;
     };
 
     // Admin Notifications
@@ -94,6 +105,7 @@ module {
         notification : {
             #OrderUpdate : AdminOrderUpdateNotification;
             #KYCUpdate : AdminKYCUpdateNotification;
+            #ProductReview : AdminProductReviewUpdateNotification;
         };
         read : Bool;
         created : Int;
@@ -107,6 +119,15 @@ module {
 
     public type AdminKYCUpdateNotification = {
         marketPlUserclientId : Text;
+        message : Text;
+    };
+
+    public type AdminProductReviewUpdateNotification = {
+        marketPlUserclientId : Text;
+        userName : Text;
+        userLastName : Text;
+        rating : Int;
+        review : Text;
         message : Text;
     };
 

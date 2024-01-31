@@ -1,5 +1,5 @@
-import React, { FC, useEffect, useState } from 'react';
-import { styled } from '@mui/material/styles';
+import React, { FC, useEffect, useState } from "react";
+import { styled } from "@mui/material/styles";
 import {
   Select,
   Dialog,
@@ -12,15 +12,15 @@ import {
   Container,
   Button,
 } from "@mui/material";
-import CloseIcon from '@mui/icons-material/Close';
+import CloseIcon from "@mui/icons-material/Close";
 import AccordionDetails from "@mui/material/AccordionDetails";
-import { useAuth } from '../../../hooks/auth';
+import { useAuth } from "../../../hooks/auth";
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
-  '& .MuiDialogContent-root': {
+  "& .MuiDialogContent-root": {
     padding: theme.spacing(2),
   },
-  '& .MuiDialogActions-root': {
+  "& .MuiDialogActions-root": {
     padding: theme.spacing(1),
   },
 }));
@@ -31,61 +31,71 @@ type UpdateAccessLevelProps = {
   theme: any;
   openAccessModal: boolean;
   setAccessModal: (show: boolean) => void;
-}
+};
 
-const UpdateAccessLevel : FC<UpdateAccessLevelProps> = ({
-  openAccessModal, setAccessModal, setShowAccessForm, theme, member
+const UpdateAccessLevel: FC<UpdateAccessLevelProps> = ({
+  openAccessModal,
+  setAccessModal,
+  setShowAccessForm,
+  theme,
+  member,
 }) => {
+  const { backendActor } = useAuth();
 
-  const { backendActor } = useAuth()
-
-  const [updated, setUpdated] = useState(false)
-  const [updating, setUpdating] = useState(false)
-  const [accessLevel, setAccessLevel] = useState("")
+  const [updated, setUpdated] = useState(false);
+  const [updating, setUpdating] = useState(false);
+  const [accessLevel, setAccessLevel] = useState("");
 
   const handleAccessModalClose = () => {
     setAccessModal(false);
-  }
+  };
 
   const handleUpdateAccessLevel = async () => {
-    try {
-      setUpdating(true)
+    if (backendActor) {
+      try {
+        setUpdating(true);
 
-      const getRole = () => {
-        if (accessLevel === "admin") {
-          return { 'admin': null };
+        const getRole = () => {
+          if (accessLevel === "admin") {
+            return { admin: null };
+          }
+          if (accessLevel === "staff") {
+            return { staff: null };
+          }
+          if (accessLevel === "authorized") {
+            return { authorized: null };
+          }
+        };
+        const role = getRole();
+        if (role) {
+          await backendActor.assign_role(member.principal, [role]);
+          console.log("No role value");
         }
-        if (accessLevel === "staff") {
-          return { 'staff': null };
-        }
-        if (accessLevel === "authorized") {
-          return { 'authorized': null };
-        }
+        let updatedUser = {
+          ...member,
+          role: [getRole()],
+          approved: true,
+          created: BigInt(Date.parse(member.created)),
+        };
+        await backendActor.updateStaffMember(updatedUser);
+        setUpdating(false);
+        setUpdated(true);
+        setAccessModal(false);
+        setShowAccessForm(false);
+      } catch (error) {
+        setUpdating(false);
+        console.log(error);
       }
-      await backendActor.assign_role(member.principal, [getRole()])
-      let updatedUser = {
-        ...member,
-        role: [getRole()],
-        approved: true,
-        created: BigInt(Date.parse(member.created))
-      }
-      await backendActor.updateStaffMember(updatedUser)
-      setUpdating(false)
-      setUpdated(true)
-      setAccessModal(false)
-      setShowAccessForm(false)
-
-    } catch (error) {
-      setUpdating(false)
-      console.log(error)
+    } else {
+      console.log("No backend actor");
     }
-  }
+  };
 
   useEffect(() => {
     if (updated) {
-      setUpdated(false)
+      setUpdated(false);
     }
-  }, [updated])
+  }, [updated]);
   return (
     <div>
       <BootstrapDialog
@@ -93,30 +103,37 @@ const UpdateAccessLevel : FC<UpdateAccessLevelProps> = ({
         aria-labelledby="customized-dialog-title"
         open={openAccessModal}
       >
-        <DialogTitle sx={{ m: 0, p: 2, backgroundColor: theme.palette.background.alt }} id="customized-dialog-title">
+        <DialogTitle
+          sx={{ m: 0, p: 2, backgroundColor: theme.palette.background.alt }}
+          id="customized-dialog-title"
+        >
           Update Customer Status
         </DialogTitle>
         <IconButton
           aria-label="close"
           onClick={handleAccessModalClose}
           sx={{
-            position: 'absolute',
+            position: "absolute",
             right: 8,
             top: 8,
             color: "white",
-            backgroundColor: theme.palette.background.alt
+            backgroundColor: theme.palette.background.alt,
           }}
         >
           <CloseIcon />
         </IconButton>
-        <DialogContent dividers sx={{ backgroundColor: theme.palette.background.alt, minWidth: '600px' }}>
-          <div className="" style={{ minWidth: '500px' }}>
+        <DialogContent
+          dividers
+          sx={{
+            backgroundColor: theme.palette.background.alt,
+            minWidth: "600px",
+          }}
+        >
+          <div className="" style={{ minWidth: "500px" }}>
             <AccordionDetails>
               <Container maxWidth="sm" style={{ marginTop: "2rem" }}>
                 <FormControl fullWidth margin="dense">
-                  <InputLabel id="status-label">
-                    User AccessLevel
-                  </InputLabel>
+                  <InputLabel id="status-label">User AccessLevel</InputLabel>
                   <Select
                     labelId="status-label"
                     value={accessLevel}
@@ -124,9 +141,7 @@ const UpdateAccessLevel : FC<UpdateAccessLevelProps> = ({
                   >
                     <MenuItem value="admin">Admin</MenuItem>
                     <MenuItem value="staff">General Staff</MenuItem>
-                    <MenuItem value="authorized">
-                      Authorized
-                    </MenuItem>
+                    <MenuItem value="authorized">Authorized</MenuItem>
                   </Select>
                 </FormControl>
 
@@ -148,11 +163,10 @@ const UpdateAccessLevel : FC<UpdateAccessLevelProps> = ({
               </Container>
             </AccordionDetails>
           </div>
-
         </DialogContent>
       </BootstrapDialog>
     </div>
-  )
-}
+  );
+};
 
-export default UpdateAccessLevel
+export default UpdateAccessLevel;

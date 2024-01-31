@@ -21,13 +21,12 @@ import {
 } from "../../../emails/orderUpdateEmails";
 import { useAuth } from "../../../hooks/auth";
 import {
-  AdminMessage,
-  AdminOrderUpdate,
   AppMessage,
   OrderStatus,
+  UserNotification,
 } from "../../../declarations/tswaanda_backend/tswaanda_backend.did";
-import { ProductOrderType } from "../utils/types";
-import { Principal } from "@dfinity/principal";
+import { v4 as uuidv4 } from "uuid";
+import { ProductOrder } from "../../../declarations/marketplace_backend/marketplace_backend.did";
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   "& .MuiDialogContent-root": {
@@ -46,7 +45,7 @@ type Props = {
   setOrderStatus: any;
   updating: boolean;
   theme: any;
-  modalOrder: ProductOrderType | null;
+  modalOrder: ProductOrder | null;
   updated: boolean;
   setUpdated: any;
 };
@@ -70,31 +69,43 @@ const UpdateOrderStatusModal: FC<Props> = ({
   };
 
   const handleUpdateOrderStatus = async () => {
-    const product = await backendActor.getProductById(
-      modalOrder?.orderProducts.id
-    );
-    if (product.ok) {
-      const farmerInfo = await backendActor.getFarmerByEmail(product.ok.farmer);
-      if (farmerInfo.ok) {
-        try {
-          if (orderStatus === "approved") {
-            // sendOrderApprovedEmail(farmerInfo.ok, modalOrder);
-            await sendOrderUpdateWSMessage(orderStatus);
-          } else if (orderStatus === "shipped") {
-            // sendOrderShippedEmail(farmerInfo.ok, modalOrder);
-            await sendOrderUpdateWSMessage(orderStatus);
-          } else if (orderStatus === "delivered") {
-            // sendOrderDeliveredEmail(farmerInfo.ok, modalOrder);
-            await sendOrderUpdateWSMessage(orderStatus);
-          } else {
-            console.log("No email sent");
+    if (modalOrder) {
+      const product = await backendActor?.getProductById(
+        modalOrder.orderProducts.id
+      );
+      if (product) {
+        if ("ok" in product) {
+          const farmerInfo = await backendActor?.getFarmerByEmail(
+            product.ok.farmer
+          );
+          if (farmerInfo) {
+            if ("ok" in farmerInfo) {
+              try {
+                // TODO: update the emails sending to use the new status types
+                if (orderStatus === "purchased") {
+                  // sendOrderApprovedEmail(farmerInfo.ok, modalOrder);
+                  await sendOrderUpdateWSMessage(orderStatus);
+                } else if (orderStatus === "cancelled") {
+                  // sendOrderShippedEmail(farmerInfo.ok, modalOrder);
+                  await sendOrderUpdateWSMessage(orderStatus);
+                } else if (orderStatus === "shippment") {
+                  // sendOrderShippedEmail(farmerInfo.ok, modalOrder);
+                  await sendOrderUpdateWSMessage(orderStatus);
+                } else if (orderStatus === "fulfillment") {
+                  // sendOrderDeliveredEmail(farmerInfo.ok, modalOrder);
+                  await sendOrderUpdateWSMessage(orderStatus);
+                } else {
+                  console.log("No email sent");
+                }
+              } catch (error) {
+                console.log("Error sending email", error);
+              }
+            }
           }
-        } catch (error) {
-          console.log("Error sending email", error);
         }
       }
+      // updateOrderStatus(modalOrder?.orderId);
     }
-    updateOrderStatus(modalOrder?.orderId);
   };
 
   useEffect(() => {
@@ -104,42 +115,92 @@ const UpdateOrderStatusModal: FC<Props> = ({
     }
   }, [updated]);
 
-  const getStatus = (status: string): OrderStatus => {
-    switch (status) {
-      case "pending":
-        return { Pending: null };
-      case "approved":
-        return { Approved: null };
-      case "shipped":
-        return { Shipped: null };
-      case "delivered":
-        return { Delivered: null };
-      case "completed":
-        return { Completed: null };
-      case "cancelled":
-        return { Cancelled: null };
-      case "rejected":
-        return { Rejected: null };
-      default:
-        return { Pending: null };
+  const getStatus = (status: string) => {
+    if (status === "orderplaced") {
+      let _status: OrderStatus = { orderplaced: null };
+      let message: string = "We have received your order";
+      let res = {
+        status: _status,
+        message: message,
+      };
+      return res;
+    } else if (status === "purchased") {
+      let _status: OrderStatus = { purchased: null };
+      let message: string =
+        "We have received your payment, order is processing for shippment, you will be notified when order is shipped";
+      let res = {
+        status: _status,
+        message: message,
+      };
+      return res;
+    } else if (status === "cancelled") {
+      let _status: OrderStatus = { cancelled: null };
+      let message: string = "Order has been cancelled";
+      let res = {
+        status: _status,
+        message: message,
+      };
+      return res;
+    } else if (status === "shippment") {
+      let _status: OrderStatus = { shippment: null };
+      let message: string =
+        "Order have been shipped, you will be notified when order is delivered";
+      let res = {
+        status: _status,
+        message: message,
+      };
+      return res;
+    } else if (status === "completed") {
+      let _status: OrderStatus = { fulfillment: null };
+      let message: string =
+        "Order has been delivered, thank you for shopping with us";
+      let res = {
+        status: _status,
+        message: message,
+      };
+      return res;
+    } else {
+      let _status: OrderStatus = { orderplaced: null };
+      let message: string = "We have received your order";
+      let res = {
+        status: _status,
+        message: message,
+      };
+      return res;
     }
   };
-
   const sendOrderUpdateWSMessage = async (status: string) => {
+    let data = getStatus(status);
     if (modalOrder) {
-      let orderMsg: AdminOrderUpdate = {
-        marketPlUserclientId: modalOrder.orderOwner.toString(),
-        orderId: modalOrder.orderId,
-        status: getStatus(status),
-        timestamp: BigInt(Date.now()),
-      };
-      let adminMessage: AdminMessage = {
-        OrderUpdate: orderMsg,
-      };
       const msg: AppMessage = {
-        FromAdmin: adminMessage,
+        FromAdmin: {
+          OrderUpdate: {
+            marketPlUserclientId: modalOrder.orderOwner.toString(),
+            status: data.status,
+            message: data.message,
+          },
+        },
       };
+      let notification: UserNotification = {
+        id: uuidv4(),
+        notification: {
+          OrderUpdate: {
+            orderId: modalOrder.orderId,
+            message: data.message,
+            status: data.status,
+          },
+        },
+        read: false,
+        created: BigInt(Date.now()),
+      };
+
+      await backendActor?.createUserNotification(
+        modalOrder.orderOwner,
+        notification
+      );
       ws.send(msg);
+      setUpdated(true);
+      setStatusModal(false);
     }
   };
 
@@ -186,10 +247,10 @@ const UpdateOrderStatusModal: FC<Props> = ({
                     value={orderStatus}
                     onChange={(e) => setOrderStatus(e.target.value)}
                   >
-                    <MenuItem value="pending">Pending Approval</MenuItem>
-                    <MenuItem value="approved">Approved-processing</MenuItem>
-                    <MenuItem value="shipped">Shipped</MenuItem>
-                    <MenuItem value="delivered">Delivered</MenuItem>
+                    <MenuItem value="purchased">Payment Recieved</MenuItem>
+                    <MenuItem value="shippment">Order Shipped</MenuItem>
+                    <MenuItem value="fulfillment">Order Delivered</MenuItem>
+                    <MenuItem value="cancelled">Cancelled</MenuItem>
                   </Select>
                 </FormControl>
 

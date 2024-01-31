@@ -154,8 +154,8 @@ const Sidebar: FC<Props> = ({
   ];
 
   const getSize = async () => {
-    const orderSize = await marketActor.getPendingOrdersSize();
-    const kycSize = await marketActor.getPendingKYCReaquestSize();
+    const orderSize = await marketActor?.getPendingOrdersSize();
+    const kycSize = await marketActor?.getPendingKYCReaquestSize();
     setNewOrders(orderSize);
     setNewKYC(kycSize);
   };

@@ -16,14 +16,12 @@ const network = process.env.DFX_NETWORK || "local";
 let motoko_identity = Ed25519KeyIdentity.generate();
 let fileScalingManagerActor;
 let fileStorageActor;
-let mediaFiles = [];
-let packery;
 let actorsInitialized = false;
 
 export async function initActors() {
   if (!actorsInitialized) {
     fileScalingManagerActor = await getActor(
-      scalingCanId,
+      "yg4ya-nyaaa-aaaal-qb3eq-cai",
       fileScalingManagerIdlFactory,
       motoko_identity
     );
@@ -31,7 +29,7 @@ export async function initActors() {
     fileScalingManagerActor.init();
 
     fileStorageActor = await getActor(
-      storageCanId,
+      "kyzel-7yaaa-aaaal-qb73a-cai",
       fileStorageIdlFactory,
       motoko_identity
     );

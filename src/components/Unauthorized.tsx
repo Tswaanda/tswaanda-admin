@@ -14,6 +14,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "react-toastify";
 import { useAuth } from "../hooks/auth";
+import { Staff } from "../declarations/tswaanda_backend/tswaanda_backend.did";
 
 type Props = {
   user: any;
@@ -58,7 +59,7 @@ const Unauthorized: FC<Props> = ({ user }) => {
       setEmailError("Not a valid Tswaanda email address");
     } else {
       setSubmitting(true);
-      const member = {
+      const member: Staff = {
         fullName: data.fullName,
         email: email,
         phone: data.phone,
@@ -68,7 +69,7 @@ const Unauthorized: FC<Props> = ({ user }) => {
         suspended: false,
         created: BigInt(Date.now()),
       };
-      await backendActor.addStaffMember(member);
+      await backendActor?.addStaffMember(member);
       toast.success(
         `Thank you! We will notify you shortly when your have been granted access`,
         {

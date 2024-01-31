@@ -1,27 +1,23 @@
-import React, { useEffect, useState } from "react";
-import { Box, Tabs, Tab, Button } from "@mui/material";
+import { useEffect, useState } from "react";
+import { Box, Tabs, Tab} from "@mui/material";
 import Header from "../../components/Header";
 import { toast } from "react-toastify";
 import { sendAutomaticEmailMessage } from "../../emails/kycApprovals";
-import { Customer } from "../../declarations/marketplace_backend/marketplace_backend.did";
 import { useAuth } from "../../hooks/auth";
-import { formatDate} from "../../utils/time";
-import { All, Anon, Approved, Pending, ProofOfAddress } from "./components";
+import { formatDate } from "../../utils/time";
+import { All, Anon, Approved, Pending } from "./components";
+import { backendActor } from "../../hooks/live-config";
+import { Customer } from "../../declarations/marketplace_backend/marketplace_backend.did";
 
 const Customers = () => {
-  const {marketActor} = useAuth();
-  const [expanded, setExpanded] = useState<string | false>(false);
-  const [showStatus, setShowStatus] = useState(false);
+  const { marketActor } = useAuth();
   const [updating, setUpdating] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const [customers, setCustomers] = useState<any[] | null>(null);
   const [data, setData] = useState<Customer[] | null>(null);
   const [pendingCustomers, setPendingCustomers] = useState(null);
   const [approvedCustomers, setApprovedCustomers] = useState(null);
   const [updated, setUpdated] = useState(false);
   const [anonUsers, setAnonUsers] = useState(null);
-
-  const [selectedCustomerId, setSelectedCustomerId] = useState(null);
   const [customerStatus, setCustomerStatus] = useState("");
   const [value, setValue] = useState(0);
 
@@ -29,35 +25,43 @@ const Customers = () => {
     setValue(newValue);
   };
 
-  const handleChange = (panel: any) => (isExpanded: any) => {
-    setExpanded(isExpanded ? panel : false);
-  };
-
   const getPendingCustomers = async () => {
-    const res = await marketActor.getPendingKYCReaquest();
-    const sortedData = res.sort(
-      (a: any, b: any) => Number(b.created) - Number(a.created)
-    );
-    const convertedCustomers = convertData(sortedData);
-    setPendingCustomers(convertedCustomers);
+    const res = await marketActor?.getPendingKYCReaquest();
+    if (res) {
+      const sortedData = res.sort(
+        (a: any, b: any) => Number(b.created) - Number(a.created)
+      );
+      const convertedCustomers = convertData(sortedData);
+      setPendingCustomers(convertedCustomers);
+    } else {
+      console.log("Pending customers undefined");
+    }
   };
 
   const getApprovedCustomers = async () => {
-    const res = await marketActor.getApprovedKYC();
-    const sortedData = res.sort(
-      (a: any, b: any) => Number(b.created) - Number(a.created)
-    );
-    const convertedCustomers = convertData(sortedData);
-    setApprovedCustomers(convertedCustomers);
+    const res = await marketActor?.getApprovedKYC();
+    if (res) {
+      const sortedData = res.sort(
+        (a: any, b: any) => Number(b.created) - Number(a.created)
+      );
+      const convertedCustomers = convertData(sortedData);
+      setApprovedCustomers(convertedCustomers);
+    } else {
+      console.log("Approved customers undefined");
+    }
   };
 
   const getAnonUsers = async () => {
-    const res = await marketActor.getAnonUsers();
-    const sortedData = res.sort(
-      (a: any, b: any) => Number(b.created) - Number(a.created)
-    );
-    const convertedCustomers = convertData(sortedData);
-    setAnonUsers(convertedCustomers);
+    const res = await marketActor?.getAnonUsers();
+    if (res) {
+      const sortedData = res.sort(
+        (a: any, b: any) => Number(b.created) - Number(a.created)
+      );
+      const convertedCustomers = convertData(sortedData);
+      setAnonUsers(convertedCustomers);
+    } else {
+      console.log("Anon users undefined");
+    }
   };
 
   const convertData = (data: any) => {
@@ -72,6 +76,13 @@ const Customers = () => {
         ...customer,
         step: Number(customer.step),
         created: `${formattedDate}`,
+        body: customer.body
+          ? {
+              ...customer.body,
+              zipCode: Number(customer.body.zipCode),
+              phoneNumber: Number(customer.body.phoneNumber),
+            }
+          : undefined,
       };
     });
 
@@ -79,9 +90,10 @@ const Customers = () => {
   };
 
   const getCustomers = async () => {
-    setIsLoading(true);
-    const res = await marketActor.getAllKYC();
-    setData(res);
+    const res = await marketActor?.getAllKYC();
+    if (res) {
+      setData(res);
+    }
   };
 
   useEffect(() => {
@@ -99,16 +111,17 @@ const Customers = () => {
           : undefined,
       }));
       setCustomers(modfifiedCustomers);
-      setIsLoading(false);
     }
   }, [data]);
 
   useEffect(() => {
-    getCustomers();
-    getPendingCustomers();
-    getApprovedCustomers();
-    getAnonUsers();
-  }, []);
+    if (backendActor) {
+      getCustomers();
+      getPendingCustomers();
+      getApprovedCustomers();
+      getAnonUsers();
+    }
+  }, [backendActor]);
 
   useEffect(() => {
     if (value === 0 && !pendingCustomers) {
@@ -118,11 +131,6 @@ const Customers = () => {
     }
   }, [value]);
 
-  const handleShowStatusForm = (id: any) => {
-    setSelectedCustomerId(id);
-    setShowStatus(true);
-  };
-
   const updateCustomerStatus = async (id: any) => {
     if (data && customerStatus != "") {
       try {
@@ -131,48 +139,46 @@ const Customers = () => {
 
         if (customerIndex !== -1) {
           const customer = data[customerIndex];
-          if (customer.body && customer.body.length > 0) {
-            const firstBodyElement = customer.body[0];
-            if (firstBodyElement) {
-              firstBodyElement.status = customerStatus;
+          if (customer.body[0]) {
+            if (customer.body) {
+              customer.body[0].status = customerStatus;
             }
-          }
-          await marketActor.updateKYCRequest(data[customerIndex]);
-          if (customerStatus === "approved") {
-            await sendAutomaticEmailMessage(
-              data[customerIndex].body[0]?.firstName,
-              data[customerIndex].body[0]?.email
+            await marketActor?.updateKYCRequest(data[customerIndex]);
+            if (customerStatus === "approved") {
+              await sendAutomaticEmailMessage(
+                data[customerIndex].body[0]?.firstName,
+                data[customerIndex].body[0]?.email
+              );
+            }
+            setUpdated(true);
+            toast.success(
+              `Customer status have been updated to ${customerStatus} ${
+                customerStatus === "approved"
+                  ? ", Approval email have been sent"
+                  : ""
+              } `,
+              {
+                autoClose: 5000,
+                position: "top-center",
+                hideProgressBar: true,
+              }
             );
-          }
-          setUpdated(true);
-          toast.success(
-            `Customer status have been updated to ${customerStatus} ${
-              customerStatus === "approved"
-                ? ", Approval email have been sent"
-                : ""
-            } `,
-            {
+            const customerPosition = customers?.findIndex(
+              (customer) => customer.id === id
+            );
+            if (customerPosition !== undefined) {
+              if (customers) {
+                customers[customerPosition].body.status = customerStatus;
+              }
+            }
+            setUpdating(false);
+          } else {
+            toast.warning("Customer not found", {
               autoClose: 5000,
               position: "top-center",
               hideProgressBar: true,
-            }
-          );
-          const customerPosition = customers?.findIndex(
-            (customer) => customer.id === id
-          );
-          if (customerPosition !== undefined) {
-            if (customers) {
-              customers[customerPosition].body.status = customerStatus;
-            }
+            });
           }
-          setUpdating(false);
-          setSelectedCustomerId(null);
-        } else {
-          toast.warning("Customer not found", {
-            autoClose: 5000,
-            position: "top-center",
-            hideProgressBar: true,
-          });
         }
       } catch (error) {
         console.log("Error updating the customer status", error);
@@ -186,19 +192,12 @@ const Customers = () => {
         return (
           <All
             {...{
-              updated,
-              setUpdated,
               customers,
               updateCustomerStatus,
-              handleShowStatusForm,
               setCustomerStatus,
-              expanded,
-              showStatus,
               updating,
-              isLoading,
-              selectedCustomerId,
-              customerStatus,
-              handleChange,
+              setUpdated,
+              updated,
             }}
           />
         );
@@ -206,19 +205,13 @@ const Customers = () => {
         return (
           <Pending
             {...{
-              updated,
-              setUpdated,
               pendingCustomers,
+              customers,
               updateCustomerStatus,
-              handleShowStatusForm,
               setCustomerStatus,
-              expanded,
-              showStatus,
               updating,
-              isLoading,
-              selectedCustomerId,
-              customerStatus,
-              handleChange,
+              setUpdated,
+              updated,
             }}
           />
         );
@@ -226,19 +219,14 @@ const Customers = () => {
         return (
           <Approved
             {...{
-              updated,
-              setUpdated,
               approvedCustomers,
+              pendingCustomers,
+              customers,
               updateCustomerStatus,
-              handleShowStatusForm,
               setCustomerStatus,
-              expanded,
-              showStatus,
               updating,
-              isLoading,
-              selectedCustomerId,
-              customerStatus,
-              handleChange,
+              setUpdated,
+              updated,
             }}
           />
         );
@@ -246,19 +234,15 @@ const Customers = () => {
         return (
           <Anon
             {...{
-              updated,
-              setUpdated,
               anonUsers,
+              approvedCustomers,
+              pendingCustomers,
+              customers,
               updateCustomerStatus,
-              handleShowStatusForm,
               setCustomerStatus,
-              expanded,
-              showStatus,
               updating,
-              isLoading,
-              selectedCustomerId,
-              customerStatus,
-              handleChange,
+              setUpdated,
+              updated,
             }}
           />
         );

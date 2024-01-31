@@ -16,6 +16,7 @@ import { Principal } from "@dfinity/principal";
 import { useAuth } from '../../../hooks/auth';
 import { type } from 'os';
 import { Status } from '../../../declarations/tswaanda_backend/tswaanda_backend.did';
+import { CustomStatus } from './utils/types';
 
 type Props = {
     canister: any,
@@ -26,7 +27,7 @@ type Props = {
 const Canister : FC<Props> = ({ canister, unauthorized, setUnauthorized }) => {
     const theme = useTheme();
     const { identity, backendActor } = useAuth()
-    const [status, setStatus] = useState<Status| null>(null)
+    const [status, setStatus] = useState<CustomStatus| null>(null)
     const [loading, setLoading] = useState(false)
 
     useEffect(() => {
@@ -48,9 +49,9 @@ const Canister : FC<Props> = ({ canister, unauthorized, setUnauthorized }) => {
                 }
             }
 
-            const status = await backendActor.getCanisterStatus(Principal.fromText(canister.id));
-           if (status.ok) {
-            let modifiedStatus = {
+            const status = await backendActor?.getCanisterStatus(Principal.fromText(canister.id));
+           if (status && "ok" in status) {
+            let modifiedStatus: CustomStatus = {
                 ...status.ok,
                 memory_size: Number(status.ok.memory_size) / 1073741824,
                 cycles: Number(status.ok.cycles) / 1000000000000,
@@ -116,9 +117,9 @@ const Canister : FC<Props> = ({ canister, unauthorized, setUnauthorized }) => {
                                     }}
                                 >
                                     <span style={{ fontWeight: "bold" }}>Status</span>{" "}
-                                    {("Stopped" in status.status && "Stopped") ||""}
-                                    {("Running" in status.status && "Running") ||""}
-                                    {("Stopping" in status.status && "Stopping") ||""}
+                                    {("Stopped" === status.status && "Stopped") ||""}
+                                    {("Running" === status.status && "Running") ||""}
+                                    {("Stopping" === status.status && "Stopping") ||""}
                                 </Typography>
                             </AccordionSummary>
                             <AccordionSummary>

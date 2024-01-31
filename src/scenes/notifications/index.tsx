@@ -1,60 +1,49 @@
-import React from "react";
-import {
-  AdminKYCUpdate,
-  AdminMessage,
-  AdminOrderUpdate,
-  AppMessage,
-} from "../../declarations/tswaanda_backend/tswaanda_backend.did";
+import { useEffect, useState } from "react";
+import Header from "../../components/Header";
+import { AdminNotification } from "../../declarations/tswaanda_backend/tswaanda_backend.did";
 import { useAuth } from "../../hooks/auth";
-import { Button } from "@mui/material";
+import NotificationCard from "./components/NotificationCard";
+import { Box } from "@mui/material";
 
 const NotificationsPage = () => {
-  const { ws } = useAuth();
+  const { backendActor } = useAuth();
+  const [notifications, setNotifications] = useState<
+    AdminNotification[] | null
+  >(null);
 
-  const sendOrderUpdateWSMessage = async (status: string) => {
-    let orderMsg: AdminOrderUpdate = {
-      marketPlUserclientId:
-        "vnw6d-awyvd-bvqjd-mxu3r-zwfmv-hnkt5-7b5j3-zttj6-gyyv3-urq3r-pqe",
-      orderId: "2v7x3-4iaaa-aaaah-qaa4q-cai",
-      status: { Approved: null },
-      timestamp: BigInt(Date.now()),
-    };
-    let adminMessage: AdminMessage = {
-      OrderUpdate: orderMsg,
-    };
-    const msg: AppMessage = {
-      FromAdmin: adminMessage,
-    };
-    ws.send(msg);
+  useEffect(() => {
+    if (backendActor) {
+      fetchNotifications();
+    }
+  }, [backendActor]);
+
+  const fetchNotifications = async () => {
+    const notifications = await backendActor?.getAdminNotifications();
+    if (notifications) {
+      notifications.sort((a: AdminNotification, b: AdminNotification) => {
+        return Number(b.created) - Number(a.created);
+      });
+      setNotifications(notifications);
+    }
   };
 
-  const sendKYCUpdateWSMessage = async (status: string) => {
-    let kycMsg: AdminKYCUpdate = {
-      marketPlUserclientId:
-        "vnw6d-awyvd-bvqjd-mxu3r-zwfmv-hnkt5-7b5j3-zttj6-gyyv3-urq3r-pqe",
-      status: "Approved",
-      message: "KYC Approved",
-      timestamp: BigInt(Date.now()),
-    };
-    let adminMessage: AdminMessage = {
-      KYCUpdate: kycMsg,
-    };
-    const msg: AppMessage = {
-      FromAdmin: adminMessage,
-    };
-    ws.send(msg);
-  };
+  console.log("notifications", notifications)
 
   return (
-    <div>
-      {" "}
-      <Button onClick={() => sendOrderUpdateWSMessage("Approved")}>
-        Send Order Update
-      </Button>
-      <Button onClick={() => sendKYCUpdateWSMessage("Approved")}>
-        Send KYC Update
-      </Button>
-    </div>
+    <Box m="1.5rem 2.5rem">
+      <Box
+        display="flex"
+        justifyContent="space-between"
+        alignItems="center"
+        sx={{ marginBottom: 5 }}
+      >
+        <Header title="NOTIFICATIONS" subtitle="List of Notifications" />
+      </Box>
+
+      {notifications?.map((notification) => (
+        <NotificationCard key={notification.id} {...{ notification }} />
+      ))}
+    </Box>
   );
 };
 

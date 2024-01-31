@@ -3,11 +3,15 @@ import Header from "../../components/Header";
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { sendAutomaticOrderUpdateEmail } from "../../emails/orders";
-import { formatDate} from "../../utils/time";
+import { formatDate } from "../../utils/time";
 import { useAuth } from "../../hooks/auth";
-import { DeliveredComponent, PendingApprovalComponent, ProcessingComponent, ShippedComponent } from "./components";
+import {
+  DeliveredComponent,
+  JustPlacedComponent,
+  PurchasedComponent,
+  ShippmentComponent,
+} from "./components";
 import { ProductOrder } from "../../declarations/marketplace_backend/marketplace_backend.did";
-import { ProductOrderType } from "./utils/types";
 
 const Orders = () => {
   const { marketActor } = useAuth();
@@ -15,12 +19,22 @@ const Orders = () => {
   const [expanded, setExpanded] = useState(false);
   const [pendingData, setPendingData] = useState<ProductOrder[] | null>(null);
   const [shippedData, setShippedData] = useState<ProductOrder[] | null>(null);
-  const [deliveredData, setDeliverdData] = useState<ProductOrder[] | null>(null);
+  const [deliveredData, setDeliverdData] = useState<ProductOrder[] | null>(
+    null
+  );
   const [approvedData, setApprovedData] = useState<ProductOrder[] | null>(null);
-  const [pendingOrders, setPendingOrders] = useState<ProductOrderType[] | null>(null);
-  const [shippedOrders, setShippedOrders] = useState<ProductOrderType[] | null>(null);
-  const [deliveredOrders, setDeliverdOrders] = useState<ProductOrderType[] | null>(null);
-  const [approvedOrders, setApprovedOrders] = useState<ProductOrderType[] | null>(null);
+  const [pendingOrders, setPendingOrders] = useState<ProductOrder[] | null>(
+    null
+  );
+  const [shippedOrders, setShippedOrders] = useState<ProductOrder[] | null>(
+    null
+  );
+  const [deliveredOrders, setDeliverdOrders] = useState<
+    ProductOrder[] | null
+  >(null);
+  const [approvedOrders, setApprovedOrders] = useState<
+    ProductOrder[] | null
+  >(null);
 
   const [showStep, setShowStep] = useState(false);
 
@@ -48,7 +62,7 @@ const Orders = () => {
   }, [value]);
 
   const getPendingOrders = async () => {
-    const res = (await marketActor.getPendingOrders()) as any[];
+    const res = (await marketActor?.getPendingOrders()) as any[];
     const sortedData = res.sort(
       (a: any, b: any) => Number(b.dateCreated) - Number(a.dateCreated)
     );
@@ -57,7 +71,7 @@ const Orders = () => {
     setPendingOrders(convertedOrders);
   };
   const getApprovedOrders = async () => {
-    const res = (await marketActor.getApprovedOrders()) as any[];
+    const res = (await marketActor?.getPurchasedOrders()) as any[];
     const sortedData = res.sort(
       (a: any, b: any) => Number(b.dateCreated) - Number(a.dateCreated)
     );
@@ -66,7 +80,7 @@ const Orders = () => {
     setApprovedOrders(convertedOrders);
   };
   const getShippedOrders = async () => {
-    const res = (await marketActor.getShippedOrders()) as any[];
+    const res = (await marketActor?.getShippedOrders()) as any[];
     const sortedData = res.sort(
       (a: any, b: any) => Number(b.dateCreated) - Number(a.dateCreated)
     );
@@ -75,7 +89,7 @@ const Orders = () => {
     setShippedOrders(convertedOrders);
   };
   const getDeliveredOrders = async () => {
-    const res = (await marketActor.getDeliveredOrders()) as any[];
+    const res = (await marketActor?.getDeliveredOrders()) as any[];
     const sortedData = res.sort(
       (a: any, b: any) => Number(b.dateCreated) - Number(a.dateCreated)
     );
@@ -101,7 +115,6 @@ const Orders = () => {
 
     return modifiedOrder;
   };
-
 
   const updatePendingOrderStatus = async (id: any) => {
     updateOrderStatus(id, pendingData, pendingOrders);
@@ -132,7 +145,7 @@ const Orders = () => {
         } else if (orderStatus === "delivered") {
           data[orderIndex].step = Number(3);
         }
-        await marketActor.updatePOrder(id, data[orderIndex]);
+        await marketActor?.updatePOrder(data[orderIndex]);
         if (orderStatus !== "pending") {
           await sendAutomaticOrderUpdateEmail(
             data[orderIndex].fistName,
@@ -199,11 +212,11 @@ const Orders = () => {
     }
   };
 
-  const handleShowStepForm = (id:any) => {
+  const handleShowStepForm = (id: any) => {
     setShowStep(true);
   };
 
-  const handleChange = (panel:any) => (event: any, isExpanded:any) => {
+  const handleChange = (panel: any) => (event: any, isExpanded: any) => {
     setExpanded(isExpanded ? panel : false);
   };
 
@@ -211,19 +224,16 @@ const Orders = () => {
     switch (value) {
       case 0:
         return (
-          <PendingApprovalComponent
+          <JustPlacedComponent
             {...{
               updated,
               setUpdated,
               pendingOrders,
-              handleShowStepForm,
               handleChange,
               updatePendingOrderStatus,
               expanded,
               theme,
-              showStep,
               updating,
-              setOrderStep,
               setOrderStatus,
               orderStatus,
             }}
@@ -231,7 +241,7 @@ const Orders = () => {
         );
       case 1:
         return (
-          <ProcessingComponent
+          <PurchasedComponent
             {...{
               updated,
               setUpdated,
@@ -251,7 +261,7 @@ const Orders = () => {
         );
       case 2:
         return (
-          <ShippedComponent
+          <ShippmentComponent
             {...{
               updated,
               setUpdated,
@@ -302,10 +312,10 @@ const Orders = () => {
         </Box>
         <Box m="2.5rem 0 0 0">
           <Tabs value={value} onChange={handleTabChange}>
-            <Tab label="Pending Approval" />
-            <Tab label="Processing" />
-            <Tab label="shipped" />
-            <Tab label="delivered" />
+            <Tab label="Just Placed" />
+            <Tab label="Purchased" />
+            <Tab label="Shippment" />
+            <Tab label="Fulfillment" />
           </Tabs>
         </Box>
         {renderTabContent()}

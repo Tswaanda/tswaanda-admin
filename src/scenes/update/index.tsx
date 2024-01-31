@@ -102,8 +102,8 @@ const UpdateProduct: FC<UpdateProductProps> = ({
   };
 
   const saveUpdatedProduct = async (filesUrls:any) => {
-    const farmerRes = await backendActor.getFarmerByEmail(farmer)
-    if (!farmerRes.ok) {
+    const farmerRes = await backendActor?.getFarmerByEmail(farmer)
+    if (!farmerRes) {
       console.log("Farmer not found, please check email address or register farmer first")
       toast.error(
         `Farmer not found, please check email address or register farmer first`,
@@ -133,7 +133,7 @@ const UpdateProduct: FC<UpdateProductProps> = ({
       created: productInfo.created,
     };
     console.log("Updated product", updatedProduct)
-    await backendActor.updateProduct(id, updatedProduct);
+    await backendActor?.updateProduct(id, updatedProduct);
     setProductsUpdated(true);
     setUpdating(false);
     onClose();
