@@ -4,7 +4,7 @@ import CampaignIcon from "@mui/icons-material/Campaign";
 import { useAuth } from "../../../hooks/auth";
 import { AdminNotification } from "../../../declarations/tswaanda_backend/tswaanda_backend.did";
 import { FC, useState } from "react";
-import { nanoDateFormat } from "../../../utils/time";
+import { formatDate, nanoDateFormat } from "../../../utils/time";
 
 type Props = {
   notification: AdminNotification;
@@ -31,7 +31,7 @@ const NotificationCard: FC<Props> = ({ notification }) => {
               KYC Update
             </Typography>
             <Typography variant="caption" color="secondary">
-              {nanoDateFormat(Number(localNotification.created))}
+              {formatDate(Number(localNotification.created))}
             </Typography>
           </FlexBetween>
           <Typography variant="body1" color="lightgrey">
@@ -64,7 +64,7 @@ const NotificationCard: FC<Props> = ({ notification }) => {
               Order Update
             </Typography>
             <Typography variant="caption" color="secondary">
-              {nanoDateFormat(Number(localNotification.created))}
+              {formatDate(Number(localNotification.created))}
             </Typography>
           </FlexBetween>
           <Typography variant="body1" color="lightgrey">
@@ -97,7 +97,7 @@ const NotificationCard: FC<Props> = ({ notification }) => {
               Product Review
             </Typography>
             <Typography variant="caption" color="secondary">
-              {nanoDateFormat(Number(localNotification.created))}
+              {formatDate(Number(localNotification.created))}
             </Typography>
           </FlexBetween>
           <Typography variant="body1" color="lightgrey">

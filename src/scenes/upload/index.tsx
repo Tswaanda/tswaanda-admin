@@ -27,6 +27,8 @@ import {
   UserNotification,
 } from "../../declarations/tswaanda_backend/tswaanda_backend.did";
 
+const network = process.env.DFX_NETWORK || "local";
+
 function UpLoadProduct({ isOpen, onClose, setProductsUpdated }) {
   const { storageInitiated } = useSelector((state: RootState) => state.global);
   const { backendActor, marketActor, ws } = useAuth();
@@ -109,9 +111,9 @@ function UpLoadProduct({ isOpen, onClose, setProductsUpdated }) {
               ...farmerRes.ok,
               listedProducts: [...farmerRes.ok.listedProducts, newProduct.id],
             };
+            await sendNewProductDropWSMessage(newProduct);
             await backendActor?.updateFarmer(updatedFarmer);
             await backendActor?.createProduct(newProduct);
-            await sendNewProductDropWSMessage(newProduct);
             // Send email to farmer to notify them of new product
             const res = await sendOrderListedEmail(farmerRes.ok, newProduct);
             if (res) {
@@ -139,35 +141,42 @@ function UpLoadProduct({ isOpen, onClose, setProductsUpdated }) {
   };
 
   const sendNewProductDropWSMessage = async (_prod: Product) => {
-    const msg: AppMessage = {
-      FromAdmin: {
-        NewProductDrop: {
-          productName: _prod.name,
+    try {
+      const msg: AppMessage = {
+        FromAdmin: {
+          NewProductDrop: {
+            productName: _prod.name,
+          },
         },
-      },
-    };
-    let notification: UserNotification = {
-      id: uuidv4(),
-      notification: {
-        NewProductDrop: {
-          productId: _prod.id,
-          link: `https://tswaanda.com/product/${_prod.id}`,
-          productName: _prod.name,
-          price: _prod.price,
-          image: _prod.images[0],
+      };
+      let url = network === "local" ? `http://localhost:3000/product/${_prod.id}` : `https://tswaanda.com/product/${_prod.id}`;
+      let notification: UserNotification = {
+        id: uuidv4(),
+        notification: {
+          NewProductDrop: {
+            productId: _prod.id,
+            link: url,
+            productName: _prod.name,
+            price: _prod.price,
+            image: _prod.images[0],
+          },
         },
-      },
-      read: false,
-      created: BigInt(Date.now()),
-    };
-
-    let all_users = await marketActor?.getAllCustomersPrincipals();
-    if (all_users) {
-      for (const user of all_users) {
-        await backendActor?.createUserNotification(user, notification);
+        read: false,
+        created: BigInt(Date.now()),
+      };
+  
+      let all_users = await marketActor?.getAllCustomersPrincipals();
+      if (all_users) {
+        for (const user of all_users) {
+          await backendActor?.createUserNotification(user, notification);
+        }
       }
+      ws.send(msg);
+    } catch (error) {
+      console.log("Error sending new product drop message", error)
+      setSaving(false);
+      setUpLoading(false);
     }
-    ws.send(msg);
   };
 
   const uploadAssets = async () => {

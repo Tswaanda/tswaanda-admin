@@ -1,76 +1,69 @@
 import React, { FC, useEffect, useState } from "react";
-import {
-  Box,
-  Typography,
-  Grid,
-  CardActions,
-  Button,
-} from "@mui/material";
+import { Box, Typography, Grid, CardActions, Button } from "@mui/material";
 import Accordion from "@mui/material/Accordion";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import AccordionSummary from "@mui/material/AccordionSummary";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import UpdateOrderStatusModal from "./UpdateOrderStatusModal";
 import ContactCustomerOnOrder from "./ContactCustomerOnOrder";
-import { ProductOrderType } from "../utils/types";
+import { ProductOrder } from "../../../declarations/marketplace_backend/marketplace_backend.did";
+import { formatDate } from "../../../utils/time";
 
 type Props = {
-  updated: boolean,
-  setUpdated: any,
-  pendingOrders: any,
-  handleChange: any,
-  updatePendingOrderStatus: any,
-  expanded: any,
-  theme: any,
-  updating: boolean,
-  setOrderStatus: any,
-  orderStatus: any
-}
+  updated: boolean;
+  setUpdated: any;
+  shippedOrders: any;
+  handleChange: any;
+  updateShippedOrderStatus: any;
+  expanded: any;
+  theme: any;
+  updating: boolean;
+  setOrderStatus: any;
+  orderStatus: any;
+};
 
-const PendingApprovalComponent: FC<Props> = ({
+const ShippmentComponent: FC<Props> = ({
   updated,
   setUpdated,
-  pendingOrders,
+  shippedOrders,
   handleChange,
-  updatePendingOrderStatus,
+  updateShippedOrderStatus,
   expanded,
   theme,
   updating,
   setOrderStatus,
-  orderStatus
+  orderStatus,
 }) => {
-
-  const [orders, setOrders] = useState<any[] | null>(null)
-  const [updateSatus, setUpdateStatus] = useState(false)
-  const [contactCustomer, setContactCustomer] = useState(false)
+  const [orders, setOrders] = useState<ProductOrder[] | null>(null);
+  const [updateSatus, setUpdateStatus] = useState(false);
+  const [contactCustomer, setContactCustomer] = useState(false);
 
   const [openStatusModal, setStatusModal] = useState(false);
   const [openContactModal, setContactModal] = useState(false);
 
-  const [modalOrder, setOrder] = useState<ProductOrderType| null>(null)
+  const [modalOrder, setOrder] = useState<ProductOrder | null>(null);
 
   const handleContactCustomer = (order: any) => {
-    setOrder(order)
-    setContactCustomer(!contactCustomer)
-    setContactModal(true)
-    setUpdateStatus(false)
-  }
+    setOrder(order);
+    setContactCustomer(!contactCustomer);
+    setContactModal(true);
+    setUpdateStatus(false);
+  };
 
   const handleUpdateStatus = (order: any) => {
-    setOrder(order)
-    setUpdateStatus(!updateSatus)
-    setStatusModal(true)
-    setContactCustomer(false)
-  }
+    setOrder(order);
+    setUpdateStatus(!updateSatus);
+    setStatusModal(true);
+    setContactCustomer(false);
+  };
 
   const updateOrderStatus = (id: any) => {
-    updatePendingOrderStatus(id)
-  }
+    updateShippedOrderStatus(id);
+  };
 
   useEffect(() => {
-    setOrders(pendingOrders)
-  }, [pendingOrders])
-
+    setOrders(shippedOrders);
+  }, [shippedOrders]);
 
   return (
     <Box m="1rem 0 0 0">
@@ -98,7 +91,7 @@ const PendingApprovalComponent: FC<Props> = ({
             </Typography>
             <Typography sx={{ color: "text.secondary" }}>
               <span style={{ fontWeight: "bold" }}>Date</span>:{" "}
-              {order.dateCreated}
+              {formatDate(Number(order.created))}
             </Typography>
           </AccordionSummary>
           <AccordionDetails>
@@ -110,17 +103,21 @@ const PendingApprovalComponent: FC<Props> = ({
               }}
             >
               <Grid container spacing={4} m="0 0.1rem 0 0.1rem">
+                {/* TODO: fix the status */}
                 <Grid item xs={6}>
-                  <Typography>Status: {order.status}</Typography>
+                  {/* <Typography>Status: {order.status}</Typography> */}
                 </Grid>
-                <Grid item xs={6}>
-                  <Typography>Step: {Number(order.step)}</Typography>
-                </Grid>
+  
               </Grid>
               <hr />
               <Grid container spacing={4} m="0 0.1rem 0 0.1rem">
-
-                <Grid key={order.orderProducts.id} item xs={4} display="flex" alignItems="center">
+                <Grid
+                  key={order.orderProducts.id}
+                  item
+                  xs={4}
+                  display="flex"
+                  alignItems="center"
+                >
                   <Box
                     component="img"
                     alt="profile"
@@ -150,7 +147,6 @@ const PendingApprovalComponent: FC<Props> = ({
                     </Typography>
                   </Box>
                 </Grid>
-
               </Grid>
               <hr />
               <Grid container spacing={4} m="0 0.1rem 0 0.1rem">
@@ -182,14 +178,8 @@ const PendingApprovalComponent: FC<Props> = ({
                   variant="outlined"
                   size="small"
                   style={{
-                    backgroundColor:
-                      updateSatus
-                        ? "white"
-                        : undefined,
-                    color:
-                      updateSatus
-                        ? "green"
-                        : "white",
+                    backgroundColor: updateSatus ? "white" : undefined,
+                    color: updateSatus ? "green" : "white",
                   }}
                 >
                   Update Order status
@@ -199,37 +189,42 @@ const PendingApprovalComponent: FC<Props> = ({
                   variant="outlined"
                   size="small"
                   style={{
-                    backgroundColor:
-                      contactCustomer
-                        ? "white"
-                        : undefined,
-                    color:
-                      contactCustomer
-                        ? "green"
-                        : "white",
+                    backgroundColor: contactCustomer ? "white" : undefined,
+                    color: contactCustomer ? "green" : "white",
                   }}
                 >
                   Contact customer
                 </Button>
               </CardActions>
-
             </Box>
           </AccordionDetails>
         </Accordion>
       ))}
       <>
         {updateSatus && (
-          <UpdateOrderStatusModal {...{
-            updateOrderStatus, setOrderStatus, orderStatus, updating, theme, setStatusModal, openStatusModal, modalOrder, updated,
-            setUpdated
-          }} />
+          <UpdateOrderStatusModal
+            {...{
+              updateOrderStatus,
+              setOrderStatus,
+              orderStatus,
+              updating,
+              theme,
+              setStatusModal,
+              openStatusModal,
+              modalOrder,
+              updated,
+              setUpdated,
+            }}
+          />
         )}
         {contactCustomer && (
-          <ContactCustomerOnOrder {...{ openContactModal, setContactModal, theme, modalOrder }} />
+          <ContactCustomerOnOrder
+            {...{ openContactModal, setContactModal, theme, modalOrder }}
+          />
         )}
       </>
     </Box>
   );
 };
 
-export default PendingApprovalComponent;
+export default ShippmentComponent;

@@ -23,7 +23,7 @@ import IcWebSocketCdkTypes "mo:ic-websocket-cdk/Types";
 
 import Type "types";
 import Debug "mo:base/Debug";
-import HashMap "mo:base/HashMap";
+import TrieMap "mo:base/TrieMap";
 import Iter "mo:base/Iter";
 import Result "mo:base/Result";
 import Buffer "mo:base/Buffer";
@@ -64,23 +64,26 @@ shared ({ caller = initializer }) actor class TswaandaAdmin() = this {
     private stable var roles : AssocList.AssocList<Principal, Role> = List.nil();
     private stable var role_requests : AssocList.AssocList<Principal, Role> = List.nil();
 
-    var products = HashMap.HashMap<ProductId, Product>(0, Text.equal, Text.hash);
+    var products = TrieMap.TrieMap<ProductId, Product>(Text.equal, Text.hash);
     private stable var productsEntries : [(Text, Product)] = [];
 
-    var productReviews = HashMap.HashMap<ProductId, List.List<ProductReview>>(0, Text.equal, Text.hash);
+    var productReviews = TrieMap.TrieMap<ProductId, List.List<ProductReview>>(Text.equal, Text.hash);
     private stable var productReviewsEntries : [(Text, List.List<ProductReview>)] = [];
 
-    var farmers = HashMap.HashMap<farmerEmail, Farmer>(0, Text.equal, Text.hash);
+    var farmers = TrieMap.TrieMap<farmerEmail, Farmer>(Text.equal, Text.hash);
     private stable var farmersEntries : [(Text, Farmer)] = [];
 
-    var staff = HashMap.HashMap<Principal, Staff>(0, Principal.equal, Principal.hash);
+    var staff = TrieMap.TrieMap<Principal, Staff>(Principal.equal, Principal.hash);
     private stable var staffEntries : [(Principal, Staff)] = [];
 
-    var adminNotifications = HashMap.HashMap<NotificationId, AdminNotification>(0, Text.equal, Text.hash);
+    var adminNotifications = TrieMap.TrieMap<NotificationId, AdminNotification>(Text.equal, Text.hash);
     private stable var adminNotificationsEntries : [(Text, AdminNotification)] = [];
 
-    var userNotifications = HashMap.HashMap<Principal, List.List<UserNotification>>(0, Principal.equal, Principal.hash);
-    private stable var userNotificationsEntries : [(Principal, List.List<UserNotification>)] = [];
+    var usersNotifications = TrieMap.TrieMap<NotificationId, UserNotification>(Text.equal, Text.hash);
+    private stable var usersNotificationsEntries : [(NotificationId, UserNotification)] = [];
+
+    var userNotificationsList = TrieMap.TrieMap<Principal, List.List<NotificationId>>(Principal.equal, Principal.hash);
+    private stable var userNotificationsListEntries : [(Principal, List.List<NotificationId>)] = [];
 
     let all_connected_clients = Buffer.Buffer<IcWebSocketCdk.ClientPrincipal>(0);
     var market_clients = Buffer.Buffer<IcWebSocketCdk.ClientPrincipal>(0);
@@ -96,18 +99,20 @@ shared ({ caller = initializer }) actor class TswaandaAdmin() = this {
         productReviewsEntries := Iter.toArray(productReviews.entries());
         staffEntries := Iter.toArray(staff.entries());
         adminNotificationsEntries := Iter.toArray(adminNotifications.entries());
-        userNotificationsEntries := Iter.toArray(userNotifications.entries());
+        userNotificationsListEntries := Iter.toArray(userNotificationsList.entries());
+        usersNotificationsEntries := Iter.toArray(usersNotifications.entries());
         admin_clients_entries := Buffer.toArray<IcWebSocketCdk.ClientPrincipal>(admin_clients);
         market_clients_entries := Buffer.toArray<IcWebSocketCdk.ClientPrincipal>(market_clients);
     };
 
     system func postupgrade() {
-        products := HashMap.fromIter<Text, Product>(productsEntries.vals(), 0, Text.equal, Text.hash);
-        farmers := HashMap.fromIter<Text, Farmer>(farmersEntries.vals(), 0, Text.equal, Text.hash);
-        productReviews := HashMap.fromIter<Text, List.List<ProductReview>>(productReviewsEntries.vals(), 0, Text.equal, Text.hash);
-        staff := HashMap.fromIter<Principal, Staff>(staffEntries.vals(), 0, Principal.equal, Principal.hash);
-        adminNotifications := HashMap.fromIter<Text, AdminNotification>(adminNotificationsEntries.vals(), 0, Text.equal, Text.hash);
-        userNotifications := HashMap.fromIter<Principal, List.List<UserNotification>>(userNotificationsEntries.vals(), 0, Principal.equal, Principal.hash);
+        products := TrieMap.fromEntries<Text, Product>(productsEntries.vals(), Text.equal, Text.hash);
+        farmers := TrieMap.fromEntries<Text, Farmer>(farmersEntries.vals(), Text.equal, Text.hash);
+        productReviews := TrieMap.fromEntries<Text, List.List<ProductReview>>(productReviewsEntries.vals(), Text.equal, Text.hash);
+        staff := TrieMap.fromEntries<Principal, Staff>(staffEntries.vals(), Principal.equal, Principal.hash);
+        adminNotifications := TrieMap.fromEntries<Text, AdminNotification>(adminNotificationsEntries.vals(), Text.equal, Text.hash);
+        userNotificationsList := TrieMap.fromEntries<Principal, List.List<NotificationId>>(userNotificationsListEntries.vals(), Principal.equal, Principal.hash);
+        usersNotifications := TrieMap.fromEntries<NotificationId, UserNotification>(usersNotificationsEntries.vals(), Text.equal, Text.hash);
         admin_clients := Buffer.fromIter<IcWebSocketCdk.ClientPrincipal>(admin_clients_entries.vals());
         market_clients := Buffer.fromIter<IcWebSocketCdk.ClientPrincipal>(market_clients_entries.vals());
     };
@@ -133,8 +138,6 @@ shared ({ caller = initializer }) actor class TswaandaAdmin() = this {
             market_clients.add(args.client_principal);
         };
     };
-
-    // TODO: ADD PRODUCT REVIEW NOTIFICATION
 
     func on_message(args : IcWebSocketCdk.OnMessageCallbackArgs) : async () {
         let app_msg : ?AppMessage = from_candid (args.message);
@@ -166,6 +169,7 @@ shared ({ caller = initializer }) actor class TswaandaAdmin() = this {
                                     productName = msg.productName;
                                 };
                                 for (client in market_clients.vals()) {
+                                    Debug.print("Sending message to client: " # debug_show (Principal.toText(client)));
                                     await send_app_message(client, #FromAdmin(#NewProductDrop(newProductDrop)));
                                 };
                             };
@@ -258,7 +262,7 @@ shared ({ caller = initializer }) actor class TswaandaAdmin() = this {
     };
 
     public shared func createUserNotification(user_id : Principal, ntf : UserNotification) : async () {
-        var notifications : List.List<UserNotification> = switch (userNotifications.get(user_id)) {
+        var notificationsIds : List.List<NotificationId> = switch (userNotificationsList.get(user_id)) {
             case (null) {
                 List.nil();
             };
@@ -266,8 +270,9 @@ shared ({ caller = initializer }) actor class TswaandaAdmin() = this {
                 result;
             };
         };
-        notifications := List.push(ntf, notifications);
-        userNotifications.put(user_id, notifications);
+        notificationsIds := List.push(ntf.id, notificationsIds);
+        userNotificationsList.put(user_id, notificationsIds);
+        usersNotifications.put(ntf.id, ntf);
     };
 
     public shared func createAdminNotification(ntf : AdminNotification) : async () {
@@ -330,73 +335,82 @@ shared ({ caller = initializer }) actor class TswaandaAdmin() = this {
 
     /************User notifications************/
 
-    public shared ({ caller }) func getUserNotifications() : async [UserNotification] {
-        let _nots = userNotifications.get(caller);
-        switch (userNotifications.get(caller)) {
+    public shared query ({ caller }) func getUserNotifications() : async [UserNotification] {
+        switch (userNotificationsList.get(caller)) {
             case (null) {
                 return [];
             };
             case (?result) {
-                return List.toArray(result);
+                var notifications = Buffer.Buffer<UserNotification>(0);
+                for (notificationId in List.toArray(result).vals()) {
+                    switch (usersNotifications.get(notificationId)) {
+                        case (null) {
+                            // Do nothing
+                        };
+                        case (?result) {
+                            notifications.add(result);
+                        };
+                    };
+                };
+                return Buffer.toArray<UserNotification>(notifications);
             };
         };
     };
 
     public shared ({ caller }) func markAllUserNotificationsAsRead() : async () {
-        switch (userNotifications.get(caller)) {
+        switch (userNotificationsList.get(caller)) {
             case (null) {
                 // Do nothing
             };
-            case (?result) {
-                var updatedNotifications : List.List<UserNotification> = List.nil<UserNotification>();
-                for (notification in List.toArray(result).vals()) {
-                    let updatedNotification : UserNotification = {
-                        notification with
-                        read = true;
+            case (?results) {
+                for (notification in List.toArray(results).vals()) {
+                    switch (usersNotifications.get(notification)) {
+                        case (null) {};
+                        case (?result) {
+                            let updatedNotification : UserNotification = {
+                                result with
+                                read = true;
+                            };
+                            usersNotifications.put(notification, updatedNotification);
+                        };
                     };
-                    updatedNotifications := List.push(updatedNotification, updatedNotifications);
                 };
-                userNotifications.put(caller, updatedNotifications);
+
             };
         };
     };
 
     public shared ({ caller }) func markUserNotificationAsRead(id : Text) : async () {
-        switch (userNotifications.get(caller)) {
-            case (null) {
-                // Do nothing
-            };
-            case (?results) {
-                var _nots = List.nil<UserNotification>();
-                for (notification in List.toArray(results).vals()) {
-                    if (notification.id == id) {
-                        let updatedNotification : UserNotification = {
-                            notification with
-                            read = true;
-                        };
-                        _nots := List.push(updatedNotification, _nots);
-                    } else {
-                        _nots := List.push(notification, _nots);
-                    };
+        switch (usersNotifications.get(id)) {
+            case (null) {};
+            case (?result) {
+                let updatedNotification : UserNotification = {
+                    result with
+                    read = true;
                 };
-                userNotifications.put(caller, _nots);
+                usersNotifications.put(id, updatedNotification);
             };
         };
     };
 
     public shared query ({ caller }) func getUnreadUserNotifications() : async [UserNotification] {
-        let unreadNotifications = Buffer.Buffer<UserNotification>(0);
-        switch (userNotifications.get(caller)) {
+        switch (userNotificationsList.get(caller)) {
             case (null) {
                 return [];
             };
             case (?result) {
-                for (notification in List.toArray(result).vals()) {
-                    if (notification.read == false) {
-                        unreadNotifications.add(notification);
+                var notifications = Buffer.Buffer<UserNotification>(0);
+                for (notificationId in List.toArray(result).vals()) {
+                    switch (usersNotifications.get(notificationId)) {
+                        case (null) {};
+                        case (?result) {
+                            if (result.read == false) {
+                                notifications.add(result);
+                            };
+                        };
                     };
                 };
-                return Buffer.toArray<UserNotification>(unreadNotifications);
+                return Buffer.toArray<UserNotification>(notifications);
             };
         };
     };

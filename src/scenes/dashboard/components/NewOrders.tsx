@@ -15,7 +15,7 @@ import { type } from "os";
 import { ProductOrder } from "../../../declarations/marketplace_backend/marketplace_backend.did";
 
 type NewOrdersProps = {
-    orders: ProductOrder[];
+    orders: any[];
 };
 
 const NewOrders: FC<NewOrdersProps> = ({
@@ -57,7 +57,7 @@ const NewOrders: FC<NewOrdersProps> = ({
                         </Typography>
                         <Typography sx={{ color: "text.secondary" }}>
                             <span style={{ fontWeight: "bold" }}>Date</span>:{" "}
-                            {Number(order.created)}
+                            {order.created}
                         </Typography>
                     </AccordionSummary>
                     <AccordionDetails>

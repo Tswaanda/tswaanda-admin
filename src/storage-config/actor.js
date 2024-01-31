@@ -1,6 +1,6 @@
 import { HttpAgent, Actor } from "@dfinity/agent";
 
-const network = process.env.DFX_NETWORK 
+const network = "ic"
 
 // CHANGE ME IN PRODUCTION;
 

@@ -20,7 +20,7 @@ import SendModal from "./SendModal";
 import AddControllersModal from "./AddControllerModal";
 import ReceiveModal from "./ReceiveModal";
 
-const AccountAccordion = () => {
+const AccountAccordion = ({data}) => {
   const theme = useTheme();
   const [expanded, setExpanded] = useState(false);
   const { walletActor } = useAuth();
@@ -29,29 +29,9 @@ const AccountAccordion = () => {
   const [openControllerModal, setOpenControllerModal] = useState(false);
   const [openReceiveModal, setOpenReceiveModal] = useState(false);
 
-  const accordionRef = useRef<HTMLDivElement>(null);
-
   const handleSend = (address, amount) => {
     console.log(`Sending ${amount} to ${address}`);
-    // Add logic to handle sending cryptocurrency
-    };
-
-
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (
-        accordionRef.current &&
-        !accordionRef.current.contains(event.target as Node)
-      ) {
-        setExpanded(false);
-      }
-    }
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [accordionRef]);
+  };
 
   useEffect(() => {
     if (walletActor) {
@@ -88,7 +68,7 @@ const AccountAccordion = () => {
   };
 
   return (
-    <Box m="1rem 0 0 0" ref={accordionRef}>
+    <Box m="1rem 0 0 0">
       <Accordion
         expanded={expanded}
         onChange={() => setExpanded(!expanded)}
@@ -103,20 +83,20 @@ const AccountAccordion = () => {
           id="panel1bh-header"
         >
           <Typography sx={{ width: "25%", flexShrink: 0 }}>
-            <span style={{ fontWeight: "bold" }}>Name</span>: ckBTC
+            <span style={{ fontWeight: "bold" }}>Name</span>: {data.name}
           </Typography>
           <Typography sx={{ width: "25%", flexShrink: 0 }}>
-            <span style={{ fontWeight: "bold" }}>Balance</span>: 3.45 ckBTC
+            <span style={{ fontWeight: "bold" }}>Balance</span>: {data.balance}
           </Typography>
           <Typography sx={{ width: "25%", flexShrink: 0 }}>
             <span style={{ fontWeight: "bold" }}>Address</span>:
-            0x03923d2210929109aq92232s223
+            {data.address}
           </Typography>
           <Typography
             sx={{ color: "text.secondary", width: "25%", flexShrink: 0 }}
           >
             <span style={{ fontWeight: "bold" }}>Created</span>:{" "}
-            2021-10-06T18:52:58.000Z
+            {data.created}
           </Typography>
         </AccordionSummary>
         <AccordionDetails>
@@ -133,7 +113,7 @@ const AccountAccordion = () => {
                 id="panel1bh-header"
               >
                 <Typography sx={{ width: "50%", flexShrink: 0 }}>
-                  <span style={{ fontWeight: "bold" }}>Memory size:</span> {""}3
+                  <span style={{ fontWeight: "bold" }}>Memory size:</span> {""}{data.memorySize}
                   GB
                 </Typography>
                 <Typography
@@ -143,9 +123,7 @@ const AccountAccordion = () => {
                   }}
                 >
                   <span style={{ fontWeight: "bold" }}>Status</span>{" "}
-                  {/* {("Stopped" in status.status && "Stopped") ||""}
-        {("Running" in status.status && "Running") ||""}
-        {("Stopping" in status.status && "Stopping") ||""} */}
+                  {data.status}
                 </Typography>
               </AccordionSummary>
               <AccordionSummary>
@@ -156,14 +134,14 @@ const AccountAccordion = () => {
                   }}
                 >
                   <span style={{ fontWeight: "bold" }}>Memory allocation:</span>{" "}
-                  {/* {Number(status.settings.memory_allocation)} GB */}3 GB
+                  {data.memoryAllocation} GB
                 </Typography>
                 <Typography
                   sx={{ width: "50%", flexShrink: 0, fontWeight: "bold" }}
                 >
                   Freezing threshold:{" "}
-                  {/* {Number(status.settings.freezing_threshold) / 86400} Days */}
-                  3 Days
+                  
+                  {data.freezingThreshold}
                 </Typography>
               </AccordionSummary>
               <AccordionSummary>
@@ -175,12 +153,7 @@ const AccountAccordion = () => {
                   }}
                 >
                   Controllers:{" "}
-                  {/* {status.settings.controllers.map((controller, index) => (
-            <Typography key={index}>
-                {controller.toString()}
-            </Typography>
-        ))} */}
-                  0x03923d2210929109aq92232s223
+                  {data.controllers}
                 </Typography>
               </AccordionSummary>
 
@@ -211,6 +184,18 @@ const AccountAccordion = () => {
                     fontWeight: "bold",
                     fontSize: "14px",
                   }}
+                  onClick={() => setOpenReceiveModal(true)}
+                >
+                  Receive
+                </Button>
+                <Button
+                  variant="outlined"
+                  size="small"
+                  style={{
+                    backgroundColor: "white",
+                    fontWeight: "bold",
+                    fontSize: "14px",
+                  }}
                   onClick={() => setOpenControllerModal(true)}
                 >
                   Add Controller
@@ -218,46 +203,11 @@ const AccountAccordion = () => {
                 <AddControllersModal
                   isOpen={openControllerModal}
                   onClose={() => setOpenControllerModal(false)}
-                /> 
-                <Button
-                  variant="outlined"
-                  size="small"
-                  style={{
-                    backgroundColor: "white",
-                    fontWeight: "bold",
-                    fontSize: "14px",
-                  }}
-                  onClick={() => setOpenReceiveModal(true)}
-                >
-                  Receive
-                </Button>
+                />
                 <ReceiveModal
                   isOpen={openReceiveModal}
-                  onClose={() => setOpenReceiveModal(false)}  
+                  onClose={() => setOpenReceiveModal(false)}
                 />
-                <Button
-                  onClick={createAccountAddress}
-                  variant="outlined"
-                  size="small"
-                  style={{
-                    backgroundColor: "white",
-                    fontWeight: "bold",
-                    fontSize: "14px",
-                  }}
-                >
-                  Create Address
-                </Button>
-                <Button
-                  variant="outlined"
-                  size="small"
-                  style={{
-                    backgroundColor: "white",
-                    fontWeight: "bold",
-                    fontSize: "14px",
-                  }}
-                >
-                  View Transactions
-                </Button>
               </CardActions>
             </Container>
           </Box>

@@ -1,6 +1,6 @@
 export {default as ContactCustomerOnOrder} from './ContactCustomerOnOrder';
 export {default as DeliveredComponent} from './DeliveredComponent';
-export {default as PendingApprovalComponent} from './PendingApprovalComponent';
-export {default as ProcessingComponent} from './ProcessingComponent';
-export {default as ShippedComponent} from './ShippedComponent';
+export {default as JustPlacedComponent} from './JustPlacedComponent';
+export {default as PurchasedComponent} from './PurchasedComponent';
+export {default as ShippmentComponent} from './ShippmentComponent';
 export {default as UpdateOrderStatusModal} from './UpdateOrderStatusModal';

@@ -25,8 +25,8 @@ import {
   OrderStatus,
   UserNotification,
 } from "../../../declarations/tswaanda_backend/tswaanda_backend.did";
-import { ProductOrderType } from "../utils/types";
 import { v4 as uuidv4 } from "uuid";
+import { ProductOrder } from "../../../declarations/marketplace_backend/marketplace_backend.did";
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   "& .MuiDialogContent-root": {
@@ -45,7 +45,7 @@ type Props = {
   setOrderStatus: any;
   updating: boolean;
   theme: any;
-  modalOrder: ProductOrderType | null;
+  modalOrder: ProductOrder | null;
   updated: boolean;
   setUpdated: any;
 };
@@ -81,13 +81,17 @@ const UpdateOrderStatusModal: FC<Props> = ({
           if (farmerInfo) {
             if ("ok" in farmerInfo) {
               try {
-                if (orderStatus === "approved") {
+                // TODO: update the emails sending to use the new status types
+                if (orderStatus === "purchased") {
                   // sendOrderApprovedEmail(farmerInfo.ok, modalOrder);
                   await sendOrderUpdateWSMessage(orderStatus);
-                } else if (orderStatus === "shipped") {
+                } else if (orderStatus === "cancelled") {
                   // sendOrderShippedEmail(farmerInfo.ok, modalOrder);
                   await sendOrderUpdateWSMessage(orderStatus);
-                } else if (orderStatus === "delivered") {
+                } else if (orderStatus === "shippment") {
+                  // sendOrderShippedEmail(farmerInfo.ok, modalOrder);
+                  await sendOrderUpdateWSMessage(orderStatus);
+                } else if (orderStatus === "fulfillment") {
                   // sendOrderDeliveredEmail(farmerInfo.ok, modalOrder);
                   await sendOrderUpdateWSMessage(orderStatus);
                 } else {
@@ -122,7 +126,8 @@ const UpdateOrderStatusModal: FC<Props> = ({
       return res;
     } else if (status === "purchased") {
       let _status: OrderStatus = { purchased: null };
-      let message: string = "We have received your payment, order is processing for shippment, you will be notified when order is shipped";
+      let message: string =
+        "We have received your payment, order is processing for shippment, you will be notified when order is shipped";
       let res = {
         status: _status,
         message: message,
@@ -138,7 +143,8 @@ const UpdateOrderStatusModal: FC<Props> = ({
       return res;
     } else if (status === "shippment") {
       let _status: OrderStatus = { shippment: null };
-      let message: string = "Order have been shipped, you will be notified when order is delivered";
+      let message: string =
+        "Order have been shipped, you will be notified when order is delivered";
       let res = {
         status: _status,
         message: message,
@@ -146,7 +152,8 @@ const UpdateOrderStatusModal: FC<Props> = ({
       return res;
     } else if (status === "completed") {
       let _status: OrderStatus = { fulfillment: null };
-      let message: string = "Order has been delivered, thank you for shopping with us";
+      let message: string =
+        "Order has been delivered, thank you for shopping with us";
       let res = {
         status: _status,
         message: message,
@@ -192,6 +199,8 @@ const UpdateOrderStatusModal: FC<Props> = ({
         notification
       );
       ws.send(msg);
+      setUpdated(true);
+      setStatusModal(false);
     }
   };
 
@@ -238,11 +247,10 @@ const UpdateOrderStatusModal: FC<Props> = ({
                     value={orderStatus}
                     onChange={(e) => setOrderStatus(e.target.value)}
                   >
-                    <MenuItem value="orderplaced">Order Recieved</MenuItem>
-                    <MenuItem value="purchased">Purchased, payment recieved</MenuItem>
-                    <MenuItem value="cancelled">Cancel Order</MenuItem>
+                    <MenuItem value="purchased">Payment Recieved</MenuItem>
                     <MenuItem value="shippment">Order Shipped</MenuItem>
                     <MenuItem value="fulfillment">Order Delivered</MenuItem>
+                    <MenuItem value="cancelled">Cancelled</MenuItem>
                   </Select>
                 </FormControl>
 

@@ -453,7 +453,7 @@ const Dashboard = () => {
                   backgroundColor: theme.palette.background.default,
                 }}
               >
-                <CardActionArea>
+                {/* <CardActionArea>
                   <CardMedia
                     component="img"
                     height="140"
@@ -477,7 +477,7 @@ const Dashboard = () => {
                       </a>
                     </Typography>
                   </CardContent>
-                </CardActionArea>
+                </CardActionArea> */}
               </Card>
             ))}
           </Box>

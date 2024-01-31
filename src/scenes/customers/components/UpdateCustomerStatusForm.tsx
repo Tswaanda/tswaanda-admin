@@ -132,6 +132,8 @@ const UpdateCustomerStatusForm: FC<UpdateCustomerStatusFormProps> = ({
         };
         await backendActor?.createUserNotification(Principal.fromText(customer.principal), notification);
         ws.send(msg);
+        setUpdated(true);
+        setStatusModal(false);
       } catch (error) {
         console.log("Error sending KYC update message", error);
       }

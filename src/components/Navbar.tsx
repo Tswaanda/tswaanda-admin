@@ -138,8 +138,7 @@ const Navbar = ({ user, isSidebarOpen, setIsSidebarOpen }) => {
           <IconButton onClick={handleNotificationsClick}>
             <Badge
               color="secondary"
-              variant={`${notifications.length > 0 ? "dot" : "standard"}`}
-              overlap="circular"
+              badgeContent={notifications.length > 0 ? notifications.length : 0}
             >
               <NotificationsIcon sx={{ fontSize: "25px" }} />
             </Badge>
