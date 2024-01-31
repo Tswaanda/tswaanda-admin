@@ -127,12 +127,9 @@ shared ({ caller = initializer }) actor class TswaandaAdmin() = this {
         let index_in_admin_c = Buffer.indexOf<IcWebSocketCdk.ClientPrincipal>(args.client_principal, admin_clients, Principal.equal);
         switch (index_in_all_c) {
             case (null) {
-                // Do nothing
+                all_connected_clients.add(args.client_principal);
             };
-            case (?index_in_all_c) {
-                // remove the client at the given even
-                ignore all_connected_clients.remove(index_in_all_c);
-            };
+            case (?index_in_all_c) {};
         };
         if (index_in_market_c == null and index_in_admin_c == null) {
             market_clients.add(args.client_principal);
