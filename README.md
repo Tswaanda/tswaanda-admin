@@ -40,23 +40,31 @@ mops install
 #### Step 4: Start DFX locally by running the following command
 
 ```bash
-dfx start --clean --background
+npm run dfx
 ```
 
-#### Step 5: Deploy the canister by running the following command
+#### Step 5: Deploy the canisters by running the following command
 
 ```bash
-dfx deploy file_scaling_manager --argument='(false)'
-
-dfx deploy file_storage --argument='(false)'
-
-dfx deploy
+npm run deploy
 ```
 
 #### Step 6: Run the front-end
 
 ```bash
 npm start
+```
+
+#### Step 6: If you want to run with the websockets locally, Make sure you have the Rust toolchain installed. You can find instructions [here](https://www.rust-lang.org/tools/install), and then clone the gateway repo:
+
+```bash
+git clone https://github.com/omnia-network/ic-websocket-gateway.git
+```
+
+#### Step 7: Navigate to the `ic-websocket-gateway` folder and run:
+
+```bash
+cargo run
 ```
 
 ## Contributing
