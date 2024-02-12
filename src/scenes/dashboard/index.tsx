@@ -34,6 +34,7 @@ import {
   Stats,
 } from "../../declarations/tswaanda_backend/tswaanda_backend.did";
 import { NewOrders } from "./components";
+import addNotification from "react-push-notification";
 
 const Dashboard = () => {
   const [products, setProducts] = useState<Product[]>([]);

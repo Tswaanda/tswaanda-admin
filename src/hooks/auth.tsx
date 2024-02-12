@@ -14,7 +14,7 @@ import {
   tswaanda_backend,
   idlFactory as tswaandaIdl,
 } from "../declarations/tswaanda_backend/index";
-import {idlFactory as walletIdl} from "../walletIDL/index"
+import { idlFactory as walletIdl } from "../walletIDL/index";
 import IcWebSocket from "ic-websocket-js";
 import {
   AppMessage,
@@ -33,12 +33,10 @@ import {
   AuthClientLoginOptions,
 } from "@dfinity/auth-client";
 import { canisterId as iiCanId } from "../declarations/internet_identity";
-// @ts-ignore
-import icblast from "@infu/icblast";
-import { handleWebSocketMessage } from "../service/main.js";
 import { processWsMessage } from "./utils";
 import { _SERVICE as _MKTSERVICE } from "../declarations/marketplace_backend/marketplace_backend.did";
 import { _SERVICE as _WALLETSERVICE } from "../walletIDL/wallet.did";
+import addNotification from "react-push-notification";
 
 const marketLiveCanisterId = "55ger-liaaa-aaaal-qb33q-cai";
 const walletCanisterId = "qg5ne-wqaaa-aaaam-ab47a-cai";
@@ -57,7 +55,7 @@ interface ContextType {
   walletActor: ActorSubclass<_WALLETSERVICE> | null;
   storageInitiated: boolean;
   identity: any;
-  backendActor: ActorSubclass<_BACKENDSERVICE> | null
+  backendActor: ActorSubclass<_BACKENDSERVICE> | null;
   isAuthenticated: boolean;
   updateNotifications: boolean;
   ws: any;
@@ -84,7 +82,7 @@ const initialContext: ContextType = {
   setAccessLevel: (): void => {},
   login: (): void => {},
   logout: (): void => {},
-  setUpdateNotifications: (): void => {}
+  setUpdateNotifications: (): void => {},
 };
 
 const AuthContext = createContext<ContextType>(initialContext);
@@ -112,11 +110,16 @@ export const useAuthClient = (options = defaultOptions) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [authClient, setAuthClient] = useState<AuthClient | null>(null);
   const [identity, setIdentity] = useState<Identity | null>(null);
-  const [backendActor, setBackendActor] = useState<ActorSubclass<_BACKENDSERVICE> | null>(null);
-  const [marketActor, setMarketActor] = useState<ActorSubclass<_MKTSERVICE> | null>(null);
-  const [walletActor, setWalletActor] = useState<ActorSubclass<_WALLETSERVICE> | null>(null);
+  const [backendActor, setBackendActor] =
+    useState<ActorSubclass<_BACKENDSERVICE> | null>(null);
+  const [marketActor, setMarketActor] =
+    useState<ActorSubclass<_MKTSERVICE> | null>(null);
+  const [walletActor, setWalletActor] =
+    useState<ActorSubclass<_WALLETSERVICE> | null>(null);
 
-  const [ws, setWs] = useState<IcWebSocket<_BACKENDSERVICE, AppMessage> | null>(null);
+  const [ws, setWs] = useState<IcWebSocket<_BACKENDSERVICE, AppMessage> | null>(
+    null
+  );
   const [storageInitiated, setStorageInitiated] = useState(false);
   const [accessLevel, setAccessLevel] = useState("");
   const [wsMessage, setWsMessage] = useState(null);
@@ -154,23 +157,32 @@ export const useAuthClient = (options = defaultOptions) => {
       agent.fetchRootKey();
     }
 
-    const _backendActor: ActorSubclass<_BACKENDSERVICE> = Actor.createActor(tswaandaIdl, {
-      agent,
-      canisterId: backendCanId,
-    });
+    const _backendActor: ActorSubclass<_BACKENDSERVICE> = Actor.createActor(
+      tswaandaIdl,
+      {
+        agent,
+        canisterId: backendCanId,
+      }
+    );
     setBackendActor(_backendActor);
 
-    const _walletActor: ActorSubclass<_WALLETSERVICE> = Actor.createActor(walletIdl, {
-      agent,
-      canisterId: walletCanisterId,
-    });
+    const _walletActor: ActorSubclass<_WALLETSERVICE> = Actor.createActor(
+      walletIdl,
+      {
+        agent,
+        canisterId: walletCanisterId,
+      }
+    );
 
     setWalletActor(_walletActor);
 
-    let _marketActor: ActorSubclass<_MKTSERVICE> = Actor.createActor(marketIdlFactory, {
-      agent: agent,
-      canisterId: network === "local" ? marketLocalId : marketLiveCanisterId,
-    });
+    let _marketActor: ActorSubclass<_MKTSERVICE> = Actor.createActor(
+      marketIdlFactory,
+      {
+        agent: agent,
+        canisterId: network === "local" ? marketLocalId : marketLiveCanisterId,
+      }
+    );
 
     setMarketActor(_marketActor);
 
@@ -214,6 +226,16 @@ export const useAuthClient = (options = defaultOptions) => {
       setUpdateNotifications(true);
     };
   }, [ws]);
+
+  async function handleWebSocketMessage(msg: any) {
+    addNotification({
+      title: msg.title,
+      subtitle: "Notification",
+      message: msg.message,
+      theme: "darkblue",
+      native: true,
+    });
+  }
 
   async function logout() {
     await authClient?.logout();

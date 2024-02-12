@@ -280,6 +280,14 @@ shared ({ caller = initializer }) actor class TswaandaAdmin() = this {
     *  NOTIFICATIONS IMPL
     ************************************/
 
+    // TODO: REMEMBER TO REMOVE THESE, JUST FOR TESTING
+
+    public shared func deleteAllAdminNotificaions() : async () {
+        for (notification in adminNotifications.vals()) {
+            adminNotifications.delete(notification.id);
+        };
+    };
+    
     /*************Admin notifications*************/
 
     public shared query ({ caller }) func getAdminNotifications() : async [AdminNotification] {
